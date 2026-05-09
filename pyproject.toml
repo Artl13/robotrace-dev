@@ -1,0 +1,166 @@
+[project]
+# `robotrace` (no hyphen) was claimed on PyPI in March 2026 by an
+# unrelated robotics-observability project (FaultLine-labs /
+# RoboSwarm Team) — their stub redirects to their `robotrace-sdk`.
+# We initially tried `robo-trace` but PyPI's typo-squat protector
+# (Damerau-Levenshtein distance < 3 from an existing project) blocked
+# it with `400 Bad Request`. `robotrace-dev` clears the threshold
+# (distance 4 from `robotrace`, distance 3 from `robotrace-sdk`) AND
+# matches our `robotrace.dev` domain literally — the cleanest
+# pragmatic name for `pip install`. The *import* path stays
+# `import robotrace` for muscle memory and zero-churn upgrades.
+# Pattern is identical to:
+#   `pip install python-dateutil` → `import dateutil`
+#   `pip install scikit-learn`    → `import sklearn`
+name = "robotrace-dev"
+# 0.1.0a2 — adds OpenTelemetry trace correlation. When the SDK is
+# called inside an active OTel span, `start_episode` (and therefore
+# `log_episode`) attaches `trace_id` / `span_id` / `traceparent` to
+# the create-episode payload. The server stores it on the episode
+# row's metadata.otel block so the portal can deep-link to your APM
+# of choice (Datadog, Honeycomb, Grafana Tempo, Jaeger, …) via
+# `NEXT_PUBLIC_TRACE_URL_TEMPLATE`. The "sacred" log_episode
+# signature stays unchanged — OTel is read implicitly, not via a
+# new kwarg. Locked once we hit 1.0.
+version = "0.1.0a2"
+description = "RoboTrace — observability and evals for AI robots."
+readme = "README.md"
+requires-python = ">=3.10"
+# PEP 639 (Metadata 2.4): use SPDX `license` string + `license-files`
+# glob. The old `license = { text = "MIT" }` table form combined with
+# `License-File: LICENSE` (which hatchling auto-emits) violates PEP
+# 639 and PyPI rejects with `400 Bad Request`. The
+# `License :: OSI Approved :: MIT License` classifier is also gone —
+# PEP 639 forbids combining license classifiers with the new
+# `License-Expression` metadata field.
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "RoboTrace", email = "hello@robotrace.dev" }]
+keywords = ["robotics", "observability", "evals", "ros2", "lerobot", "vla"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# Hard deps kept minimal so the SDK doesn't drag in heavyweight
+# robotics libs by default. Adapters live behind `[project.optional-dependencies]`.
+#
+# httpx — sync+async HTTP, modern timeouts, Cloudflare R2 PUT support
+#         via `client.put(url, content=...)` for streaming uploads.
+#
+# Upper bound `<1` is intentional. httpx 1.0.dev3 (May 2026) renamed
+# `httpx.Timeout` → `httpx.timeout`, which breaks our SDK at import
+# time — `_http.py` instantiates `httpx.Timeout(connect=..., read=...)`.
+# The bound prevents pip from resolving to the dev release in *any*
+# install path, including `pip install --pre robotrace-dev` (which
+# would otherwise opt into pre-releases globally and pick up
+# `httpx 1.0.dev3` automatically). Lift this once httpx 1.0 ships
+# stable AND we've validated against it.
+dependencies = [
+    "httpx>=0.27,<1",
+]
+
+[project.optional-dependencies]
+# Adapters for popular robotics stacks. None are required to log a
+# raw episode — they exist to slurp dataset formats into the
+# log_episode contract.
+#
+# `[ros2]` reads rosbag2 files (sqlite3 + mcap) without requiring an
+# actual ROS 2 / rclpy install — `rosbags` is pure-Python, so the
+# adapter runs in CI and on macOS dev boxes. `numpy` is listed even
+# though `rosbags` already pulls it in, so a `pip install
+# 'robotrace[ros2]'` line stays self-documenting.
+#
+# Image-topic encoding (sensor_msgs/Image → mp4) lives behind the
+# `[video]` extra so a sensor-only bag doesn't pay the opencv install
+# cost. The adapter raises a friendly error pointing at
+# `pip install 'robotrace-dev[ros2,video]'` when an image topic is
+# present and opencv is missing.
+ros2 = ["rosbags>=0.11,<0.12", "numpy>=1.26"]
+lerobot = ["lerobot"]
+video = ["opencv-python>=4.10"]
+numpy = ["numpy>=1.26"]
+
+# Trace correlation — pulls only `opentelemetry-api`, NOT the heavy
+# `opentelemetry-sdk` (which carries exporters, processors, and a
+# whole HTTP/gRPC stack the user already has from their OTel
+# instrumentation). The SDK reads the *active* span via
+# `opentelemetry.trace.get_current_span()` if importable, no-op
+# otherwise. So users who already instrument with OTel get
+# `pip install 'robotrace-dev[otel]'` and zero extra config; users who
+# don't are unaffected.
+otel = ["opentelemetry-api>=1.20"]
+
+dev = [
+    "pytest>=8",
+    "pytest-httpx>=0.30",
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "build>=1.2",
+]
+
+[project.urls]
+# These appear on the PyPI project page sidebar in the order
+# declared. Repository goes first because that's the most-clicked
+# link from a PyPI listing — engineers want to see the source
+# before they `pip install`. The GitHub repo is a public read-only
+# mirror of `packages/sdk-python/` from our private monorepo
+# (see .github/workflows/mirror-sdk.yml).
+Homepage = "https://robotrace.dev"
+Documentation = "https://robotrace.dev/docs"
+Repository = "https://github.com/Artl13/robotrace-dev"
+Issues = "https://github.com/Artl13/robotrace-dev/issues"
+Changelog = "https://robotrace.dev/docs/changelog"
+
+# `pip install robotrace-dev` exposes a `robotrace` console command,
+# implemented in `src/robotrace/cli.py`. It's intentionally tiny
+# (login / logout / whoami) so the install footprint stays small.
+[project.scripts]
+robotrace = "robotrace.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/robotrace"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/robotrace", "README.md", "LICENSE", "CHANGELOG.md"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# `__all__` is grouped by category (verbs / result types / errors /
+# convenience), not alphabetized. The grouping carries doc value —
+# leave it alone.
+"src/robotrace/__init__.py" = ["RUF022"]
+"src/robotrace/adapters/ros2/__init__.py" = ["RUF022"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+
+# Optional-extra deps don't ship type stubs and may not even be
+# installed when mypy runs (CI without `[ros2,video]` extras). Telling
+# mypy to ignore missing imports here is preferable to scattering
+# inline `# type: ignore[import-not-found]` across the adapter
+# modules — those go stale the moment the dep gets installed.
+[[tool.mypy.overrides]]
+module = ["rosbags.*", "cv2", "cv2.*", "opentelemetry", "opentelemetry.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
