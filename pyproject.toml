@@ -13,16 +13,27 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
-# 0.1.0a2 — adds OpenTelemetry trace correlation. When the SDK is
-# called inside an active OTel span, `start_episode` (and therefore
-# `log_episode`) attaches `trace_id` / `span_id` / `traceparent` to
-# the create-episode payload. The server stores it on the episode
-# row's metadata.otel block so the portal can deep-link to your APM
-# of choice (Datadog, Honeycomb, Grafana Tempo, Jaeger, …) via
-# `NEXT_PUBLIC_TRACE_URL_TEMPLATE`. The "sacred" log_episode
-# signature stays unchanged — OTel is read implicitly, not via a
-# new kwarg. Locked once we hit 1.0.
-version = "0.1.0a2"
+# 0.1.0a3 — adds the LeRobot adapter (`robotrace.adapters.lerobot`).
+# Walks Hugging Face LeRobot v2.1 datasets and creates one RoboTrace
+# episode per trajectory. Three verbs mirror the ROS 2 adapter:
+# scan_dataset / encode_episode / upload_episode, plus upload_dataset
+# for bulk. Reads the on-disk format directly via pyarrow +
+# huggingface_hub — does NOT depend on the `lerobot` PyPI package
+# (which would pull torch + torchvision + pyav, multi-GB footprint).
+# Only adds ~20 MB to a base install. v3.0 dataset format support is
+# explicitly deferred to 0.1.0a4 with a clear error pointing at the
+# v2.1 fallback.
+#
+# Earlier in 0.1.0a2: OpenTelemetry trace correlation. When the SDK
+# is called inside an active OTel span, `start_episode` (and
+# therefore `log_episode`) attaches `trace_id` / `span_id` /
+# `traceparent` to the create-episode payload. The server stores it
+# on the episode row's metadata.otel block so the portal can
+# deep-link to your APM of choice (Datadog, Honeycomb, Grafana
+# Tempo, Jaeger, …) via `NEXT_PUBLIC_TRACE_URL_TEMPLATE`. The
+# "sacred" log_episode signature stays unchanged — OTel is read
+# implicitly, not via a new kwarg. Locked once we hit 1.0.
+version = "0.1.0a3"
 description = "RoboTrace — observability and evals for AI robots."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -81,7 +92,20 @@ dependencies = [
 # `pip install 'robotrace-dev[ros2,video]'` when an image topic is
 # present and opencv is missing.
 ros2 = ["rosbags>=0.11,<0.12", "numpy>=1.26"]
-lerobot = ["lerobot"]
+# `[lerobot]` reads the LeRobot dataset on-disk format directly —
+# pyarrow for parquet, huggingface_hub for Hub downloads (single-file
+# fetches; no full-repo clone). We deliberately do NOT depend on the
+# `lerobot` PyPI package: it pulls torch, torchvision, torchaudio,
+# datasets, pyav, and several CUDA wheels (multi-GB install). Reading
+# the format directly stays loyal to the SDK's "lean install" rule and
+# matches the ~20 MB footprint of `[ros2]`. Multi-camera mp4 tiling
+# uses opencv from the `[video]` extra; pass `canonical_camera=...`
+# to skip tiling and avoid the opencv install entirely.
+lerobot = [
+    "huggingface_hub>=0.20,<1",
+    "pyarrow>=14",
+    "numpy>=1.26",
+]
 video = ["opencv-python>=4.10"]
 numpy = ["numpy>=1.26"]
 
@@ -145,6 +169,7 @@ select = ["E", "F", "I", "B", "UP", "RUF"]
 # leave it alone.
 "src/robotrace/__init__.py" = ["RUF022"]
 "src/robotrace/adapters/ros2/__init__.py" = ["RUF022"]
+"src/robotrace/adapters/lerobot/__init__.py" = ["RUF022"]
 
 [tool.mypy]
 python_version = "3.10"
@@ -158,7 +183,17 @@ warn_unused_ignores = true
 # inline `# type: ignore[import-not-found]` across the adapter
 # modules — those go stale the moment the dep gets installed.
 [[tool.mypy.overrides]]
-module = ["rosbags.*", "cv2", "cv2.*", "opentelemetry", "opentelemetry.*"]
+module = [
+    "rosbags.*",
+    "cv2",
+    "cv2.*",
+    "opentelemetry",
+    "opentelemetry.*",
+    "huggingface_hub",
+    "huggingface_hub.*",
+    "pyarrow",
+    "pyarrow.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

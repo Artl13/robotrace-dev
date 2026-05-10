@@ -11,6 +11,73 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a3] — 2026-05-10
+
+### Added
+
+- **`robotrace.adapters.lerobot`** — Hugging Face LeRobot datasets
+  (format **v2.1**) → RoboTrace episodes, one trajectory per episode.
+  Four public verbs:
+  - `lerobot.scan_dataset(repo_or_path) → DatasetSummary` — read-only
+    introspection. Pulls only `meta/*` from the Hub (info.json,
+    episodes.jsonl, tasks.jsonl); never downloads a parquet shard or
+    an mp4. Returns fps, episode count, frame count, camera list,
+    and per-episode lengths and tasks.
+  - `lerobot.encode_episode(repo, idx, output_dir) → EncodedEpisode` —
+    fetches one episode's parquet + per-camera mp4s and writes
+    `video.mp4` / `sensors.npz` / `actions.npz` with provenance
+    metadata. No upload.
+  - `lerobot.upload_episode(repo, idx, **episode_kwargs) → Episode` —
+    one-shot for a single trajectory. `source="replay"` default
+    matches the LeRobot context (logged trajectories replayed
+    against new policies).
+  - `lerobot.upload_dataset(repo, **episode_kwargs) → list[Episode]`
+    — bulk: walks every trajectory (or `episode_indices=range(...)`)
+    and uploads each as its own RoboTrace episode. Sequential, with
+    optional `on_progress=` callback for tqdm-style reporting in
+    user code.
+- Column auto-classification routes `observation.images.<cam>` to
+  `video`, `action[.x]` to `actions`, `next.{reward,done,success,*}` to
+  episode-level metadata, and everything `observation.*` plus unknown
+  columns to `sensors`. Internal LeRobot bookkeeping
+  (`timestamp` / `frame_index` / `episode_index` / `index` /
+  `task_index`) is filtered out.
+- Multi-camera datasets get tiled horizontally into one `video.mp4`;
+  pass `canonical_camera="observation.images.<key>"` to pick one
+  camera instead and skip the opencv code path entirely (single-cam
+  copies the source mp4 byte-for-byte).
+- Episode outcome (`next.reward_sum`, `next.done`, `next.success`)
+  rolls into `metadata.lerobot_episode_outcome` so the portal can
+  surface "did the trajectory succeed?" without unpacking actions.npz.
+- 9 new unit tests (`tests/test_lerobot_adapter.py`) with a
+  programmatically-built v2.1 fixture (parquet + per-camera mp4s on
+  disk) — never touches the HF Hub during CI.
+
+### Changed
+
+- **`[project.optional-dependencies].lerobot`** changed from the
+  unbounded `["lerobot"]` to
+  `["huggingface_hub>=0.20,<1", "pyarrow>=14", "numpy>=1.26"]`.
+  Reason: the `lerobot` PyPI package pulls torch, torchvision,
+  torchaudio, datasets, pyav, and several CUDA wheels (multi-GB
+  install). Reading the v2.1 on-disk format directly with pyarrow
+  + huggingface_hub keeps the install footprint loyal to the SDK's
+  "lean install" rule (~20 MB, comparable to `[ros2]`).
+- Marketing-side: the LeRobot integration card on the landing page
+  flipped from "Soon" to "Shipped".
+
+### Notes
+
+- LeRobot dataset format **v3.0** (multi-episode parquet shards,
+  introduced late 2025) raises a clear `ConfigurationError`
+  pointing at the v2.1 revision fallback. v3.0 support is tracked
+  for a follow-up release once we see real-user demand — most
+  public `lerobot/*` Hub datasets are still v2.1 as of this release.
+- The `[lerobot]` extra deliberately does NOT depend on the
+  `lerobot` PyPI package. Set `HF_TOKEN` in your environment for
+  private / gated datasets — `huggingface_hub` reads it
+  automatically.
+
 ## [0.1.0a2] — 2026-05-09
 
 ### Changed

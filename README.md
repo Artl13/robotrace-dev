@@ -4,7 +4,7 @@
 > observability and evals for AI-powered robots.
 
 ```bash
-pip install robotrace-dev==0.1.0a2
+pip install robotrace-dev==0.1.0a3
 ```
 
 > **Why the pin?** Pinning is the most reliable install during alpha.
@@ -19,7 +19,7 @@ pip install robotrace-dev==0.1.0a2
 > The *import* name stays `import robotrace` — same pattern as
 > `pip install python-dateutil` → `import dateutil`.
 
-> **Status:** alpha (`0.1.0a2`). The public API in this README is the
+> **Status:** alpha (`0.1.0a3`). The public API in this README is the
 > shape we're iterating against; once we cut `1.0.0`, the
 > [`log_episode`](#log_episode-the-sacred-call) signature is locked
 > and breakages require a major bump (per `AGENTS.md` in the
