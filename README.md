@@ -27,8 +27,10 @@ pip install robotrace-dev==0.1.0a3
 
 ## Quickstart
 
-Mint an API key in your RoboTrace admin console
-(**Admin → Clients → \<client\> → API access**), then:
+Sign in at
+[**app.robotrace.dev/login?next=/portal/api-keys**](https://app.robotrace.dev/login?next=/portal/api-keys)
+(portal sign-in — after authentication you land on **API keys**).
+Click **Create key**, copy it once, then:
 
 ```python
 import robotrace as rt
@@ -55,9 +57,12 @@ rt.log_episode(
 )
 ```
 
-The episode appears in `/admin/episodes` immediately, with the four
-reproducibility fields (policy / env / git / seed) front-and-center
-on the detail page.
+The episode appears in your portal at
+[app.robotrace.dev/portal/episodes](https://app.robotrace.dev/portal/episodes)
+immediately, with the four reproducibility fields (policy / env /
+git / seed) front-and-center on the detail page. The SDK also
+prints a clickable URL to the run as soon as `start_episode` /
+`log_episode` opens it — usually before the bytes finish uploading.
 
 ### From environment variables
 
@@ -203,19 +208,87 @@ blank), the create response has `storage="unconfigured"` and any
 production setup checklist. Metadata-only runs still work — useful
 for testing the SDK contract end-to-end before R2 is provisioned.
 
+## Adapters
+
+Framework adapters slurp third-party recording / dataset formats
+into the canonical `log_episode` contract. None are loaded by
+default — each lives behind an extras pin so the base install
+stays slim:
+
+```bash
+# rosbag2 → episode (sqlite3 + mcap; no rclpy required)
+pip install 'robotrace-dev[ros2]==0.1.0a3'
+
+# Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
+pip install 'robotrace-dev[lerobot]==0.1.0a3'
+
+# Multi-camera mp4 encoding (opencv) — combine with [ros2] or [lerobot]
+pip install 'robotrace-dev[ros2,video]==0.1.0a3'
+```
+
+```python
+# ROS 2: one rosbag2 directory → one episode
+from robotrace.adapters import ros2
+ros2.upload_bag(
+    "./run_2026-05-08/",
+    policy_version="pap-v3.2.1",
+    env_version="halcyon-cell-rev4",
+    git_sha="abc1234",
+)
+
+# LeRobot: one HF dataset → one episode per trajectory
+from robotrace.adapters import lerobot
+lerobot.upload_dataset(
+    "lerobot/aloha_static_cups_open",
+    policy_version="aloha-v1",
+    env_version="aloha-cell-1",
+)
+```
+
+Both adapters mirror the same surface: `scan_*` for read-only
+introspection, `encode_*` to write artifacts to disk without
+uploading, and `upload_*` for the one-shot pipeline. Full reference
+at [robotrace.dev/docs/sdk/ros2](https://robotrace.dev/docs/sdk/ros2)
+and [robotrace.dev/docs/sdk/lerobot](https://robotrace.dev/docs/sdk/lerobot).
+
+The LeRobot adapter deliberately does **not** depend on the heavy
+`lerobot` PyPI package (which would pull torch + torchvision +
+pyav + several CUDA wheels). It reads the v2.1 on-disk format
+directly via `pyarrow` + `huggingface_hub` — ~20 MB install
+footprint, comparable to `[ros2]`. LeRobot v3.0 (multi-episode
+parquet shards, late 2025) is on the roadmap.
+
 ## Layout (current)
 
 ```
 src/robotrace/
 ├── __init__.py          # public API + module-level default client
 ├── _version.py
+├── _credentials.py      # netrc / keyring / env resolution
+├── _http.py             # internal httpx wrapper
+├── _otel.py             # optional OpenTelemetry hook
 ├── client.py            # Client class
 ├── episode.py           # Episode handle + UploadUrl + ArtifactKind
 ├── errors.py            # RobotraceError + typed subclasses
-└── _http.py             # internal httpx wrapper
+├── cli.py               # `robotrace` CLI entrypoint
+└── adapters/
+    ├── __init__.py
+    ├── ros2/            # rosbag2 → episode (since 0.1.0a1)
+    │   ├── __init__.py
+    │   ├── _classify.py
+    │   ├── _scan.py
+    │   ├── _encode.py
+    │   └── _upload.py
+    └── lerobot/         # HF LeRobot v2.1 → episode (since 0.1.0a3)
+        ├── __init__.py
+        ├── _classify.py
+        ├── _meta.py
+        ├── _encode.py
+        └── _upload.py
 ```
 
-ROS 2 / LeRobot adapters land later under `src/robotrace/adapters/`.
+Next adapter targets (not yet shipped): MuJoCo, Genesis, Isaac Sim,
+LeRobot v3.0.
 
 ## Contributing
 

@@ -11,6 +11,47 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a3.post2] — 2026-05-10
+
+### Fixed
+
+- **README-only republish** (PEP 440 post-release; identical wheel
+  contents to `0.1.0a3.post1` functionally — only the README on
+  PyPI's project page changes). The user-facing pin stays at
+  `0.1.0a3`; post-releases are install-equivalent.
+- README "Layout (current)" tree was missing three real modules
+  that ship in the wheel: `_credentials.py` (netrc / keyring / env
+  resolution), `_otel.py` (optional OpenTelemetry hook), and
+  `cli.py` (the `robotrace` CLI entrypoint registered under
+  `[project.scripts]`). The tree now matches `find src/robotrace
+  -name '*.py'` exactly so users grepping the README before
+  vendoring can trust it.
+
+## [0.1.0a3.post1] — 2026-05-10
+
+### Fixed
+
+- **README-only republish** (PEP 440 post-release; same wheel
+  contents as `0.1.0a3` functionally — the only delta is the
+  README rendered on PyPI's project page). The user-facing pin
+  in `apps/web/lib/sdk/version.ts` and across docs / portal stays
+  at `0.1.0a3`; post-releases are install-equivalent.
+- README quickstart pointed prospective users at the internal CMS
+  flow (`/admin/episodes`, "Admin → Clients → API access"), which
+  only RoboTrace staff can reach. Now points at the customer-
+  facing portal: sign-in deep-link to
+  `app.robotrace.dev/login?next=/portal/api-keys` (the proxy at
+  `apps/web/proxy.ts` resolves `?next=` after a successful
+  password / magic-link login), and run-list URL at
+  `app.robotrace.dev/portal/episodes`.
+- README "Layout" section claimed "ROS 2 / LeRobot adapters land
+  later under `src/robotrace/adapters/`" — false since `0.1.0a1`
+  (ROS 2) and `0.1.0a3` (LeRobot). Replaced with a real Adapters
+  section (install matrix, one-shot examples for both adapters,
+  rationale for the lean `[lerobot]` extra) and a corrected
+  Layout tree showing the actual `adapters/{ros2,lerobot}/`
+  packages with version stamps.
+
 ## [0.1.0a3] — 2026-05-10
 
 ### Added
