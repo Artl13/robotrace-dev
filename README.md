@@ -4,12 +4,8 @@
 > observability and evals for AI-powered robots.
 
 ```bash
-pip install robotrace-dev==0.1.0a3
+pip install robotrace-dev
 ```
-
-> **Why the pin?** Pinning is the most reliable install during alpha.
-> The pin goes away once we cut `1.0` — `pip install robotrace-dev`
-> will be enough then.
 
 > **Distribution name vs. import name.** PyPI distributes us as
 > `robotrace-dev` (matching our `robotrace.dev` domain). The
@@ -18,6 +14,10 @@ pip install robotrace-dev==0.1.0a3
 > single-edit-distance variant (so `robo-trace` was rejected too).
 > The *import* name stays `import robotrace` — same pattern as
 > `pip install python-dateutil` → `import dateutil`.
+>
+> Pinning for reproducibility (CI, `requirements.txt`) still works
+> as usual — `pip install robotrace-dev==0.1.0a3` pulls the exact
+> alpha you've validated against.
 
 > **Status:** alpha (`0.1.0a3`). The public API in this README is the
 > shape we're iterating against; once we cut `1.0.0`, the
