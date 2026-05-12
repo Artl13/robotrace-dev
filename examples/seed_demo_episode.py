@@ -1,9 +1,10 @@
 """Seed the canonical demo episode for the empty-state portal.
 
-Generates a synthetic but realistic-looking pick-and-place rollout
-(top-down 480×270 sim view, ~6 s @ 30 fps), uploads it through the
-SDK to your R2 bucket, and prints a one-liner you paste into
-`apps/web/.env.local` as `DEMO_EPISODE_VIDEO_KEY`.
+Generates a synthetic pick-and-place rollout (top-down 480×270 sim
+view, ~6 s @ 30 fps) plus tiny **sensors** (`.npz`) and **actions**
+(`.csv`) blobs, uploads all three slots through the SDK to R2, and
+prints a one-liner you paste into `apps/web/.env.local` as
+`DEMO_EPISODE_VIDEO_KEY`.
 
 What you'll see in the portal:
 
@@ -13,6 +14,8 @@ What you'll see in the portal:
     - A HUD overlay with policy_version / env_version / seed and
       a frame counter — same fields the reproducibility section
       surfaces, so the video matches the metadata 1:1
+    - Episode detail also lists **sensors** (`.npz`) and **actions**
+      (`.csv`) blobs — synthetic tabular traces aligned to the timeline
     - A subtle "RoboTrace · SAMPLE" watermark so nobody mistakes
       it for production data
 
@@ -300,10 +303,60 @@ def _make_demo_mp4(out_path: Path) -> None:
         writer.release()
 
 
+def _write_demo_sensors_npz(path: Path, *, fps: float, n_frames: int) -> None:
+    """One row per video frame — enough to exercise the sensors slot."""
+    import numpy as np
+
+    t = np.arange(n_frames, dtype=np.float64) / float(fps)
+    phase_ix = np.arange(n_frames, dtype=np.float32)
+    ee_x = np.linspace(-0.2, 0.35, n_frames, dtype=np.float32)
+    ee_y = (0.12 * np.sin(phase_ix * 0.08)).astype(np.float32)
+    gripper = np.clip(
+        np.where(
+            phase_ix < APPROACH_END,
+            1.0,
+            np.where(phase_ix < GRASP_END, 0.0, 1.0),
+        ),
+        0.0,
+        1.0,
+    ).astype(np.float32)
+    np.savez(
+        path,
+        time_s=t,
+        ee_xy=np.stack([ee_x, ee_y], axis=-1),
+        gripper_open=gripper,
+        schema=np.array("robotrace.demo.v1"),
+    )
+
+
+def _write_demo_actions_csv(path: Path, *, fps: float, n_frames: int) -> None:
+    """Tiny CSV — `.csv` is not heuristically `sensors`, so `actions=` is valid."""
+    lines = ["t_s,cmd_vx,cmd_vy,gripper_target\n"]
+    for i in range(n_frames):
+        ts = i / fps
+        phase = i / max(n_frames - 1, 1)
+        cmd_vx = 0.8 * math.sin(phase * math.pi)
+        cmd_vy = 0.15 * math.cos(phase * 2 * math.pi)
+        g_target = (
+            1.0 if i < APPROACH_END else (0.0 if i < TRANSPORT_END else 1.0)
+        )
+        lines.append(f"{ts:.6f},{cmd_vx:.6f},{cmd_vy:.6f},{g_target:.2f}\n")
+    path.write_text("".join(lines), encoding="utf-8")
+
+
 def main() -> None:
     out_path = Path("/tmp/robotrace_demo_episode.mp4")
+    sensors_path = Path("/tmp/robotrace_demo_sensors.npz")
+    actions_path = Path("/tmp/robotrace_demo_actions.csv")
+
     _make_demo_mp4(out_path)
     print(f"wrote {out_path} ({out_path.stat().st_size:,} bytes)")
+
+    _write_demo_sensors_npz(sensors_path, fps=FPS, n_frames=TOTAL_FRAMES)
+    print(f"wrote {sensors_path} ({sensors_path.stat().st_size:,} bytes)")
+
+    _write_demo_actions_csv(actions_path, fps=FPS, n_frames=TOTAL_FRAMES)
+    print(f"wrote {actions_path} ({actions_path.stat().st_size:,} bytes)")
 
     rt.init()  # reads ROBOTRACE_API_KEY / ROBOTRACE_BASE_URL from env
     try:
@@ -316,6 +369,8 @@ def main() -> None:
             git_sha="demo0001",
             seed=8124,
             video=str(out_path),
+            sensors=str(sensors_path),
+            actions=str(actions_path),
             duration_s=DURATION_S,
             fps=FPS,
             metadata={
