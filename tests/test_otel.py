@@ -155,24 +155,21 @@ def test_otel_active_span_attaches_w3c_trace_context(
 def test_otel_unsampled_flag_round_trips(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """When the active span carries a non-default trace_flags value
-    (e.g. unsampled tail-based propagation), we must preserve it in
-    the traceparent — the user's APM may use it to decide whether
-    to render the trace at all."""
+    """When the active span carries trace_flags=0 (explicitly unsampled),
+    the traceparent must end in ``-00`` — never overwrite the customer's
+    sampler decision (W3C Trace Context §3.2.2.7). Portal deep-links use
+    trace_id / span_id only."""
     _install_fake_otel_module(
         monkeypatch,
         trace_id=0x000000000000000000000000DEADBEEF,
         span_id=0x00000000CAFEBABE,
-        flags=0,  # explicitly unsampled — but capture should *force* 01
+        flags=0,
     )
     client, captured = _make_capturing_client()
     client.start_episode(name="unsampled", artifacts=[])
 
     payload = json.loads(captured[0].content)
-    # `flags` of 0 is a valid OTel state but rare; the SDK falls back
-    # to "sampled" (01) so the portal-side deep-link is renderable.
-    # Pinning the policy here so a future change is intentional.
-    assert payload["otel"]["traceparent"].endswith("-01")
+    assert payload["otel"]["traceparent"].endswith("-00")
 
 
 def test_otel_capture_never_raises_when_module_misbehaves(

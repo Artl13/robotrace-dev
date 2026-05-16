@@ -26,26 +26,21 @@ W3C Trace Context format
 
 We emit both the raw IDs *and* the W3C ``traceparent`` header value:
 
-    00-<32-hex-trace-id>-<16-hex-span-id>-01
+    00-<32-hex-trace-id>-<16-hex-span-id>-<flags-hex>
 
-The IDs are friendlier in the portal UI (deep-linkable into Datadog /
-Honeycomb / Tempo / Jaeger via a template URL). The traceparent string
-is what every other OTel-aware system on the team's network expects to
-see, so propagating it makes the episode row a first-class member of
-the trace graph — e.g. you can paste it into a curl call to replay a
-downstream service with the same trace context.
+The final two hex digits are the OTel ``trace_flags`` byte (W3C §3.2.2.7),
+preserved verbatim from ``span.get_span_context().trace_flags`` — typically
+``01`` when the span is sampled and ``00`` when it is not. The portal only
+needs ``trace_id`` / ``span_id`` for deep-links; the ``traceparent`` string
+must stay spec-correct so anything downstream (curl replay, sidecars,
+APM) that re-ingests the header does not contradict the customer's
+sampler.
 
-Sampling note
--------------
-
-We deliberately do **not** check ``span.get_span_context().trace_flags``
-for the sampled bit. If OTel was sampled out, ``get_current_span()``
-returns ``INVALID_SPAN`` and we already short-circuit to ``None`` —
-honoring user sampling. But if the span is recorded *and not exported*
-(local trace context only), we still want to pin it on the episode so
-the user can replay the episode to find what their policy was doing
-at that exact ``trace_id`` later. The episode row is its own retention
-domain.
+When there is no active span, ``get_current_span()`` yields
+``INVALID_SPAN`` with zero IDs and we return ``None`` — that is distinct
+from a *valid* trace that the customer marked unsampled (``flags=00``),
+which we still attach so the episode remains joinable by ID in Postgres
+without lying to propagation.
 """
 
 from __future__ import annotations
@@ -137,13 +132,14 @@ def capture_trace_context() -> TraceContext | None:
     trace_hex = f"{trace_id_int:032x}"
     span_hex = f"{span_id_int:016x}"
 
-    # W3C traceparent: version-trace-span-flags. We always emit
-    # version 00 (the only version defined today). `trace_flags` is
-    # 8 bits — the low bit is "sampled". Default to 01 ("sampled")
-    # because the user is explicitly opting in by passing through
-    # log_episode; if they want the unsampled bit they can post-edit
-    # the metadata.
-    flags_int = getattr(ctx, "trace_flags", 1) or 1
+    # W3C traceparent: version-trace-span-flags. Emit `trace_flags`
+    # from the span context unchanged (masked to one byte). Never
+    # force the sampled bit — that made APMs treat unsampled tails
+    # as sampled and broke W3C semantics.
+    try:
+        flags_int = int(getattr(ctx, "trace_flags", 0)) & 0xFF
+    except (TypeError, ValueError):
+        flags_int = 0
     traceparent = f"00-{trace_hex}-{span_hex}-{flags_int:02x}"
 
     return TraceContext(

@@ -687,7 +687,7 @@ def _import_anyreader() -> type:
     except ImportError as exc:
         raise ConfigurationError(
             "the ROS 2 adapter needs the `rosbags` library. "
-            "Install with `pip install 'robotrace-dev[ros2]==0.1.0a3'`."
+            "Install with `pip install 'robotrace-dev[ros2]==0.1.0a5'`."
         ) from exc
     return AnyReader
 
@@ -698,7 +698,7 @@ def _import_numpy() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "the ROS 2 adapter needs `numpy`. Install with "
-            "`pip install 'robotrace-dev[ros2]==0.1.0a3'` (which pulls it in)."
+            "`pip install 'robotrace-dev[ros2]==0.1.0a5'` (which pulls it in)."
         ) from exc
     return np
 
@@ -709,7 +709,7 @@ def _import_cv2() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "encoding ROS 2 Image topics into MP4 needs OpenCV. "
-            "Install with `pip install 'robotrace-dev[ros2,video]==0.1.0a3'` "
+            "Install with `pip install 'robotrace-dev[ros2,video]==0.1.0a5'` "
             "(both extras together — the [video] extra carries "
             "opencv-python so a sensor-only bag doesn't pay the "
             "install cost)."

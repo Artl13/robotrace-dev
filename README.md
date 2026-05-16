@@ -16,10 +16,10 @@ pip install robotrace-dev
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual — `pip install robotrace-dev==0.1.0a3` pulls the exact
+> as usual — `pip install robotrace-dev==0.1.0a5` pulls the exact
 > alpha you've validated against.
 
-> **Status:** alpha (`0.1.0a3`). The public API in this README is the
+> **Status:** alpha (`0.1.0a5`). The public API in this README is the
 > shape we're iterating against; once we cut `1.0.0`, the
 > [`log_episode`](#log_episode-the-sacred-call) signature is locked
 > and breakages require a major bump (per `AGENTS.md` in the
@@ -217,13 +217,13 @@ stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.1.0a3'
+pip install 'robotrace-dev[ros2]==0.1.0a5'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.1.0a3'
+pip install 'robotrace-dev[lerobot]==0.1.0a5'
 
 # Multi-camera mp4 encoding (opencv) — combine with [ros2] or [lerobot]
-pip install 'robotrace-dev[ros2,video]==0.1.0a3'
+pip install 'robotrace-dev[ros2,video]==0.1.0a5'
 ```
 
 ```python

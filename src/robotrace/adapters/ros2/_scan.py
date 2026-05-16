@@ -181,7 +181,7 @@ def _import_anyreader() -> type:
     except ImportError as exc:
         raise ConfigurationError(
             "the ROS 2 adapter needs the `rosbags` library. "
-            "Install with `pip install 'robotrace-dev[ros2]==0.1.0a3'`."
+            "Install with `pip install 'robotrace-dev[ros2]==0.1.0a5'`."
         ) from exc
     return AnyReader
 

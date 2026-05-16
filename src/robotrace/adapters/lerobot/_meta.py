@@ -392,7 +392,7 @@ def _import_huggingface_hub() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "the LeRobot adapter needs `huggingface_hub` to talk to the HF Hub. "
-            "Install with `pip install 'robotrace-dev[lerobot]==0.1.0a3'`. "
+            "Install with `pip install 'robotrace-dev[lerobot]==0.1.0a5'`. "
             "If you only ever pass local dataset paths you can install "
             "`pip install huggingface_hub` separately and skip the rest of "
             "the extra."

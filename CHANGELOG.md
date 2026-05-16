@@ -11,6 +11,15 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a5] — 2026-05-21
+
+### Fixed
+
+- **OpenTelemetry `traceparent`** — `capture_trace_context()` now emits the
+  upstream `trace_flags` byte from `SpanContext` (masked to 8 bits) instead of
+  forcing the sampled bit to `01`. Aligns with W3C Trace Context so APMs that
+  honor the flag stay consistent with the customer's sampler.
+
 ## [0.1.0a3.post2] — 2026-05-10
 
 ### Fixed

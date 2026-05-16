@@ -13,6 +13,10 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.1.0a5 — OTel traceparent correctness: preserve the upstream
+# trace_flags byte in the W3C header instead of forcing sampled=01,
+# so APMs that trust the bit stay aligned with the customer's sampler.
+#
 # 0.1.0a4 — the replay regression harness lands. Closes the last
 # vapor marketing claim ("re-roll a candidate policy against
 # history") with a customer-side runner: weights never touch our
@@ -59,7 +63,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a4"
+version = "0.1.0a5"
 description = "RoboTrace — observability and evals for AI robots."
 readme = "README.md"
 requires-python = ">=3.10"
