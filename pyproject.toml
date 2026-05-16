@@ -13,43 +13,52 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
-# 0.1.0a3 — adds the LeRobot adapter (`robotrace.adapters.lerobot`).
-# Walks Hugging Face LeRobot v2.1 datasets and creates one RoboTrace
-# episode per trajectory. Three verbs mirror the ROS 2 adapter:
-# scan_dataset / encode_episode / upload_episode, plus upload_dataset
-# for bulk. Reads the on-disk format directly via pyarrow +
-# huggingface_hub — does NOT depend on the `lerobot` PyPI package
-# (which would pull torch + torchvision + pyav, multi-GB footprint).
-# Only adds ~20 MB to a base install. v3.0 dataset format support is
-# explicitly deferred to 0.1.0a4 with a clear error pointing at the
-# v2.1 fallback.
+# 0.1.0a4 — the replay regression harness lands. Closes the last
+# vapor marketing claim ("re-roll a candidate policy against
+# history") with a customer-side runner: weights never touch our
+# infra. Adds the `robotrace.evals` module (`create_run` /
+# `run_against` / `complete_run`) and the matching CLI verb
+# (`robotrace replay run --policy module:fn --baseline-episodes
+# ids|@file --candidate-version vN`). Wires three new ingest routes
+# on the server (POST /api/ingest/eval-run + /result + /finalize)
+# against the new `eval_runs` + `eval_results` tables
+# (migrations 0011 + 0012). Same metric set as the marketing
+# DiffCard (success / reward / collision / time-to-goal / OOD
+# share); sign-aware delta_is_better encoded server-side. 16 new
+# SDK tests; suite is now 49 passing.
 #
-# Earlier in 0.1.0a2: OpenTelemetry trace correlation. When the SDK
-# is called inside an active OTel span, `start_episode` (and
-# therefore `log_episode`) attaches `trace_id` / `span_id` /
-# `traceparent` to the create-episode payload. The server stores it
-# on the episode row's metadata.otel block so the portal can
-# deep-link to your APM of choice (Datadog, Honeycomb, Grafana
-# Tempo, Jaeger, …) via `NEXT_PUBLIC_TRACE_URL_TEMPLATE`. The
-# "sacred" log_episode signature stays unchanged — OTel is read
-# implicitly, not via a new kwarg. Locked once we hit 1.0.
+# Stacked on the harness in the same release:
+#   * `RateLimitError(APIError)` carries `retry_after` parsed from
+#     `Retry-After`; the HTTP layer auto-retries 429s on safe paths
+#     (start_episode create, signed-PUT uploads, evals create /
+#     result push) with exponential backoff. Explicitly NOT
+#     retrying `finalize` so a future paid tier can't double-bill
+#     when the server already processed the request before the 429
+#     came back. Same trade-off as `ServerError`, now typed.
+#   * `robotrace logout --revoke` POSTs `/api/cli/auth/revoke`,
+#     marks the calling key revoked on `client_api_keys`, and only
+#     then drops `~/.robotrace/credentials`. Stolen-laptop scenario
+#     no longer requires opening the portal.
+#   * `_print_summary` formatter hardening — non-numeric metric
+#     deltas no longer crash the post-run summary table, and NPZ
+#     fetcher accepts pickled-object columns (LeRobot string
+#     trajectories) without an opaque `ValueError`.
 #
-# 0.1.0a3.post1 — README-only republish (PEP 440 post-release).
-# Same wheel as 0.1.0a3 functionally; the only delta is the README
-# rendered on PyPI's project page. The original 0.1.0a3 README
-# pointed prospective users at the internal CMS path
-# (/admin/episodes, "Admin → Clients → API access"), which only
-# RoboTrace staff can reach. The corrected README points at the
-# customer-facing portal: app.robotrace.dev/login?next=/portal/api-keys
-# and app.robotrace.dev/portal/episodes. It also adds an Adapters
-# section (ROS 2 + LeRobot install matrix and one-shots) and a
-# corrected Layout tree showing the actual adapters/{ros2,lerobot}/
-# dirs that shipped — the previous text said "ROS 2 / LeRobot
-# adapters land later under src/robotrace/adapters/", which has
-# been false since 0.1.0a1 (ROS 2) and 0.1.0a3 (LeRobot). The
-# install pin in apps/web/lib/sdk/version.ts stays at 0.1.0a3
-# — post-releases are install-equivalent so we don't churn the
-# user-facing pin.
+# v3.0 LeRobot dataset support stays explicitly deferred — still
+# hard-fails with a clear v2.1 fallback hint. The install pin in
+# apps/web/lib/sdk/version.ts moves to 0.1.0a4 in lockstep this
+# release (replay surfaces depend on the new evals module being
+# present at runtime).
+#
+# Earlier in 0.1.0a3: the LeRobot adapter
+# (`robotrace.adapters.lerobot`) — Hugging Face LeRobot v2.1
+# datasets → one RoboTrace episode per trajectory via pyarrow +
+# huggingface_hub (no torch / pyav / CUDA wheels). 0.1.0a2 added
+# OpenTelemetry trace correlation: when called inside an active
+# OTel span, log_episode quietly attaches trace_id / span_id /
+# traceparent to the create-episode payload, server stores it on
+# episodes.metadata.otel for portal APM deep-links. The "sacred"
+# log_episode signature stays unchanged across both bumps.
 version = "0.1.0a4"
 description = "RoboTrace — observability and evals for AI robots."
 readme = "README.md"
