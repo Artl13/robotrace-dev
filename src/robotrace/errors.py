@@ -15,6 +15,7 @@ on the type rather than parsing message strings:
         ├── NotFoundError        # 404 — episode id doesn't exist (or cross-tenant)
         ├── ConflictError        # 409 — episode is archived, etc.
         ├── ValidationError      # 400 — payload didn't match schema
+        ├── RateLimitError       # 429 — quota tripped; honors Retry-After
         └── ServerError          # 5xx — flag for retries
 """
 
@@ -89,6 +90,39 @@ class ValidationError(APIError):
     Don't retry without changing the inputs. The server's `error`
     field carries which field was wrong.
     """
+
+
+class RateLimitError(APIError):
+    """429 — the server rejected the request because a quota was tripped.
+
+    Carries ``retry_after`` parsed from the ``Retry-After`` response
+    header (in whole seconds). ``None`` when the header was absent or
+    unparseable — callers should fall back to exponential backoff.
+
+    The SDK auto-retries this error only on call paths that are
+    **safe to retry without state changes** — currently the create
+    half of ``start_episode`` and signed-PUT uploads (which target a
+    stable R2 object key, so re-uploading just overwrites the same
+    blob). It deliberately does **not** auto-retry ``finalize``: the
+    server may have processed the request before the 429 was sent
+    back, and silently re-finalizing in a future paid tier could
+    double-bill artifact storage. The existing ``ServerError`` carries
+    the same trade-off; this class makes the back-pressure path
+    typed instead of hiding inside the generic ``APIError``.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        status_code: int,
+        response_body: object | None = None,
+        retry_after: int | None = None,
+    ) -> None:
+        super().__init__(
+            message, status_code=status_code, response_body=response_body
+        )
+        self.retry_after = retry_after
 
 
 class ServerError(APIError):

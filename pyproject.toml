@@ -50,7 +50,7 @@ name = "robotrace-dev"
 # install pin in apps/web/lib/sdk/version.ts stays at 0.1.0a3
 # — post-releases are install-equivalent so we don't churn the
 # user-facing pin.
-version = "0.1.0a3.post2"
+version = "0.1.0a4"
 description = "RoboTrace — observability and evals for AI robots."
 readme = "README.md"
 requires-python = ">=3.10"

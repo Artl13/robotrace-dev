@@ -6,4 +6,4 @@ hit 1.0 the contract is locked per AGENTS.md and breakages require
 a major bump.
 """
 
-__version__ = "0.1.0a3.post2"
+__version__ = "0.1.0a4"

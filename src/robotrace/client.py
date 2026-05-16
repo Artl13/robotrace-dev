@@ -207,7 +207,16 @@ class Client:
         if otel_ctx is not None:
             payload["otel"] = dict(otel_ctx)
 
-        body = self._http.request("POST", "/api/ingest/episode", json=payload)
+        # `retry_safe=True`: a 429 here means the server *rejected*
+        # the create before any row was written. Retrying with
+        # backoff (honoring Retry-After) is safe and friendlier to a
+        # robot rig that just bumped a quota.
+        body = self._http.request(
+            "POST",
+            "/api/ingest/episode",
+            json=payload,
+            retry_safe=True,
+        )
 
         upload_urls: dict[ArtifactKind, UploadUrl] = {}
         for raw in body.get("upload_urls", []) or []:

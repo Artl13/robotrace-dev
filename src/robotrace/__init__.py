@@ -40,6 +40,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+from . import evals
 from ._version import __version__
 from .client import (
     ENV_API_KEY,
@@ -59,6 +60,7 @@ from .errors import (
     ConfigurationError,
     ConflictError,
     NotFoundError,
+    RateLimitError,
     RobotraceError,
     ServerError,
     TransportError,
@@ -83,12 +85,15 @@ __all__ = [
     "NotFoundError",
     "ConflictError",
     "ValidationError",
+    "RateLimitError",
     "ServerError",
     # Top-level convenience (backed by the default client)
     "init",
     "close",
     "start_episode",
     "log_episode",
+    # Replay regression harness (`rt.evals.create_run`, `rt.evals.run_against`, …)
+    "evals",
     # Env-var names exposed for tooling that wants to validate them
     "ENV_API_KEY",
     "ENV_BASE_URL",
