@@ -11,6 +11,15 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a6] — 2026-05-16
+
+### Changed
+
+- **`robotrace login`** — friendlier opener (“Welcome to RoboTrace!”),
+  clearer verification URL / user-code section, spinner uses
+  clear-to-EOL so wide terminals don’t keep stale padding, and optional
+  ANSI styling when stdout is a TTY (`NO_COLOR` still disables).
+
 ## [0.1.0a5.post1] — 2026-05-22
 
 ### Fixed

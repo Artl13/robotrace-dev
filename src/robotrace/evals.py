@@ -789,7 +789,7 @@ def _import_numpy() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "the replay regression harness needs `numpy`. "
-            "Install with `pip install 'robotrace-dev[numpy]==0.1.0a5.post1'`."
+            "Install with `pip install 'robotrace-dev[numpy]==0.1.0a6'`."
         ) from exc
     return np
 
