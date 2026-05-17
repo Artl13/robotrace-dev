@@ -2,18 +2,18 @@
 
 Loads from either a local directory (``./my_dataset/``) or a HF Hub
 repo id (``lerobot/aloha_static_cups_open``). Hub access fetches only
-the small ``meta/`` files — never a parquet shard or an mp4 — so a
+the small ``meta/`` files - never a parquet shard or an mp4 - so a
 ``scan_dataset(...)`` call is fast and cheap regardless of the dataset's
 total size.
 
 Files we read:
-  * ``meta/info.json`` — fps, total_episodes, features schema,
+  * ``meta/info.json`` - fps, total_episodes, features schema,
     codebase_version (used to gate v3.0 with a friendly error).
-  * ``meta/episodes.jsonl`` — per-episode length and task index.
-  * ``meta/tasks.jsonl`` — task index → human-readable description.
+  * ``meta/episodes.jsonl`` - per-episode length and task index.
+  * ``meta/tasks.jsonl`` - task index → human-readable description.
 
 We deliberately avoid reading ``meta/stats.json`` (or
-``meta/episodes_stats.jsonl`` in v2.1) — normalization stats matter
+``meta/episodes_stats.jsonl`` in v2.1) - normalization stats matter
 for training, not for replay/observability, and they can be 100s of
 KB on big datasets.
 """
@@ -49,7 +49,7 @@ class DatasetSummary:
     """What a LeRobot dataset contains and how the adapter would treat it.
 
     Returned by `scan_dataset`. Computed before any frame data is
-    downloaded — print this first, decide what to upload, then call
+    downloaded - print this first, decide what to upload, then call
     `upload_episode` / `upload_dataset`.
 
     Attributes
@@ -128,7 +128,7 @@ class DatasetSummary:
         return "\n".join(lines)
 
     def episode(self, episode_index: int) -> EpisodeMeta:
-        """Look up one episode's meta — raises if it doesn't exist."""
+        """Look up one episode's meta - raises if it doesn't exist."""
         for ep in self.episodes:
             if ep.episode_index == episode_index:
                 return ep
@@ -167,7 +167,7 @@ def scan_dataset(
         meta_dir = Path(repo_id_or_path).expanduser().resolve() / "meta"
         if not meta_dir.is_dir():
             raise ConfigurationError(
-                f"no meta/ directory in {repo_id_or_path} — is this a "
+                f"no meta/ directory in {repo_id_or_path} - is this a "
                 "LeRobot dataset root? The expected layout is "
                 "<root>/{meta,data,videos}/."
             )
@@ -179,7 +179,7 @@ def scan_dataset(
         episodes_path = _hub_download(
             repo_id_or_path, "meta/episodes.jsonl", revision=revision
         )
-        # tasks.jsonl is optional — older v2.0 datasets sometimes ship
+        # tasks.jsonl is optional - older v2.0 datasets sometimes ship
         # the task field inline on each episode row instead.
         try:
             tasks_path = _hub_download(
@@ -219,7 +219,7 @@ def scan_dataset(
 def _looks_local(s: str) -> bool:
     """Heuristic: is this a local path or a Hub repo id?
 
-    HF repo ids are always ``namespace/dataset-name`` — exactly one
+    HF repo ids are always ``namespace/dataset-name`` - exactly one
     slash, no other path separators, no leading dot or tilde. Anything
     that looks like a real filesystem path (absolute, relative, with
     leading ``./`` / ``~``, or with a path that exists on disk) is
@@ -242,7 +242,7 @@ def _load_info(info_path: Path) -> dict[str, Any]:
         parsed = json.loads(info_path.read_text())
     except (OSError, json.JSONDecodeError) as exc:
         raise ConfigurationError(
-            f"failed to read {info_path} — corrupted info.json? ({exc})"
+            f"failed to read {info_path} - corrupted info.json? ({exc})"
         ) from exc
     if not isinstance(parsed, dict):
         raise ConfigurationError(
@@ -259,7 +259,7 @@ def _check_format_version(repo_id_or_path: str, info: dict[str, Any]) -> None:
         raise ConfigurationError(
             f"{repo_id_or_path} is a LeRobot dataset format {version!r}, which "
             "uses multi-episode parquet shards instead of one-file-per-episode. "
-            "The robotrace adapter currently supports v2.0 / v2.1 only — "
+            "The robotrace adapter currently supports v2.0 / v2.1 only - "
             "v3.0 is on the roadmap for robotrace 0.1.0a4. Workarounds: "
             "(a) pin to a v2.1 revision of the dataset (`revision='v2.1'`), "
             "(b) convert the dataset locally with `lerobot`'s "
@@ -283,7 +283,7 @@ def _load_episodes(
         {"episode_index": 0, "tasks": ["pick up the cup"], "length": 250}
     Older v2.0 datasets sometimes use ``"task"`` (singular) or
     ``"task_index"`` referencing tasks.jsonl. We accept all three
-    shapes — robotics teams in the wild really do mix versions.
+    shapes - robotics teams in the wild really do mix versions.
     """
     out: list[EpisodeMeta] = []
     try:
@@ -310,9 +310,9 @@ def _normalize_tasks(
 ) -> list[str]:
     """Coerce per-episode task fields into a uniform list[str].
 
-    ``tasks`` (plural list) — v2.1 modern shape.
-    ``task`` (singular string) — older v2.0.
-    ``task_index`` (int) — references tasks.jsonl.
+    ``tasks`` (plural list) - v2.1 modern shape.
+    ``task`` (singular string) - older v2.0.
+    ``task_index`` (int) - references tasks.jsonl.
     """
     if "tasks" in row and isinstance(row["tasks"], list):
         return [str(t) for t in row["tasks"]]
@@ -365,7 +365,7 @@ def _hub_download(
     """Pull one file from an HF Hub dataset repo and return its path.
 
     Caches in ``~/.cache/huggingface/hub`` per `huggingface_hub`'s
-    default — repeat calls don't re-download. Raises
+    default - repeat calls don't re-download. Raises
     ConfigurationError with a clear install hint if the lib is missing.
     """
     hub = _import_huggingface_hub()

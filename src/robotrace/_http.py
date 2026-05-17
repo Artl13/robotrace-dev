@@ -7,7 +7,7 @@ Centralizes:
   • Retry-After parsing + bounded auto-retry on 429
   • redaction of the API key in error messages
 
-Public API is intentionally minimal — call sites use only `request()`,
+Public API is intentionally minimal - call sites use only `request()`,
 `upload_file()`, and the dataclass shapes. Avoids spreading httpx
 specifics through `client.py` / `episode.py`.
 
@@ -51,7 +51,7 @@ UPLOAD_TIMEOUT = httpx.Timeout(connect=15.0, read=600.0, write=600.0, pool=15.0)
 # ── retry policy ────────────────────────────────────────────────────
 #
 # Tight bounds on purpose. A robot rig hitting a 429 deserves a
-# short, well-defined backoff window — long enough to not pound the
+# short, well-defined backoff window - long enough to not pound the
 # server, short enough that a busy queue still completes a training
 # episode rather than wedging on quota math.
 #
@@ -76,7 +76,7 @@ def _parse_retry_after(value: str | None) -> int | None:
 
     Per RFC 9110 §10.2.3 the value is either a non-negative decimal
     integer (delta-seconds) or an ``HTTP-date``. We support the
-    integer form only — clock skew between the robot rig and the
+    integer form only - clock skew between the robot rig and the
     server makes HTTP-date parsing a footgun, and the server's
     rate-limiter already speaks delta-seconds.
 
@@ -98,7 +98,7 @@ def _parse_retry_after(value: str | None) -> int | None:
 def _retry_delay_seconds(retry_after: int | None, attempt: int) -> float:
     """How long to sleep before the next attempt.
 
-    `attempt` is the 0-indexed *failed* attempt count — the very
+    `attempt` is the 0-indexed *failed* attempt count - the very
     first call uses attempt=0 when computing the delay before
     retrying. Honors ``Retry-After`` when present (capped) and falls
     back to exponential backoff (1s, 2s, 4s, …) otherwise.
@@ -165,7 +165,7 @@ class HTTPClient:
         using ``Retry-After`` when present and exponential backoff
         otherwise. Only pass ``retry_safe=True`` for endpoints where
         re-issuing the same request can never cause double-billing or
-        observable double-mutation — currently the create half of
+        observable double-mutation - currently the create half of
         ``start_episode``. Finalize and any other state-mutating call
         keeps the default (``retry_safe=False``) so the user owns the
         retry policy.
@@ -208,12 +208,12 @@ class HTTPClient:
         """PUT `path` to `url` with `content_type`. Returns bytes uploaded.
 
         Streams the file from disk so we don't blow up on multi-GB
-        videos. Uses a fresh httpx client (no auth header — the
+        videos. Uses a fresh httpx client (no auth header - the
         signed URL carries the credentials) and a long timeout.
 
         Auto-retries on 429 up to ``MAX_ATTEMPTS`` total. Signed-PUT
         uploads target a stable R2 object key, so re-issuing the
-        request just overwrites the same blob — safe by construction.
+        request just overwrites the same blob - safe by construction.
         """
         file_path = Path(path)
         if not file_path.is_file():
@@ -225,7 +225,7 @@ class HTTPClient:
             try:
                 with file_path.open("rb") as fh, httpx.Client(
                     timeout=UPLOAD_TIMEOUT,
-                    # Don't inherit our auth header here — the signed
+                    # Don't inherit our auth header here - the signed
                     # URL already carries the auth as query params.
                 ) as client:
                     response = client.put(
@@ -270,7 +270,7 @@ class HTTPClient:
                 )
             return size
 
-        # Unreachable — the loop either returns or raises.
+        # Unreachable - the loop either returns or raises.
         assert last_rate_limit is not None
         raise last_rate_limit
 

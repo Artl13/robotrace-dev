@@ -1,22 +1,22 @@
 """ROS 2 adapter tests.
 
-Synthesises a tiny rosbag2 on disk with three topics — one camera,
-one JointState, one Twist — using `rosbags.rosbag2.Writer` so the
+Synthesises a tiny rosbag2 on disk with three topics - one camera,
+one JointState, one Twist - using `rosbags.rosbag2.Writer` so the
 test suite never needs to ship a binary fixture or talk to a real
 ROS 2 install.
 
 Coverage:
 
-    test_scan_bag_classifies_topics       — auto-classifier picks
+    test_scan_bag_classifies_topics       - auto-classifier picks
                                             video / sensors / actions
                                             from message types.
-    test_encode_bag_writes_artifacts      — encode produces video.mp4,
+    test_encode_bag_writes_artifacts      - encode produces video.mp4,
                                             sensors.npz, actions.npz
                                             with the expected keys
                                             and shapes.
-    test_encode_bag_skips_unknown         — empty topic-list overrides
+    test_encode_bag_skips_unknown         - empty topic-list overrides
                                             actually exclude a slot.
-    test_upload_bag_uses_start_episode    — one-shot upload hits the
+    test_upload_bag_uses_start_episode    - one-shot upload hits the
                                             three ingest endpoints in
                                             the right order with the
                                             right per-slot URLs.
@@ -37,7 +37,7 @@ import pytest
 
 import robotrace as rt
 
-# Skip the module gracefully when the optional deps aren't installed —
+# Skip the module gracefully when the optional deps aren't installed -
 # the SDK's base tests must still pass on an environment that only
 # has `pip install -e ".[dev]"`.
 pytest.importorskip("rosbags")
@@ -152,7 +152,7 @@ def test_scan_bag_classifies_topics(synthetic_bag: Path) -> None:
     assert by_topic["/joint_states"].slot == "sensors"
     assert by_topic["/joint_states"].classified_by == "default"
     assert by_topic["/cmd_vel"].slot == "actions"
-    # /cmd_vel is geometry_msgs/Twist — caught by msgtype rule, not
+    # /cmd_vel is geometry_msgs/Twist - caught by msgtype rule, not
     # the topic-name fallback. The fallback exists for project-specific
     # custom message types.
     assert by_topic["/cmd_vel"].classified_by == "msgtype"
@@ -219,7 +219,7 @@ def test_encode_bag_excludes_slot_with_empty_list(
     assert encoded.video is None
     assert encoded.sensors is not None
     assert encoded.actions is not None
-    # opencv was never imported because no image topic ran — no
+    # opencv was never imported because no image topic ran - no
     # video.mp4 on disk.
     assert not (out / "video.mp4").exists()
 
@@ -235,7 +235,7 @@ def test_upload_bag_runs_full_ingest_flow(
     The signed PUT URLs go to a different host with no auth header, so
     the SDK uses a *fresh* `httpx.Client` per upload (see `_http.py`).
     That means MockTransport on the main client can't intercept the
-    PUTs — instead we patch `HTTPClient.upload_file` to record without
+    PUTs - instead we patch `HTTPClient.upload_file` to record without
     hitting the network. The test still proves that:
 
       * the create call lands with the right slots and metadata

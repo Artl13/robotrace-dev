@@ -1,4 +1,4 @@
-"""Replay regression harness — customer-side runner.
+"""Replay regression harness - customer-side runner.
 
 Lets a robotics team re-roll a candidate policy against historical
 RoboTrace episodes without booking real-robot time. Three verbs:
@@ -30,7 +30,7 @@ us complexity without changing the wall clock. A future hosted
 runner (V1) can implement the same contract on the server side.
 
 Per AGENTS.md the customer's weights never touch our infrastructure
-— ``policy_callable`` is invoked locally and only the per-step
+- ``policy_callable`` is invoked locally and only the per-step
 metric blob is uploaded.
 """
 
@@ -57,12 +57,12 @@ if TYPE_CHECKING:
 # namespaced NPZ layout the ROS 2 and LeRobot adapters emit:
 # `{ "/joint_states/position": ndarray, "/joint_states/_t_ns": int, ... }`.
 # We pass it through as a dict so the customer's code can index by
-# whatever topic / column name they recorded with — no implicit
+# whatever topic / column name they recorded with - no implicit
 # reshape, no opaque tensor that hides which sensor is which.
 Observation = dict[str, Any]
 
 # Per-step action returned by the policy callable. Same dict shape
-# as `Observation` — keyed by the original action namespace (e.g.
+# as `Observation` - keyed by the original action namespace (e.g.
 # `/cmd_vel/linear`, `action/value`) so we can L2-diff against the
 # baseline action at the same key.
 Action = dict[str, Any]
@@ -79,7 +79,7 @@ class EvalRun:
     Returned by :func:`create_run`. Hold onto it across
     :func:`run_against` (per-episode loop) and :func:`complete_run`
     (rollup). The runner state we need to track between calls fits
-    in this dataclass — no global registry.
+    in this dataclass - no global registry.
     """
 
     id: str
@@ -92,7 +92,7 @@ class EvalRun:
     episodes_completed: int = 0
     episodes_failed: int = 0
 
-    # Internal — populated at create time; not part of the user surface.
+    # Internal - populated at create time; not part of the user surface.
     _client: Client | None = field(default=None, repr=False, compare=False)
 
 
@@ -125,7 +125,7 @@ def create_run(
 ) -> EvalRun:
     """Open a new eval-run campaign on the server.
 
-    Mirrors :meth:`Client.start_episode` ergonomically — all kwargs,
+    Mirrors :meth:`Client.start_episode` ergonomically - all kwargs,
     explicit `client=` for tests, falls back to the module-level
     default client (constructed lazily from env / credentials).
     """
@@ -189,7 +189,7 @@ def run_against(
 
     For each baseline episode:
 
-      • download `actions.npz` + `sensors.npz` (best-effort — a
+      • download `actions.npz` + `sensors.npz` (best-effort - a
         baseline with no NPZ artifacts still produces a metric-only
         row),
       • iterate per-step observations into `policy_callable`,
@@ -201,14 +201,14 @@ def run_against(
       • POST `/api/ingest/eval-run/<id>/result` with the metric blob.
 
     Pass ``dry_run=True`` to skip the per-episode `log_episode` and
-    `/result` upload — useful for offline development of the policy
+    `/result` upload - useful for offline development of the policy
     callable when you just want the printed metrics. The dry-run
     path still talks to the artifact resolver, so it requires a
     valid API key.
 
     Returns the list of :class:`EvalResult` objects in baseline-id
     order. Errors inside ``policy_callable`` are caught per-episode
-    and recorded as ``status="failed"`` rows — the loop continues
+    and recorded as ``status="failed"`` rows - the loop continues
     so one bad observation doesn't sink the whole campaign.
     """
     c = run._client or _resolve_client()
@@ -233,7 +233,7 @@ def run_against(
             )
         except Exception as exc:
             # Print the traceback to the customer's terminal so they
-            # can debug locally — we only upload a truncated string
+            # can debug locally - we only upload a truncated string
             # form. Mirrors the runner-side guidance in the plan's
             # "Risks worth naming" → "we don't see failures either".
             traceback.print_exc(file=sys.stderr)
@@ -323,12 +323,12 @@ def _replay_one(
     # metadata. Robotics teams usually stamp `metadata.outcome` at
     # finalize time; LeRobot also stuffs `next.reward_sum` into
     # `metadata.lerobot_episode_outcome`. Be lenient about where we
-    # look — the customer's recording habit is the source of truth.
+    # look - the customer's recording habit is the source of truth.
     baseline_meta = _fetch_episode_metadata(client, baseline_episode_id)
     baseline_outcome = _extract_outcome(baseline_meta)
 
     # Walk per-step observations. We zip the namespaced arrays back
-    # together by index — assumes the runner has the same step count
+    # together by index - assumes the runner has the same step count
     # across topics, which the encoders enforce (`shape changed mid-bag`
     # is a hard skip on the ingest side, see adapters/_encode.py).
     observations = _materialize_observations(baseline_sensors, np=np)
@@ -380,7 +380,7 @@ def _replay_one(
         return metrics, None
 
     # Mint the candidate episode so the portal can drill from the
-    # eval result back to its replay. Metadata-only — we don't try to
+    # eval result back to its replay. Metadata-only - we don't try to
     # re-upload a video for the candidate (no rendering on the
     # customer side in V0). The portal episode detail page renders a
     # "Part of eval run" pill via the `metadata.eval_run_id` link.
@@ -411,7 +411,7 @@ def _fetch_npz(
 ) -> dict[str, Any] | None:
     """GET a baseline NPZ artifact via the artifact resolver route.
 
-    The route 302s to a short-lived signed R2 URL — `httpx` follows
+    The route 302s to a short-lived signed R2 URL - `httpx` follows
     redirects by default, so we get the bytes in one round-trip.
     Returns the parsed dict-of-arrays, or None when the episode has
     no artifact in this slot and ``optional=True``.
@@ -419,7 +419,7 @@ def _fetch_npz(
     import httpx
 
     url = f"/api/episodes/{episode_id}/artifact/{kind}"
-    # Reuse the client's authenticated httpx — same Bearer header.
+    # Reuse the client's authenticated httpx - same Bearer header.
     # We can't use `client._http.request()` because that expects
     # JSON; this endpoint returns binary.
     try:
@@ -450,7 +450,7 @@ def _fetch_npz(
     # `allow_pickle=True` on purpose: this NPZ was uploaded by the
     # user's own SDK to their own R2 bucket, and we just downloaded
     # it via a signed URL that's gated on their API key. The trust
-    # boundary is "bytes I uploaded vs bytes I'm loading" — same as
+    # boundary is "bytes I uploaded vs bytes I'm loading" - same as
     # `import my_module`, not "arbitrary network bytes". Both the
     # ROS 2 and LeRobot encoders use `np.savez(...)` which
     # transparently falls back to pickle for any column numpy can't
@@ -559,7 +559,7 @@ def _materialize_observations(
 
     The NPZ shape is `{ "<topic>/<field>": ndarray[N, ...], "<topic>/_t_ns": int64[N] }`.
     We walk by the first topic's `_t_ns` length and pick row `i` from
-    every field — same convention as the ROS 2 + LeRobot encoders.
+    every field - same convention as the ROS 2 + LeRobot encoders.
     Topics with different lengths are truncated to the min.
     """
     if not sensors:
@@ -599,9 +599,9 @@ def _is_numeric_array(arr: Any, *, np: Any) -> bool:
 
     The metric helpers below assume they can ``np.asarray(arr,
     dtype=float64)`` every column they iterate. NPZ artifacts in
-    the wild ship plenty of non-numeric columns — variable-length
+    the wild ship plenty of non-numeric columns - variable-length
     strings the LeRobot adapter writes for free-text metadata,
-    ragged label arrays, pickled object blobs — and forcing a
+    ragged label arrays, pickled object blobs - and forcing a
     float coercion on those raises ``ValueError`` and crashes the
     whole replay. We skip them here so the metric falls back to
     "the numeric subset of the column set," which is exactly what a
@@ -625,7 +625,7 @@ def _action_l2_distance(
     Sums the squared distance across every action key the two have
     in common (e.g. `/cmd_vel/linear`, `/cmd_vel/angular`), takes a
     sqrt, then averages over steps. Returns None when we can't pair
-    up any keys (different recording conventions, etc.) — the metric
+    up any keys (different recording conventions, etc.) - the metric
     column on the result row becomes null and the rollup ignores it.
     """
     if not baseline_actions or not candidate_actions:
@@ -711,7 +711,7 @@ def _ood_action_share(
             # Replace zero stds with 1 to avoid div-by-zero; a
             # constant baseline channel is "in-distribution" by
             # definition, so any candidate value matching the mean
-            # is z=0 and any deviation is huge — that's the right
+            # is z=0 and any deviation is huge - that's the right
             # behavior.
             std = np.where(std < 1e-9, 1.0, std)
             stats[full_key] = (mean, std)
@@ -806,7 +806,7 @@ __all__ = [
 ]
 
 
-# Re-exports of helpers used by the test suite — leading-underscore
+# Re-exports of helpers used by the test suite - leading-underscore
 # names are still importable, but the tests `from .evals import _foo`
 # spelling is brittle to ruff re-orderings. Expose stable handles.
 metric_action_l2_distance: Callable[..., Any] = _action_l2_distance
@@ -818,5 +818,5 @@ extract_outcome: Callable[..., Any] = _extract_outcome
 def iter_baseline_steps(
     baseline_sensors: dict[str, Any] | None,
 ) -> Iterable[Observation]:
-    """Convenience iterator — public alias for `_materialize_observations`."""
+    """Convenience iterator - public alias for `_materialize_observations`."""
     return iter(_materialize_observations(baseline_sensors, np=_import_numpy()))

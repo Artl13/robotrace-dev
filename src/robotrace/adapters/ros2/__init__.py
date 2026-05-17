@@ -1,4 +1,4 @@
-"""ROS 2 adapter — rosbag2 → RoboTrace episode.
+"""ROS 2 adapter - rosbag2 → RoboTrace episode.
 
 Three entry points, ordered by how much you want the SDK to do:
 
@@ -47,7 +47,7 @@ from ._scan import BagSummary, TopicInfo, scan_bag
 from ._upload import upload_bag
 
 __all__ = [
-    # Primary surface — the three verbs.
+    # Primary surface - the three verbs.
     "scan_bag",
     "encode_bag",
     "upload_bag",

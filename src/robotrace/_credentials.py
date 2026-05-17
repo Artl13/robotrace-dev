@@ -29,7 +29,7 @@ Security
 The file holds a long-lived API key, so the writer enforces
 ``chmod 0600`` after writing. We never log the key value. Reads
 fail loudly if the file is world-readable on systems that ship a
-strict ``UMASK`` policy — the user can re-run ``robotrace login``
+strict ``UMASK`` policy - the user can re-run ``robotrace login``
 and the file will be re-created with the right perms.
 
 Cross-platform notes
@@ -53,7 +53,7 @@ from pathlib import Path
 # tomllib only landed in 3.11; we still support 3.10 per pyproject.
 if sys.version_info >= (3, 11):
     import tomllib as _tomllib  # noqa: PLC0415
-else:  # pragma: no cover — exercised on 3.10
+else:  # pragma: no cover - exercised on 3.10
     _tomllib = None  # type: ignore[assignment]
 
 
@@ -77,7 +77,7 @@ def credentials_path() -> Path:
     """Resolve the path to the credentials file.
 
     Uses ``$ROBOTRACE_HOME`` when set (handy for tests and CI), then
-    falls back to ``~/.robotrace`` on every platform — matches the
+    falls back to ``~/.robotrace`` on every platform - matches the
     convention popular among devtools (``~/.aws``, ``~/.docker``,
     ``~/.kube``).
     """
@@ -92,7 +92,7 @@ def write_credentials(creds: StoredCredentials, *, profile: str = DEFAULT_PROFIL
 
     Returns the absolute path written. Creates the parent dir with
     mode 0700, then writes the file with mode 0600. Raises on any
-    filesystem error — login is the last step of the flow, so a
+    filesystem error - login is the last step of the flow, so a
     failure to persist is worth surfacing loudly.
     """
     path = credentials_path()
@@ -122,7 +122,7 @@ def read_credentials(*, profile: str = DEFAULT_PROFILE) -> StoredCredentials | N
 
     Returns `None` for any of: missing dir, missing file, profile
     not present, malformed file. The SDK falls back to env-var auth
-    in those cases — we never want a corrupt creds file to surface
+    in those cases - we never want a corrupt creds file to surface
     as a confusing "API key not provided" error.
     """
     path = credentials_path()
@@ -184,7 +184,7 @@ def delete_credentials(*, profile: str = DEFAULT_PROFILE) -> bool:
         try:
             path.parent.rmdir()
         except OSError:
-            # Dir not empty (other tools' creds in there) — fine.
+            # Dir not empty (other tools' creds in there) - fine.
             pass
     return True
 
@@ -231,10 +231,10 @@ def _atomic_write_toml(path: Path, data: dict[str, object]) -> None:
 
     We don't take a hard dep on a TOML *writer* (the stdlib gained
     one in 3.11 only as ``tomllib`` for *reading*). Hand-rolling the
-    minimal subset we use — ``[section]`` headers and ``key = "str"``
-    pairs — avoids a third-party dep on the SDK install path.
+    minimal subset we use - ``[section]`` headers and ``key = "str"``
+    pairs - avoids a third-party dep on the SDK install path.
     """
-    lines: list[str] = ["# robotrace credentials\n# managed by `robotrace login` — do not commit.\n\n"]
+    lines: list[str] = ["# robotrace credentials\n# managed by `robotrace login` - do not commit.\n\n"]
     # Stable ordering keeps diffs readable when the user opens the
     # file out of curiosity.
     for profile in sorted(data.keys()):

@@ -1,4 +1,4 @@
-"""`encode_episode(...)` — write artifacts for one LeRobot episode.
+"""`encode_episode(...)` - write artifacts for one LeRobot episode.
 
 Walks one episode's parquet file (``data/chunk-XXX/episode_NNNNNN.parquet``)
 and the matching per-camera mp4s (``videos/observation.images.<key>/chunk-XXX/
@@ -13,7 +13,7 @@ episode_NNNNNN.mp4``), and produces the standard RoboTrace artifact shape:
                  task description) for the SDK to merge into
                  `start_episode(metadata=...)`
 
-The encoder never opens the network for the *upload* — it only fetches
+The encoder never opens the network for the *upload* - it only fetches
 the parquet + mp4s from the Hub (or reads them from the local path)
 into a tempdir. Use `upload_episode(...)` for the full pipeline.
 
@@ -100,7 +100,7 @@ def encode_episode(
         Pick one camera as the only video output (skipping the
         multi-cam horizontal tile) when more than one camera exists.
         Pass the *full* column name (e.g. ``"observation.images.laptop"``)
-        — same format the parquet schema uses.
+        - same format the parquet schema uses.
     summary
         Pre-computed `DatasetSummary` from `scan_dataset(...)`. Skips
         the meta-fetch round-trip when the caller already scanned.
@@ -121,7 +121,7 @@ def encode_episode(
     columns = list(table.column_names)
 
     # LeRobot v2.1 stores cameras as MP4 files referenced by feature
-    # name in info.json — NOT as parquet columns. So the source of
+    # name in info.json - NOT as parquet columns. So the source of
     # truth for "which cameras does this dataset have?" is
     # `summary.camera_keys`, populated from info.json["features"].
     # The parquet classifier only handles non-image features
@@ -220,7 +220,7 @@ def _resolve_episode_parquet(
         ``data/chunk-{NNN}/episode_{NNNNNN}.parquet``
     where ``NNN`` is the chunk number (episode_index // chunks_size,
     chunks_size defaults to 1000). We compute both candidates rather
-    than hardcoding the chunk size — older datasets sometimes used 100,
+    than hardcoding the chunk size - older datasets sometimes used 100,
     and v2.0 used a flatter layout.
     """
     relative_candidates = _candidate_parquet_paths(episode_index)
@@ -288,7 +288,7 @@ def _encode_video(
 ) -> EncodedArtifact | None:
     """Resolve mp4(s) for the requested cameras and produce one output mp4.
 
-    Single camera → the source mp4 is copied (no transcode — the
+    Single camera → the source mp4 is copied (no transcode - the
     server transcodes for browser playback if needed).
     Multi camera → horizontally tile per-frame using opencv. Falls back
     to "first camera only" if opencv isn't installed, with a `skipped`
@@ -329,7 +329,7 @@ def _encode_video(
         skipped.append(
             {
                 "reason": (
-                    "multi-camera tile needs opencv — install "
+                    "multi-camera tile needs opencv - install "
                     "`pip install 'robotrace-dev[lerobot,video]==0.1.0a6'`. "
                     f"Falling back to canonical_camera={resolved[0][0]!r}."
                 ),
@@ -452,7 +452,7 @@ def _tile_videos_horizontal(
 
 def _encode_sensors_or_actions(
     *,
-    table: Any,  # pyarrow.Table — left untyped to avoid hard dep
+    table: Any,  # pyarrow.Table - left untyped to avoid hard dep
     columns: Sequence[str],
     slot: Slot,
     output_path: Path,
@@ -464,14 +464,14 @@ def _encode_sensors_or_actions(
     parsing):
 
         {
-          "<column>/_t_ns":   int64[N]   — timestamp nanoseconds
-          "<column>/value":   float32[N, K]  — column values
+          "<column>/_t_ns":   int64[N]   - timestamp nanoseconds
+          "<column>/value":   float32[N, K]  - column values
         }
 
     For columns whose value type is a list-of-floats (the usual case
     for ``observation.state``, ``action``, ``observation.imu.angular_velocity``,
     etc.) we stack into 2-D. For scalar columns (rare in LeRobot v2.1
-    but possible — e.g. ``next.reward`` would land here if it weren't
+    but possible - e.g. ``next.reward`` would land here if it weren't
     filtered into episode_meta) we stack into 1-D.
     """
     if not columns:
@@ -479,14 +479,14 @@ def _encode_sensors_or_actions(
 
     np = _import_numpy()
 
-    # `timestamp` is the canonical per-frame clock in LeRobot v2.1 —
+    # `timestamp` is the canonical per-frame clock in LeRobot v2.1 -
     # we reuse it as the nanosecond timestamp for every column in the
     # NPZ. Convert seconds (float32) → nanoseconds (int64) once.
     if "timestamp" not in table.column_names:
         skipped.append(
             {
                 "slot": slot,
-                "reason": "no `timestamp` column in parquet — cannot align rows",
+                "reason": "no `timestamp` column in parquet - cannot align rows",
             }
         )
         return None
@@ -549,7 +549,7 @@ def _column_to_ndarray(column: Any, np: Any) -> Any:
         py_rows = column.to_pylist()
         if not py_rows:
             return None
-        # Reject ragged lists — LeRobot state vectors are always fixed
+        # Reject ragged lists - LeRobot state vectors are always fixed
         # length. Variable-length would only happen if the user shoved
         # `observation.tokens` or similar into a non-image observation.
         first_len = len(py_rows[0]) if py_rows[0] is not None else 0
@@ -567,7 +567,7 @@ def _column_to_ndarray(column: Any, np: Any) -> Any:
 def _extract_episode_outcome(table: Any, columns: Sequence[str]) -> dict[str, Any]:
     """Roll up `next.reward` / `next.done` / `next.success` for the row.
 
-    Returns the *last frame's* value for each — the typical "did the
+    Returns the *last frame's* value for each - the typical "did the
     episode succeed?" signal. Reward is summed across the trajectory
     in addition (LeRobot stores per-step reward).
     """
@@ -604,7 +604,7 @@ def _import_pyarrow() -> Any:
         # `pyarrow.parquet` and `pyarrow.types` are submodules that must
         # be explicitly imported before they're available as
         # `pyarrow.parquet.read_table` / `pyarrow.types.is_floating`.
-        # We use both later — these aren't unused imports.
+        # We use both later - these aren't unused imports.
         import pyarrow
         import pyarrow.parquet
         import pyarrow.types

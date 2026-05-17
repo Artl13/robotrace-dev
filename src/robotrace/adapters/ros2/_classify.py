@@ -2,7 +2,7 @@
 
 A rosbag2 typically contains a mix of sensor streams, camera streams,
 and command streams. The RoboTrace episode model has three artifact
-slots — `video`, `sensors`, `actions` — and the adapter has to decide
+slots - `video`, `sensors`, `actions` - and the adapter has to decide
 which slot every topic belongs in.
 
 Rules (ordered, first match wins):
@@ -18,7 +18,7 @@ Rules (ordered, first match wins):
 Users always win: an explicit override (``video_topics=…``,
 ``sensor_topics=…``, ``action_topics=…`` on the public API) skips
 the heuristic entirely. The classifier just provides a sane default
-so the common case — a one-camera, one-IMU, one-cmd_vel bag — works
+so the common case - a one-camera, one-IMU, one-cmd_vel bag - works
 without any kwargs.
 """
 
@@ -27,7 +27,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-# Slot labels — match the SDK's ArtifactKind in episode.py exactly.
+# Slot labels - match the SDK's ArtifactKind in episode.py exactly.
 # Re-imported here as a Literal to avoid a circular import path
 # (adapters → core → adapters) when this module is loaded eagerly
 # from `adapters.ros2.__init__`.
@@ -69,7 +69,7 @@ class TopicClass:
     topic: str
     msgtype: str
     slot: Slot
-    # Reason the slot was picked — surfaced in `BagSummary.report()`
+    # Reason the slot was picked - surfaced in `BagSummary.report()`
     # so the user can sanity-check before uploading. "msgtype" means
     # we matched the message type list; "topic-name" means we fell
     # through to the cmd_*/command suffix rule; "default" means
@@ -80,7 +80,7 @@ class TopicClass:
 def classify_topic(topic: str, msgtype: str) -> TopicClass:
     """Return the slot decision for one (topic, msgtype) pair.
 
-    Pure function — no side effects, no IO. Tests can call this with
+    Pure function - no side effects, no IO. Tests can call this with
     arbitrary (topic, msgtype) pairs to pin behavior.
     """
     if msgtype in _IMAGE_MSGTYPES:

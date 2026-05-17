@@ -2,10 +2,10 @@
 
 Скрипт делает три вещи:
   1. Создаёт мелкий тестовый .mp4 (24 кадра @ 24 fps, 320×240) через
-     opencv. Файл занимает ~5 KB — Cloudflare R2 free tier даёт
+     opencv. Файл занимает ~5 KB - Cloudflare R2 free tier даёт
      1M Class A операций в месяц, так что прогонять можно сколько угодно.
   2. Зовёт `rt.log_episode(video=...)` против локального dev сервера.
-  3. Проверяет что `episode.storage == "r2"` — это и есть подтверждение
+  3. Проверяет что `episode.storage == "r2"` - это и есть подтверждение
      что ingest endpoint увидел R2 env переменные и сминтил подписанный
      PUT URL, а SDK успешно залил файл в bucket.
 
@@ -16,16 +16,16 @@
     export ROBOTRACE_BASE_URL=http://localhost:3000
     .venv/bin/python examples/r2_smoke.py
 
-Если `storage: r2` в выводе — всё работает, файл лежит в R2 bucket.
-Если `storage: unconfigured` — env переменные R2_* не подхватились,
+Если `storage: r2` в выводе - всё работает, файл лежит в R2 bucket.
+Если `storage: unconfigured` - env переменные R2_* не подхватились,
 скорее всего dev сервер запущен до того как ты их добавил в .env.local.
 Перезапусти Next.js (`Ctrl+C` + `npm run dev`) и попробуй снова.
 
-`opencv-python` нужен для записи .mp4 — поставь через `[video]` extra:
+`opencv-python` нужен для записи .mp4 - поставь через `[video]` extra:
 
     .venv/bin/pip install -e ".[video]"
 
-Этот скрипт не использует ROS 2 — для тестов ROS 2 адаптера смотри
+Этот скрипт не использует ROS 2 - для тестов ROS 2 адаптера смотри
 `tests/test_ros2_adapter.py` (8 тестов с синтетическим bag-ом).
 """
 
@@ -41,7 +41,7 @@ from robotrace import APIError
 def _make_test_mp4(out_path: Path) -> None:
     """Записать односекундное видео-«радуга» через opencv VideoWriter.
 
-    Каждый кадр — равномерно серый, яркость растёт от 0 до 192. Получается
+    Каждый кадр - равномерно серый, яркость растёт от 0 до 192. Получается
     короткий fade-in. Достаточно чтобы R2 PUT прошёл, и чтобы потом на
     странице эпизода в портале было видно «настоящее» видео а не чёрный
     квадрат.
@@ -62,7 +62,7 @@ def _make_test_mp4(out_path: Path) -> None:
     if not writer.isOpened():
         sys.stderr.write(
             f"opencv VideoWriter failed to open {out_path}. most often "
-            "the mp4v codec isn't compiled into your opencv wheel — try "
+            "the mp4v codec isn't compiled into your opencv wheel - try "
             "`pip install --upgrade opencv-python`.\n"
         )
         sys.exit(2)
@@ -95,10 +95,10 @@ def main() -> None:
             metadata={"task": "r2_smoke", "purpose": "verify R2 wiring"},
         )
     except APIError as exc:
-        # R2 возвращает XML body на 403 — `<Code>NoSuchBucket</Code>`,
+        # R2 возвращает XML body на 403 - `<Code>NoSuchBucket</Code>`,
         # `<Code>SignatureDoesNotMatch</Code>`, и т.п. SDK его захватил
         # в `response_body`, но не печатает по умолчанию (валит на
-        # сообщение). Тут мы достаём явно — без этого диагностировать
+        # сообщение). Тут мы достаём явно - без этого диагностировать
         # 403 от R2 практически невозможно.
         print()
         print(f"✗ APIError: {exc}")
@@ -119,13 +119,13 @@ def main() -> None:
 
     if episode.storage == "r2":
         print()
-        print("✓ R2 wired correctly — the .mp4 is in your bucket.")
+        print("✓ R2 wired correctly - the .mp4 is in your bucket.")
         print(f"  open the episode in the portal: {episode.id}")
     else:
         print()
-        print("✗ storage is not 'r2' — R2 env vars likely not picked up.")
+        print("✗ storage is not 'r2' - R2 env vars likely not picked up.")
         print("  check apps/web/.env.local has R2_ACCOUNT_ID, R2_ACCESS_KEY_ID,")
-        print("  R2_SECRET_ACCESS_KEY, R2_BUCKET_EPISODES — then restart")
+        print("  R2_SECRET_ACCESS_KEY, R2_BUCKET_EPISODES - then restart")
         print("  `npm run dev` so the new env is loaded.")
         sys.exit(1)
 

@@ -1,4 +1,4 @@
-"""`scan_bag(...)` — read-only introspection of a rosbag2 directory.
+"""`scan_bag(...)` - read-only introspection of a rosbag2 directory.
 
 Returns a `BagSummary` describing every connection, the auto-classified
 artifact slot, message counts, and the bag's wall-clock duration. No
@@ -89,7 +89,7 @@ def scan_bag(path: str | Path) -> BagSummary:
 
     `path` is the bag *directory* (the one containing `metadata.yaml`),
     not an individual `.db3` / `.mcap` file. Both sqlite3 and mcap
-    backends are accepted — `rosbags` picks the right reader.
+    backends are accepted - `rosbags` picks the right reader.
 
     Raises `ConfigurationError` if `rosbags` isn't installed or `path`
     doesn't look like a rosbag2 directory; both errors carry actionable
@@ -102,7 +102,7 @@ def scan_bag(path: str | Path) -> BagSummary:
         connections = list(reader.connections)
         topics = [_topic_info(c) for c in connections]
         # `rosbags` exposes start/end timestamps in nanoseconds on the
-        # AnyReader — they're ints since the rosbag2 metadata format
+        # AnyReader - they're ints since the rosbag2 metadata format
         # is nanoseconds-since-epoch. Empty bag → start == end == 0,
         # which we surface as duration_s=None instead of 0.0 so the
         # caller can branch on "no data" cleanly.
@@ -127,7 +127,7 @@ def scan_bag(path: str | Path) -> BagSummary:
 def _topic_info(connection: object) -> TopicInfo:
     """Adapt one rosbags `Connection` into our public dataclass.
 
-    `connection` is intentionally typed as `object` — we don't import
+    `connection` is intentionally typed as `object` - we don't import
     rosbags' types into the public surface, so we pull `.topic`,
     `.msgtype`, `.msgcount` defensively via `getattr` and let the
     underlying library evolve its internals freely.
@@ -163,7 +163,7 @@ def _resolve_bag_path(path: str | Path) -> Path:
         )
     if not (bag_path / "metadata.yaml").is_file():
         raise ConfigurationError(
-            f"no metadata.yaml in {bag_path} — is this really a rosbag2 directory? "
+            f"no metadata.yaml in {bag_path} - is this really a rosbag2 directory? "
             "If your bag is a single .mcap file, place it in a directory with "
             "metadata.yaml alongside it (the standard rosbag2 layout)."
         )
@@ -187,7 +187,7 @@ def _import_anyreader() -> type:
 
 
 def iter_connections_for_topics(reader: object, topics: Iterable[str]) -> list[object]:
-    """Helper used by the encoder — the connections matching `topics`.
+    """Helper used by the encoder - the connections matching `topics`.
 
     Kept here (rather than in `_encode.py`) so both `_scan` and `_encode`
     use the same defensive `getattr` pattern when they pull `.topic`

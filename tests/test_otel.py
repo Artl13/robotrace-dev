@@ -1,4 +1,4 @@
-"""OpenTelemetry trace correlation — wire-format + soft-import tests.
+"""OpenTelemetry trace correlation - wire-format + soft-import tests.
 
 Covers the three states the SDK can find itself in:
 
@@ -63,11 +63,11 @@ def _make_capturing_client() -> tuple[rt.Client, list[httpx.Request]]:
     return client, captured
 
 
-# ── (1) OTel not installed — the default in CI ─────────────────────
+# ── (1) OTel not installed - the default in CI ─────────────────────
 
 
 def test_no_otel_installed_omits_otel_field(monkeypatch: pytest.MonkeyPatch) -> None:
-    """When `_OTEL_AVAILABLE` is False the field is absent — not
+    """When `_OTEL_AVAILABLE` is False the field is absent - not
     `None`, not an empty dict. The server contract treats the key
     as truly optional, so omitting keeps backwards compatibility.
     """
@@ -103,7 +103,7 @@ def fake_otel_no_span(monkeypatch: pytest.MonkeyPatch) -> Iterator[types.ModuleT
 
 
 def test_otel_installed_no_active_span_omits_field(
-    fake_otel_no_span: types.ModuleType,  # noqa: ARG001 — fixture installs the mock
+    fake_otel_no_span: types.ModuleType,  # noqa: ARG001 - fixture installs the mock
 ) -> None:
     client, captured = _make_capturing_client()
     client.start_episode(name="no-active-span", artifacts=[])
@@ -112,7 +112,7 @@ def test_otel_installed_no_active_span_omits_field(
     assert "otel" not in payload
 
 
-# ── (3) OTel installed with an active span — happy path ────────────
+# ── (3) OTel installed with an active span - happy path ────────────
 
 
 @pytest.fixture
@@ -146,7 +146,7 @@ def test_otel_active_span_attaches_w3c_trace_context(
         otel["traceparent"]
         == "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
     )
-    # Pin the field set — adding fields here is a server-contract
+    # Pin the field set - adding fields here is a server-contract
     # change, so the test should fail loudly to force a server-side
     # Zod update too.
     assert set(otel.keys()) == {"trace_id", "span_id", "traceparent"}
@@ -156,7 +156,7 @@ def test_otel_unsampled_flag_round_trips(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """When the active span carries trace_flags=0 (explicitly unsampled),
-    the traceparent must end in ``-00`` — never overwrite the customer's
+    the traceparent must end in ``-00`` - never overwrite the customer's
     sampler decision (W3C Trace Context §3.2.2.7). Portal deep-links use
     trace_id / span_id only."""
     _install_fake_otel_module(
@@ -175,7 +175,7 @@ def test_otel_unsampled_flag_round_trips(
 def test_otel_capture_never_raises_when_module_misbehaves(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Any exception inside the OTel call path must be swallowed —
+    """Any exception inside the OTel call path must be swallowed -
     SDK telemetry must not crash the user's training run.
     """
     boom = types.SimpleNamespace(
@@ -248,7 +248,7 @@ def test_otel_module_exposes_public_api() -> None:
 def test_episode_payload_otel_field_round_trips_through_log_episode(
     fake_otel_with_span: types.ModuleType,  # noqa: ARG001
 ) -> None:
-    """`log_episode` is the "sacred" entrypoint — same OTel attach
+    """`log_episode` is the "sacred" entrypoint - same OTel attach
     behavior as `start_episode`. This test guards the path we
     expect 95% of users to take.
     """

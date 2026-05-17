@@ -4,7 +4,7 @@ These tests are intentionally low-level: they assert the JSON shape
 hitting the server, because the `log_episode` signature is "sacred"
 per AGENTS.md and the server contract evolves under it.
 
-If a test here fails, you've changed the wire format — confirm the
+If a test here fails, you've changed the wire format - confirm the
 server side accepts the new shape (or keeps accepting the old one
 during the deprecation window) before merging.
 """
@@ -26,7 +26,7 @@ class StubFixture:
     """Bundles a Client with the requests its MockTransport saw.
 
     Avoids reaching into httpx internals for the captured-request
-    list — every test should use `fix.requests` instead of poking
+    list - every test should use `fix.requests` instead of poking
     at private attributes.
     """
 

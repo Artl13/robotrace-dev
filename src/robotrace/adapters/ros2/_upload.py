@@ -1,8 +1,8 @@
-"""`upload_bag(...)` — the one-shot rosbag2 → episode pipeline.
+"""`upload_bag(...)` - the one-shot rosbag2 → episode pipeline.
 
 Composes `scan_bag` + `encode_bag` + `Client.start_episode` + the
 per-slot `upload_*` helpers + `finalize`. Encoded artifacts land in a
-temporary directory that's cleaned up on return — pass
+temporary directory that's cleaned up on return - pass
 ``keep_artifacts=True`` to debug a problematic encode.
 
 Why not `log_episode`?
@@ -13,7 +13,7 @@ match their slot, e.g. a `.npz` file in `actions=` is rejected
 because `kind_from_extension` guesses `sensors`. The adapter knows
 exactly what it wrote, so it bypasses that check by going directly
 through the lower-level `start_episode + upload_* + finalize` API.
-This is the right place for that bypass — `log_episode` stays strict
+This is the right place for that bypass - `log_episode` stays strict
 for human callers, the adapter speaks to a friendlier interface.
 """
 
@@ -34,11 +34,11 @@ from ._scan import BagSummary, scan_bag
 def upload_bag(
     path: str | Path,
     *,
-    # Auth — pass an explicit Client for tests / multi-deployment, or
+    # Auth - pass an explicit Client for tests / multi-deployment, or
     # leave None to use the module-level default (configured by
     # `robotrace.init(...)` or env vars).
     client: Client | None = None,
-    # Episode identification + reproducibility — same shape as the
+    # Episode identification + reproducibility - same shape as the
     # core `start_episode` call.
     name: str | None = None,
     source: EpisodeSource = "real",
@@ -189,7 +189,7 @@ def _merge_metadata(
 
 
 def _default_episode_name(bag_path: Path) -> str:
-    """`{parent_or_name} (ros2 bag)` — recognisable in the portal list."""
+    """`{parent_or_name} (ros2 bag)` - recognisable in the portal list."""
     label = bag_path.name or str(bag_path)
     return f"{label} (ros2 bag)"
 
@@ -202,7 +202,7 @@ def _get_default_client() -> Client:
     runs `from robotrace.adapters import ros2`, before
     `robotrace.__init__` is fully evaluated in some shells).
     """
-    from ... import _ensure_default_client  # local — see docstring
+    from ... import _ensure_default_client  # local - see docstring
 
     return _ensure_default_client()
 

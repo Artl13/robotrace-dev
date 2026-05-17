@@ -1,4 +1,4 @@
-"""LeRobot adapter — Hugging Face LeRobot datasets → RoboTrace episodes.
+"""LeRobot adapter - Hugging Face LeRobot datasets → RoboTrace episodes.
 
 Three entry points, ordered by how much you want the SDK to do:
 
@@ -35,7 +35,7 @@ Three entry points, ordered by how much you want the SDK to do:
         episode_indices=range(0, 50),  # default = all
     )
 
-Each LeRobot trajectory becomes one RoboTrace episode — the natural
+Each LeRobot trajectory becomes one RoboTrace episode - the natural
 mapping. Reproducibility fields (`policy_version`, `env_version`,
 `git_sha`, `seed`) come from the caller; the adapter populates the
 LeRobot-side identifiers (repo id, dataset codebase_version, episode
@@ -47,30 +47,30 @@ Format support
 
 LeRobot dataset format **v2.1** is supported in this release. v2.1 is
 the format used by the vast majority of public `lerobot/*` Hub
-datasets as of May 2026 — one parquet per episode, one mp4 per
+datasets as of May 2026 - one parquet per episode, one mp4 per
 episode per camera. Format v3.0 (multi-episode parquet shards,
 introduced late 2025) raises a clear `ConfigurationError` with a
 suggestion to either pin to v2.1 or open an issue. v3.0 support is
-on the roadmap for ``robotrace 0.1.0a4`` — we'll prioritize it once
+on the roadmap for ``robotrace 0.1.0a4`` - we'll prioritize it once
 real users hit the wall, rather than guess at the format ahead of
 demand.
 
 Dependency strategy
 -------------------
 
-The adapter does **not** depend on the `lerobot` PyPI package — that
+The adapter does **not** depend on the `lerobot` PyPI package - that
 package pulls in torch, torchvision, torchaudio, datasets, pyav, and
 several CUDA wheels (multi-GB install footprint). We read the
 on-disk format directly with `pyarrow` (parquet) +
 `huggingface-hub` (download) + `numpy`, plus our own `[video]`
 extra (opencv) for tiling multi-camera mp4s. Total install adds
-~20 MB on top of the base SDK — comparable to the ROS 2 adapter.
+~20 MB on top of the base SDK - comparable to the ROS 2 adapter.
 
 Storage / download behavior
 ---------------------------
 
 `huggingface_hub.hf_hub_download` caches per-file in
-`~/.cache/huggingface/hub` by default — repeated runs against the
+`~/.cache/huggingface/hub` by default - repeated runs against the
 same dataset don't re-download. Per-episode upload is sequential
 (no parallel HF downloads) so a flaky network only loses one
 episode's worth of progress, never a full dataset.

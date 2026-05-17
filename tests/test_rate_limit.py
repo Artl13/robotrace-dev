@@ -8,7 +8,7 @@ Three things being pinned here:
      retries on 429 until success, honoring the server's
      ``Retry-After`` value.
   3. ``Episode.finalize`` (idempotency-sensitive) does NOT auto-retry
-     — the user is expected to own that retry policy because a future
+     - the user is expected to own that retry policy because a future
      paid tier could double-bill artifact storage. The existing
      comment in ``errors.ServerError`` documents the same rule.
 
@@ -201,7 +201,7 @@ def test_retry_falls_back_to_exponential_backoff_without_header(
     def handler(request: httpx.Request) -> httpx.Response:
         seen.append(len(seen))
         if len(seen) < 4:
-            # No Retry-After header — exercise the exponential path.
+            # No Retry-After header - exercise the exponential path.
             return httpx.Response(429, json={"error": "throttled"})
         return httpx.Response(
             201,
@@ -254,7 +254,7 @@ def test_upload_file_retries_on_429(
     http = _http.HTTPClient(
         api_key="rt_x",
         base_url="https://example.test",
-        # Don't pass a transport — upload_file uses its own client.
+        # Don't pass a transport - upload_file uses its own client.
     )
     written = http.upload_file(
         "https://r2.example/signed-put",
@@ -317,7 +317,7 @@ def test_non_429_errors_are_unchanged(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_request_body_unchanged_under_retry(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A retried request must re-send the exact same JSON payload —
+    """A retried request must re-send the exact same JSON payload -
     callers depend on the wire format being identical across attempts.
     """
     _disable_sleep(monkeypatch)
@@ -347,7 +347,7 @@ def test_request_body_unchanged_under_retry(
         artifacts=["video"],
     )
     assert len(bodies) == 2
-    # Same bytes on the wire across the retry — no jitter, no
+    # Same bytes on the wire across the retry - no jitter, no
     # `attempt` field leaking into the payload.
     assert bodies[0] == bodies[1]
     payload = json.loads(bodies[0])

@@ -1,6 +1,6 @@
 # robotrace-dev (Python SDK)
 
-> The official Python SDK for [RoboTrace](https://robotrace.dev) —
+> The official Python SDK for [RoboTrace](https://robotrace.dev) -
 > observability and evals for AI-powered robots.
 
 ```bash
@@ -12,12 +12,12 @@ pip install robotrace-dev
 > un-hyphenated `robotrace` PyPI namespace is held by an unrelated
 > robotics project, and PyPI's typo-squat protector blocks any
 > single-edit-distance variant (so `robo-trace` was rejected too).
-> The *import* name stays `import robotrace` — same pattern as
+> The *import* name stays `import robotrace` - same pattern as
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual — `pip install robotrace-dev==0.1.0a6` pulls this README.
-> Older pins (`0.1.0a5.post1`, `0.1.0a5`) are prior alphas — same core
+> as usual - `pip install robotrace-dev==0.1.0a6` pulls this README.
+> Older pins (`0.1.0a5.post1`, `0.1.0a5`) are prior alphas - same core
 > SDK, but omit the refreshed `robotrace login` UX from `0.1.0a6`.
 
 > **Status:** alpha (`0.1.0a6`). The public API in this README is the
@@ -30,11 +30,11 @@ pip install robotrace-dev
 
 You need an API key on this machine **once**. Pick one path:
 
-### A) Portal — create a key
+### A) Portal - create a key
 
 Sign in at
 [**app.robotrace.dev/login?next=/portal/api-keys**](https://app.robotrace.dev/login?next=/portal/api-keys)
-(portal sign-in — after authentication you land on **API keys**).
+(portal sign-in - after authentication you land on **API keys**).
 Click **Create key**, copy it once, then:
 
 ```python
@@ -67,9 +67,9 @@ The episode appears in your portal at
 immediately, with the four reproducibility fields (policy / env /
 git / seed) front-and-center on the detail page. The SDK also
 prints a clickable URL to the run as soon as `start_episode` /
-`log_episode` opens it — usually before the bytes finish uploading.
+`log_episode` opens it - usually before the bytes finish uploading.
 
-### B) CLI — browser login (no copy-paste)
+### B) CLI - browser login (no copy-paste)
 
 Use the `robotrace` executable installed with the package:
 
@@ -80,7 +80,7 @@ robotrace login
 This opens your default browser (or prints a link to open). After you
 authorize in the portal, the CLI writes **`~/.robotrace/credentials`**
 with your API key and base URL (`chmod 0600`). From Python you can
-skip `init()` — the default client loads that file when `ROBOTRACE_API_KEY`
+skip `init()` - the default client loads that file when `ROBOTRACE_API_KEY`
 is not set:
 
 ```python
@@ -122,7 +122,7 @@ export ROBOTRACE_BASE_URL=https://app.robotrace.dev
 ```python
 import robotrace as rt
 
-# init() is optional when both env vars are set — the default
+# init() is optional when both env vars are set - the default
 # client is constructed lazily on first use.
 rt.log_episode(
     name="…",
@@ -132,7 +132,7 @@ rt.log_episode(
 ```
 
 If you already ran `robotrace login`, a credentials file usually takes
-precedence when env vars are unset — see [CLI login](https://robotrace.dev/docs/sdk/cli-login).
+precedence when env vars are unset - see [CLI login](https://robotrace.dev/docs/sdk/cli-login).
 
 ## Command-line interface
 
@@ -150,7 +150,7 @@ commands that talk to the API. Full CLI reference: [CLI login](https://robotrace
 
 ## API
 
-### `log_episode` — the sacred call
+### `log_episode` - the sacred call
 
 The one-shot entrypoint. Equivalent to `start_episode` → upload all
 artifacts → `finalize`. Use this for the 95% case of "I have files
@@ -164,7 +164,7 @@ rt.log_episode(
     source: Literal["real", "sim", "replay"] = "real",
     robot: str | None = None,
 
-    # Reproducibility — load-bearing per AGENTS.md
+    # Reproducibility - load-bearing per AGENTS.md
     policy_version: str | None = None,
     env_version: str | None = None,
     git_sha: str | None = None,
@@ -189,7 +189,7 @@ Returns the finalized `Episode`. On failure during upload the SDK
 flips the run to `status="failed"` and re-raises so your program
 sees what went wrong.
 
-### `start_episode` — explicit lifecycle
+### `start_episode` - explicit lifecycle
 
 When you want fine-grained control (stream uploads, defer finalize,
 react to upload errors per-artifact), use `start_episode` and the
@@ -203,7 +203,7 @@ with rt.start_episode(
 ) as ep:
     ep.upload_video("/tmp/run.mp4")
     ep.upload_sensors("/tmp/sensors.bin")
-    # No explicit finalize — context manager handles it:
+    # No explicit finalize - context manager handles it:
     #   • clean exit → status="ready"
     #   • exception  → status="failed", with metadata.failure_reason set
 ```
@@ -216,7 +216,7 @@ ep.upload_video("/tmp/run.mp4")
 ep.finalize(status="ready", duration_s=47.2, fps=30)
 ```
 
-### `Client` — explicit instance
+### `Client` - explicit instance
 
 Skip the module-level default when you need multiple deployments at
 once (e.g. shipping the same run to staging + production), or for
@@ -227,7 +227,7 @@ with rt.Client(api_key="rt_…", base_url="https://…") as client:
     client.log_episode(name="…", policy_version="…", video="…")
 ```
 
-`Client` holds a connection pool — construct it once at process
+`Client` holds a connection pool - construct it once at process
 startup, reuse across many episodes, and `close()` (or use as a
 context manager) on shutdown.
 
@@ -240,11 +240,11 @@ type rather than parsing message strings:
 | -------------------- | ------------------------------------------------------ |
 | `ConfigurationError` | Missing `api_key` / `base_url`, file path doesn't exist |
 | `TransportError`     | Network / DNS / TLS / timeout                          |
-| `AuthError`          | 401 — bad / missing / revoked key                      |
-| `NotFoundError`      | 404 — episode id doesn't exist (or cross-tenant)       |
-| `ConflictError`      | 409 — episode is archived, etc.                        |
-| `ValidationError`    | 400 — payload didn't pass server-side validation       |
-| `ServerError`        | 5xx — flag for retries                                 |
+| `AuthError`          | 401 - bad / missing / revoked key                      |
+| `NotFoundError`      | 404 - episode id doesn't exist (or cross-tenant)       |
+| `ConflictError`      | 409 - episode is archived, etc.                        |
+| `ValidationError`    | 400 - payload didn't pass server-side validation       |
+| `ServerError`        | 5xx - flag for retries                                 |
 
 ```python
 from robotrace import RobotraceError, AuthError
@@ -268,14 +268,14 @@ stays flat regardless of file size.
 When the deployment hasn't wired R2 yet (`R2_ACCOUNT_ID` etc. are
 blank), the create response has `storage="unconfigured"` and any
 `upload_*` call raises `ConfigurationError` with a pointer to the
-production setup checklist. Metadata-only runs still work — useful
+production setup checklist. Metadata-only runs still work - useful
 for testing the SDK contract end-to-end before R2 is provisioned.
 
 ## Adapters
 
 Framework adapters slurp third-party recording / dataset formats
 into the canonical `log_episode` contract. None are loaded by
-default — each lives behind an extras pin so the base install
+default - each lives behind an extras pin so the base install
 stays slim:
 
 ```bash
@@ -285,7 +285,7 @@ pip install 'robotrace-dev[ros2]==0.1.0a6'
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
 pip install 'robotrace-dev[lerobot]==0.1.0a6'
 
-# Multi-camera mp4 encoding (opencv) — combine with [ros2] or [lerobot]
+# Multi-camera mp4 encoding (opencv) - combine with [ros2] or [lerobot]
 pip install 'robotrace-dev[ros2,video]==0.1.0a6'
 ```
 
@@ -317,7 +317,7 @@ and [robotrace.dev/docs/sdk/lerobot](https://robotrace.dev/docs/sdk/lerobot).
 The LeRobot adapter deliberately does **not** depend on the heavy
 `lerobot` PyPI package (which would pull torch + torchvision +
 pyav + several CUDA wheels). It reads the v2.1 on-disk format
-directly via `pyarrow` + `huggingface_hub` — ~20 MB install
+directly via `pyarrow` + `huggingface_hub` - ~20 MB install
 footprint, comparable to `[ros2]`. LeRobot v3.0 (multi-episode
 parquet shards, late 2025) is on the roadmap.
 
@@ -356,14 +356,14 @@ LeRobot v3.0.
 ## Contributing
 
 The public source lives at
-[github.com/Artl13/robotrace-dev](https://github.com/Artl13/robotrace-dev) —
+[github.com/Artl13/robotrace-dev](https://github.com/Artl13/robotrace-dev) -
 a read-only mirror auto-synced from our internal monorepo. File
 issues and PRs against the mirror; we'll cherry-pick approved
 changes back into the private repo and they'll flow out on the
 next sync.
 
 The web app at `apps/web` (private) exposes the ingest API the SDK
-talks to — coordinate breaking changes by emailing the
+talks to - coordinate breaking changes by emailing the
 [`/api/ingest/episode`](https://robotrace.dev/docs/api/ingest)
 contract owner before opening a SDK PR that depends on a server
 change.
@@ -371,4 +371,4 @@ change.
 ## License
 
 The Python SDK is released under the [MIT License](https://opensource.org/license/mit).
-See [`LICENSE`](./LICENSE) beside this README for the full legal text — it ships in PyPI wheels and sdists as well.
+See [`LICENSE`](./LICENSE) beside this README for the full legal text - it ships in PyPI wheels and sdists as well.

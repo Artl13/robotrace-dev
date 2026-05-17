@@ -6,21 +6,21 @@ All notable changes to the `robotrace-dev` Python SDK
 The SDK follows [Semantic Versioning](https://semver.org/). Pre-1.0
 releases (`0.x`) may make breaking changes between minor versions.
 Once we cut `1.0.0`, the [`log_episode`](./README.md#log_episode-the-sacred-call)
-signature is **locked** per AGENTS.md — breakages require a major
+signature is **locked** per AGENTS.md - breakages require a major
 bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
-## [0.1.0a6] — 2026-05-16
+## [0.1.0a6] - 2026-05-16
 
 ### Changed
 
-- **`robotrace login`** — friendlier opener (“Welcome to RoboTrace!”),
+- **`robotrace login`** - friendlier opener (“Welcome to RoboTrace!”),
   clearer verification URL / user-code section, spinner uses
   clear-to-EOL so wide terminals don’t keep stale padding, and optional
   ANSI styling when stdout is a TTY (`NO_COLOR` still disables).
 
-## [0.1.0a5.post1] — 2026-05-22
+## [0.1.0a5.post1] - 2026-05-22
 
 ### Fixed
 
@@ -31,23 +31,23 @@ bump and at least one minor of `DeprecationWarning` first.
   vars, and refreshed **`[project]`** `description` / `keywords`
   (`cli`). Pin installs with `pip install robotrace-dev==0.1.0a5.post1`
   to match this doc refresh, or keep `==0.1.0a5` for the original wheel
-  — behavior is unchanged.
+  - behavior is unchanged.
 
-## [0.1.0a5] — 2026-05-21
+## [0.1.0a5] - 2026-05-21
 
 ### Fixed
 
-- **OpenTelemetry `traceparent`** — `capture_trace_context()` now emits the
+- **OpenTelemetry `traceparent`** - `capture_trace_context()` now emits the
   upstream `trace_flags` byte from `SpanContext` (masked to 8 bits) instead of
   forcing the sampled bit to `01`. Aligns with W3C Trace Context so APMs that
   honor the flag stay consistent with the customer's sampler.
 
-## [0.1.0a3.post2] — 2026-05-10
+## [0.1.0a3.post2] - 2026-05-10
 
 ### Fixed
 
 - **README-only republish** (PEP 440 post-release; identical wheel
-  contents to `0.1.0a3.post1` functionally — only the README on
+  contents to `0.1.0a3.post1` functionally - only the README on
   PyPI's project page changes). The user-facing pin stays at
   `0.1.0a3`; post-releases are install-equivalent.
 - README "Layout (current)" tree was missing three real modules
@@ -58,12 +58,12 @@ bump and at least one minor of `DeprecationWarning` first.
   -name '*.py'` exactly so users grepping the README before
   vendoring can trust it.
 
-## [0.1.0a3.post1] — 2026-05-10
+## [0.1.0a3.post1] - 2026-05-10
 
 ### Fixed
 
 - **README-only republish** (PEP 440 post-release; same wheel
-  contents as `0.1.0a3` functionally — the only delta is the
+  contents as `0.1.0a3` functionally - the only delta is the
   README rendered on PyPI's project page). The user-facing pin
   in `apps/web/lib/sdk/version.ts` and across docs / portal stays
   at `0.1.0a3`; post-releases are install-equivalent.
@@ -76,35 +76,35 @@ bump and at least one minor of `DeprecationWarning` first.
   password / magic-link login), and run-list URL at
   `app.robotrace.dev/portal/episodes`.
 - README "Layout" section claimed "ROS 2 / LeRobot adapters land
-  later under `src/robotrace/adapters/`" — false since `0.1.0a1`
+  later under `src/robotrace/adapters/`" - false since `0.1.0a1`
   (ROS 2) and `0.1.0a3` (LeRobot). Replaced with a real Adapters
   section (install matrix, one-shot examples for both adapters,
   rationale for the lean `[lerobot]` extra) and a corrected
   Layout tree showing the actual `adapters/{ros2,lerobot}/`
   packages with version stamps.
 
-## [0.1.0a3] — 2026-05-10
+## [0.1.0a3] - 2026-05-10
 
 ### Added
 
-- **`robotrace.adapters.lerobot`** — Hugging Face LeRobot datasets
+- **`robotrace.adapters.lerobot`** - Hugging Face LeRobot datasets
   (format **v2.1**) → RoboTrace episodes, one trajectory per episode.
   Four public verbs:
-  - `lerobot.scan_dataset(repo_or_path) → DatasetSummary` — read-only
+  - `lerobot.scan_dataset(repo_or_path) → DatasetSummary` - read-only
     introspection. Pulls only `meta/*` from the Hub (info.json,
     episodes.jsonl, tasks.jsonl); never downloads a parquet shard or
     an mp4. Returns fps, episode count, frame count, camera list,
     and per-episode lengths and tasks.
-  - `lerobot.encode_episode(repo, idx, output_dir) → EncodedEpisode` —
+  - `lerobot.encode_episode(repo, idx, output_dir) → EncodedEpisode` -
     fetches one episode's parquet + per-camera mp4s and writes
     `video.mp4` / `sensors.npz` / `actions.npz` with provenance
     metadata. No upload.
-  - `lerobot.upload_episode(repo, idx, **episode_kwargs) → Episode` —
+  - `lerobot.upload_episode(repo, idx, **episode_kwargs) → Episode` -
     one-shot for a single trajectory. `source="replay"` default
     matches the LeRobot context (logged trajectories replayed
     against new policies).
   - `lerobot.upload_dataset(repo, **episode_kwargs) → list[Episode]`
-    — bulk: walks every trajectory (or `episode_indices=range(...)`)
+    - bulk: walks every trajectory (or `episode_indices=range(...)`)
     and uploads each as its own RoboTrace episode. Sequential, with
     optional `on_progress=` callback for tqdm-style reporting in
     user code.
@@ -123,7 +123,7 @@ bump and at least one minor of `DeprecationWarning` first.
   surface "did the trajectory succeed?" without unpacking actions.npz.
 - 9 new unit tests (`tests/test_lerobot_adapter.py`) with a
   programmatically-built v2.1 fixture (parquet + per-camera mp4s on
-  disk) — never touches the HF Hub during CI.
+  disk) - never touches the HF Hub during CI.
 
 ### Changed
 
@@ -143,14 +143,14 @@ bump and at least one minor of `DeprecationWarning` first.
 - LeRobot dataset format **v3.0** (multi-episode parquet shards,
   introduced late 2025) raises a clear `ConfigurationError`
   pointing at the v2.1 revision fallback. v3.0 support is tracked
-  for a follow-up release once we see real-user demand — most
+  for a follow-up release once we see real-user demand - most
   public `lerobot/*` Hub datasets are still v2.1 as of this release.
 - The `[lerobot]` extra deliberately does NOT depend on the
   `lerobot` PyPI package. Set `HF_TOKEN` in your environment for
-  private / gated datasets — `huggingface_hub` reads it
+  private / gated datasets - `huggingface_hub` reads it
   automatically.
 
-## [0.1.0a2] — 2026-05-09
+## [0.1.0a2] - 2026-05-09
 
 ### Changed
 
@@ -158,22 +158,22 @@ bump and at least one minor of `DeprecationWarning` first.
   `robotrace.dev` domain. The un-hyphenated `robotrace` namespace on
   PyPI was claimed in March 2026 by an unrelated robotics
   observability project, and PyPI's typo-squat protector blocks any
-  single-edit-distance variant — including `robo-trace`, which we
+  single-edit-distance variant - including `robo-trace`, which we
   tried first and PyPI rejected with `400 Bad Request`.
   `robotrace-dev` clears the similarity threshold (Damerau-Levenshtein
   ≥ 3 from both `robotrace` and `robotrace-sdk`) and reads as the
   obvious match for our domain. The *import* name is still
-  `robotrace` (no hyphen, no `-dev`) — same convention as
+  `robotrace` (no hyphen, no `-dev`) - same convention as
   `pip install python-dateutil` → `import dateutil`. **No code
   changes required** in your application; the install command is
   `pip install robotrace-dev`.
 - Earlier `0.1.0a*` releases were never published to PyPI, so
-  there's no in-the-wild upgrade path to worry about — `0.1.0a2` is
+  there's no in-the-wild upgrade path to worry about - `0.1.0a2` is
   the first published release.
 
 ### Added
 
-- **`robotrace-dev[otel]`** extra — opt-in OpenTelemetry trace
+- **`robotrace-dev[otel]`** extra - opt-in OpenTelemetry trace
   correlation. Pulls only `opentelemetry-api>=1.20` (~30 KB), not
   the heavy `opentelemetry-sdk`. When `start_episode` is called
   inside an active OTel span, the SDK reads the ambient context via
@@ -188,29 +188,29 @@ bump and at least one minor of `DeprecationWarning` first.
   `NEXT_PUBLIC_TRACE_URL_TEMPLATE` env var (Datadog, Honeycomb,
   Grafana Tempo, Jaeger).
 - New `robotrace._otel` module with `capture_trace_context()`. Soft
-  imports — never raises if `opentelemetry` is missing or the active
+  imports - never raises if `opentelemetry` is missing or the active
   span is invalid / unsampled.
 - 7 new unit tests (`tests/test_otel.py`) covering: not-installed,
   no-active-span, active-span happy path, unsampled flag, OTel
   module misbehavior, public API exposure, and the `log_episode`
   round-trip.
 - The "sacred" `log_episode` / `start_episode` signature is
-  **unchanged** — OTel context is read implicitly. No new kwargs to
+  **unchanged** - OTel context is read implicitly. No new kwargs to
   learn, no opt-in flag, no deprecation warnings on existing callers.
 
-## [0.1.0a1] — 2026-05-08
+## [0.1.0a1] - 2026-05-08
 
 ### Added
 
-- **`robotrace.adapters.ros2`** — read rosbag2 directories (sqlite3 +
+- **`robotrace.adapters.ros2`** - read rosbag2 directories (sqlite3 +
   mcap backends) and turn them into RoboTrace episodes without
   needing an `rclpy` install. Three public verbs:
-  - `ros2.scan_bag(path) → BagSummary` — read-only introspection
+  - `ros2.scan_bag(path) → BagSummary` - read-only introspection
     with topic catalog, auto-classifier decisions, and bag duration.
-  - `ros2.encode_bag(path, output_dir) → EncodedBag` — writes
+  - `ros2.encode_bag(path, output_dir) → EncodedBag` - writes
     `video.mp4`, `sensors.npz`, `actions.npz` and returns the file
     paths plus inferred `duration_s` / `fps`. No network.
-  - `ros2.upload_bag(path, **episode_kwargs) → Episode` — one-shot
+  - `ros2.upload_bag(path, **episode_kwargs) → Episode` - one-shot
     scan + encode-to-tempdir + `start_episode` + `upload_*` +
     `finalize`. The headline call.
 - Auto-classification routes `sensor_msgs/Image` /
@@ -232,14 +232,14 @@ bump and at least one minor of `DeprecationWarning` first.
 ### Changed
 
 - Bumped `[project.optional-dependencies].ros2` from `[]` to
-  `["rosbags>=0.11,<0.12", "numpy>=1.26"]`. Pure Python — no real
+  `["rosbags>=0.11,<0.12", "numpy>=1.26"]`. Pure Python - no real
   ROS 2 install required to ingest bags.
 - Image-topic encoding lives behind the existing `[video]` extra
   (opencv-python). Install combo for camera bags is
   `pip install 'robotrace-dev[ros2,video]'`; sensor-only bags can stick
   with `[ros2]` and skip opencv entirely.
 
-## [0.1.0a0] — 2026-05-02
+## [0.1.0a0] - 2026-05-02
 
 First public alpha. Contract under iteration.
 

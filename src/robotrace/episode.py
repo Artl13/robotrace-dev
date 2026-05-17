@@ -18,7 +18,7 @@ Designed for two usage shapes:
                                    # failed on exception (with the
                                    # exception type recorded in metadata).
 
-The context-managed shape is the recommended default — it guarantees
+The context-managed shape is the recommended default - it guarantees
 the episode is always finalized exactly once, even if an unrelated
 piece of robot code raises mid-run.
 """
@@ -56,8 +56,8 @@ class UploadUrl:
 
     `public_url` is optional: it is set only when the server has the
     legacy ``R2_PUBLIC_URL`` env var configured (i.e. the bucket is
-    publicly readable). For private buckets — the production default
-    after the May 2026 storage refactor — it is ``None``. The portal
+    publicly readable). For private buckets - the production default
+    after the May 2026 storage refactor - it is ``None``. The portal
     and admin UI do not depend on this field; they fetch artifacts
     through ``/api/episodes/<id>/artifact/<kind>``, which mints a
     short-lived signed GET URL on every request.
@@ -75,7 +75,7 @@ class Episode:
 
     `id` is assigned by the server and is the only identity that
     matters. `upload_urls` is empty when the deployment hasn't
-    configured R2 — in that case the metadata flow still works,
+    configured R2 - in that case the metadata flow still works,
     `upload(...)` simply raises `ConfigurationError` to make the
     misconfiguration loud.
     """
@@ -85,7 +85,7 @@ class Episode:
     storage: Literal["r2", "unconfigured"]
     upload_urls: dict[ArtifactKind, UploadUrl] = field(default_factory=dict)
 
-    # Internals — populated by the client at construction time.
+    # Internals - populated by the client at construction time.
     _client: Client | None = field(default=None, repr=False, compare=False)
     _finalized: bool = field(default=False, repr=False, compare=False)
     _bytes_uploaded: int = field(default=0, repr=False, compare=False)
@@ -123,7 +123,7 @@ class Episode:
         self._bytes_uploaded += bytes_uploaded
         return bytes_uploaded
 
-    # Convenience wrappers — keep the call sites readable for the
+    # Convenience wrappers - keep the call sites readable for the
     # 95% case where users have one file per artifact kind.
     def upload_video(self, path: str | Path) -> int:
         return self.upload("video", path)
@@ -192,7 +192,7 @@ class Episode:
             return False
 
         if exc_type is None:
-            # Clean exit — assume the run succeeded.
+            # Clean exit - assume the run succeeded.
             try:
                 self.finalize(status="ready")
             except Exception:
@@ -216,10 +216,10 @@ class Episode:
                 },
             )
         except Exception:
-            # Same reasoning as above — never mask the user's
+            # Same reasoning as above - never mask the user's
             # exception with a network failure during cleanup.
             pass
-        # Don't swallow — the user's exception keeps propagating.
+        # Don't swallow - the user's exception keeps propagating.
         return False
 
     # ── internals ───────────────────────────────────────────────────
@@ -237,7 +237,7 @@ def kind_from_extension(path: str | Path) -> ArtifactKind | None:
 
     Used by `log_episode` so callers can pass `video="./run.mp4"`
     without spelling out which slot it goes in. Returns None when
-    the extension doesn't map cleanly — caller should fall back to
+    the extension doesn't map cleanly - caller should fall back to
     asking the user explicitly.
     """
     ext = os.path.splitext(str(path))[1].lower()

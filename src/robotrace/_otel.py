@@ -1,6 +1,6 @@
 """Best-effort OpenTelemetry trace correlation.
 
-Public surface — one function: ``capture_trace_context()``. It returns
+Public surface - one function: ``capture_trace_context()``. It returns
 the active OTel trace+span as a small dict the SDK attaches to the
 ``start_episode`` payload, or ``None`` when there's nothing to attach.
 
@@ -15,7 +15,7 @@ import keeps three guarantees:
 
 1.  ``import robotrace`` never raises because OTel isn't installed.
 2.  Calling ``log_episode(...)`` outside an OTel span behaves exactly
-    the same as before — the field is simply absent from the payload.
+    the same as before - the field is simply absent from the payload.
 3.  Calling ``log_episode(...)`` inside an active span attaches
     ``trace_id`` / ``span_id`` / ``traceparent`` automatically, with
     zero new kwargs (and therefore zero risk of breaking the
@@ -29,7 +29,7 @@ We emit both the raw IDs *and* the W3C ``traceparent`` header value:
     00-<32-hex-trace-id>-<16-hex-span-id>-<flags-hex>
 
 The final two hex digits are the OTel ``trace_flags`` byte (W3C §3.2.2.7),
-preserved verbatim from ``span.get_span_context().trace_flags`` — typically
+preserved verbatim from ``span.get_span_context().trace_flags`` - typically
 ``01`` when the span is sampled and ``00`` when it is not. The portal only
 needs ``trace_id`` / ``span_id`` for deep-links; the ``traceparent`` string
 must stay spec-correct so anything downstream (curl replay, sidecars,
@@ -37,7 +37,7 @@ APM) that re-ingests the header does not contradict the customer's
 sampler.
 
 When there is no active span, ``get_current_span()`` yields
-``INVALID_SPAN`` with zero IDs and we return ``None`` — that is distinct
+``INVALID_SPAN`` with zero IDs and we return ``None`` - that is distinct
 from a *valid* trace that the customer marked unsampled (``flags=00``),
 which we still attach so the episode remains joinable by ID in Postgres
 without lying to propagation.
@@ -53,7 +53,7 @@ try:
     from opentelemetry import trace as _otel_trace  # type: ignore[import-not-found]
 
     _OTEL_AVAILABLE = True
-except ImportError:  # pragma: no cover — exercised by tests via monkeypatch
+except ImportError:  # pragma: no cover - exercised by tests via monkeypatch
     _otel_trace = None  # type: ignore[assignment]
     _OTEL_AVAILABLE = False
 
@@ -65,9 +65,9 @@ class TraceContext(TypedDict):
     case, since the rest of the wire format is snake case). Format
     follows OTel's ID conventions:
 
-    - ``trace_id`` — 32 hex chars, no dashes (16 raw bytes)
-    - ``span_id``  — 16 hex chars, no dashes (8 raw bytes)
-    - ``traceparent`` — full W3C header value (``00-trace-span-flags``)
+    - ``trace_id`` - 32 hex chars, no dashes (16 raw bytes)
+    - ``span_id``  - 16 hex chars, no dashes (8 raw bytes)
+    - ``traceparent`` - full W3C header value (``00-trace-span-flags``)
 
     Two extra fields hint at the user's vendor + service so the portal
     can show "from datadog · my-policy-server" without a second
@@ -85,7 +85,7 @@ def is_available() -> bool:
 
     Exposed for the docs page and for tests that want to assert the
     soft-import didn't degrade silently. Production callers should
-    never need to branch on this — ``capture_trace_context()`` is the
+    never need to branch on this - ``capture_trace_context()`` is the
     one thing to call.
     """
     return _OTEL_AVAILABLE
@@ -99,7 +99,7 @@ def capture_trace_context() -> TraceContext | None:
     - OpenTelemetry isn't installed (``[otel]`` extra missing); or
     - OTel is installed but there's no active span (``INVALID_SPAN``);
       or
-    - OTel raises any exception while resolving the span (defensive —
+    - OTel raises any exception while resolving the span (defensive -
       we never want SDK telemetry to fail a customer's training run).
 
     Otherwise returns a ``TraceContext`` dict ready to drop into a
@@ -122,7 +122,7 @@ def capture_trace_context() -> TraceContext | None:
 
     # OTel uses sentinel zero IDs (``INVALID_TRACE_ID`` /
     # ``INVALID_SPAN_ID``) for "no active span". Don't propagate
-    # those — the portal would render an unclickable string of
+    # those - the portal would render an unclickable string of
     # zeroes, and an APM deep-link would 404.
     trace_id_int = getattr(ctx, "trace_id", 0)
     span_id_int = getattr(ctx, "span_id", 0)
@@ -134,7 +134,7 @@ def capture_trace_context() -> TraceContext | None:
 
     # W3C traceparent: version-trace-span-flags. Emit `trace_flags`
     # from the span context unchanged (masked to one byte). Never
-    # force the sampled bit — that made APMs treat unsampled tails
+    # force the sampled bit - that made APMs treat unsampled tails
     # as sampled and broke W3C semantics.
     try:
         flags_int = int(getattr(ctx, "trace_flags", 0)) & 0xFF

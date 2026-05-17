@@ -3,29 +3,29 @@
 Synthesises a tiny LeRobot v2.1 dataset on disk with two episodes, two
 cameras, an `observation.state`, an `action` vector, and a few `next.*`
 outcome columns. Uses pyarrow to write the parquet shards and opencv
-(when available) to write the per-camera mp4s — so the test never
+(when available) to write the per-camera mp4s - so the test never
 talks to the HF Hub and never needs the heavy `lerobot` package.
 
 Coverage:
 
-    test_classify_columns_routes_into_slots     — pure-function classifier
+    test_classify_columns_routes_into_slots     - pure-function classifier
                                                    pins LeRobot's column
                                                    conventions.
-    test_scan_dataset_reads_meta                — info.json, episodes.jsonl,
+    test_scan_dataset_reads_meta                - info.json, episodes.jsonl,
                                                    tasks.jsonl all parsed,
                                                    v3.0 hard-fails clearly.
-    test_encode_episode_writes_artifacts        — encode produces video.mp4 +
+    test_encode_episode_writes_artifacts        - encode produces video.mp4 +
                                                    sensors.npz + actions.npz
                                                    with the expected keys
                                                    and shapes.
-    test_encode_episode_canonical_camera        — picking one camera skips
+    test_encode_episode_canonical_camera        - picking one camera skips
                                                    the multi-cam tile.
-    test_upload_episode_uses_start_episode      — one-shot upload hits the
+    test_upload_episode_uses_start_episode      - one-shot upload hits the
                                                    ingest endpoints in the
                                                    right order with the
                                                    right per-slot URLs and
                                                    merged metadata.
-    test_upload_dataset_walks_episodes          — bulk verb uploads each
+    test_upload_dataset_walks_episodes          - bulk verb uploads each
                                                    trajectory and surfaces
                                                    per-episode progress
                                                    through the on_progress
@@ -33,7 +33,7 @@ Coverage:
 
 Modules guard their hard deps via `pytest.importorskip` so a CI run
 with only `[dev]` installed (no `[lerobot]`) skips the whole file
-gracefully — same pattern as the ROS 2 adapter tests.
+gracefully - same pattern as the ROS 2 adapter tests.
 """
 
 from __future__ import annotations
@@ -49,7 +49,7 @@ import pytest
 import robotrace as rt
 
 # Guard the heavy deps. Without them, the adapter module can't be
-# imported either — `pytest.importorskip` is the right tool. (cv2 is
+# imported either - `pytest.importorskip` is the right tool. (cv2 is
 # only needed for multi-camera tiling; we still want the single-camera
 # tests to run without it, which we handle via a per-test skip.)
 pytest.importorskip("pyarrow")
@@ -91,7 +91,7 @@ def synthetic_dataset(tmp_path: Path) -> Path:
                     ├── episode_000000.mp4
                     └── episode_000001.mp4
 
-    The mp4 files are minimal — just a few frames of a deterministic
+    The mp4 files are minimal - just a few frames of a deterministic
     color so opencv can decode them. We only generate cam_b mp4s if
     cv2 is importable (i.e. on the CI matrix that has the [video]
     extra installed); otherwise we skip the multi-camera tests.
@@ -201,7 +201,7 @@ def _maybe_write_videos(root: Path, *, episode_index: int, length: int) -> None:
 
     We use opencv even though `_encode_video` for the single-camera
     case only does `shutil.copyfile`. The point is that *some* readable
-    mp4 has to exist on disk so the copy is meaningful — and writing a
+    mp4 has to exist on disk so the copy is meaningful - and writing a
     real one with cv2 is the cleanest option that doesn't bake a
     binary fixture into the repo.
     """
@@ -235,7 +235,7 @@ def _maybe_write_videos(root: Path, *, episode_index: int, length: int) -> None:
 
 
 def test_classify_columns_routes_into_slots() -> None:
-    """Pure-function classifier — pins LeRobot's column conventions."""
+    """Pure-function classifier - pins LeRobot's column conventions."""
     by_column = {
         col: lerobot.classify_column(col)
         for col in [
@@ -306,7 +306,7 @@ def test_scan_dataset_reads_meta(synthetic_dataset: Path) -> None:
 
 
 def test_scan_dataset_rejects_v3(tmp_path: Path) -> None:
-    """v3.0 is explicitly out of scope for 0.1.0a3 — fail clearly."""
+    """v3.0 is explicitly out of scope for 0.1.0a3 - fail clearly."""
     root = tmp_path / "v3_dataset"
     (root / "meta").mkdir(parents=True)
     (root / "meta" / "info.json").write_text(

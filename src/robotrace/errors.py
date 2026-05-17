@@ -11,12 +11,12 @@ on the type rather than parsing message strings:
     ├── ConfigurationError       # missing api_key / base_url, bad path, etc.
     ├── TransportError           # network / timeout / DNS
     └── APIError                 # the server responded with an error
-        ├── AuthError            # 401 — bad / missing / revoked key
-        ├── NotFoundError        # 404 — episode id doesn't exist (or cross-tenant)
-        ├── ConflictError        # 409 — episode is archived, etc.
-        ├── ValidationError      # 400 — payload didn't match schema
-        ├── RateLimitError       # 429 — quota tripped; honors Retry-After
-        └── ServerError          # 5xx — flag for retries
+        ├── AuthError            # 401 - bad / missing / revoked key
+        ├── NotFoundError        # 404 - episode id doesn't exist (or cross-tenant)
+        ├── ConflictError        # 409 - episode is archived, etc.
+        ├── ValidationError      # 400 - payload didn't match schema
+        ├── RateLimitError       # 429 - quota tripped; honors Retry-After
+        └── ServerError          # 5xx - flag for retries
 """
 
 from __future__ import annotations
@@ -61,7 +61,7 @@ class APIError(RobotraceError):
 
 
 class AuthError(APIError):
-    """401 — the API key is missing, malformed, or revoked.
+    """401 - the API key is missing, malformed, or revoked.
 
     Don't retry. The user needs to mint a fresh key in the admin UI
     (Admin → Clients → <client> → API access).
@@ -69,7 +69,7 @@ class AuthError(APIError):
 
 
 class NotFoundError(APIError):
-    """404 — the episode id doesn't exist, or belongs to a different client.
+    """404 - the episode id doesn't exist, or belongs to a different client.
 
     The two cases are intentionally indistinguishable server-side to
     avoid a UUID-enumeration oracle. Don't retry.
@@ -77,7 +77,7 @@ class NotFoundError(APIError):
 
 
 class ConflictError(APIError):
-    """409 — the request is well-formed but conflicts with current state.
+    """409 - the request is well-formed but conflicts with current state.
 
     Most common case: trying to finalize an archived episode. Restore
     it from the admin UI before retrying.
@@ -85,7 +85,7 @@ class ConflictError(APIError):
 
 
 class ValidationError(APIError):
-    """400 — the payload didn't pass server-side validation.
+    """400 - the payload didn't pass server-side validation.
 
     Don't retry without changing the inputs. The server's `error`
     field carries which field was wrong.
@@ -93,14 +93,14 @@ class ValidationError(APIError):
 
 
 class RateLimitError(APIError):
-    """429 — the server rejected the request because a quota was tripped.
+    """429 - the server rejected the request because a quota was tripped.
 
     Carries ``retry_after`` parsed from the ``Retry-After`` response
     header (in whole seconds). ``None`` when the header was absent or
-    unparseable — callers should fall back to exponential backoff.
+    unparseable - callers should fall back to exponential backoff.
 
     The SDK auto-retries this error only on call paths that are
-    **safe to retry without state changes** — currently the create
+    **safe to retry without state changes** - currently the create
     half of ``start_episode`` and signed-PUT uploads (which target a
     stable R2 object key, so re-uploading just overwrites the same
     blob). It deliberately does **not** auto-retry ``finalize``: the
@@ -126,7 +126,7 @@ class RateLimitError(APIError):
 
 
 class ServerError(APIError):
-    """5xx — the server hit an unexpected error.
+    """5xx - the server hit an unexpected error.
 
     Worth retrying with exponential backoff; the SDK doesn't retry
     automatically because doing so on a finalize call could

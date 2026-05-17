@@ -1,19 +1,19 @@
-"""`upload_episode(...)` and `upload_dataset(...)` — LeRobot → RoboTrace.
+"""`upload_episode(...)` and `upload_dataset(...)` - LeRobot → RoboTrace.
 
 Composes `scan_dataset` + `encode_episode` + `Client.start_episode` +
 the per-slot `upload_*` helpers + `finalize`. Each LeRobot trajectory
-becomes one RoboTrace episode (the natural mapping — a LeRobot
+becomes one RoboTrace episode (the natural mapping - a LeRobot
 "episode" is a single robot trajectory, which is exactly what
 `log_episode` expects).
 
-`upload_dataset(...)` is the bulk entry point — iterates episodes,
+`upload_dataset(...)` is the bulk entry point - iterates episodes,
 uploads each in turn, returns a list of finalized `Episode` objects.
 Sequential, not parallel: a flaky network only loses one episode's
 worth of progress, never a full dataset, and we don't surprise the
 user with N concurrent HF Hub downloads.
 
 Like the ROS 2 adapter, the upload path goes through the lower-level
-`start_episode + upload_* + finalize` API instead of `log_episode` —
+`start_episode + upload_* + finalize` API instead of `log_episode` -
 the high-level helper validates that file extensions match their
 slots (a `.npz` in `actions=` is rejected because `kind_from_extension`
 guesses `sensors`). The adapter knows what it wrote, so it bypasses
@@ -38,11 +38,11 @@ def upload_episode(
     repo_id_or_path: str,
     episode_index: int,
     *,
-    # Auth — explicit Client for tests / multi-deployment, or None to
+    # Auth - explicit Client for tests / multi-deployment, or None to
     # use the module-level default (configured by `robotrace.init` /
     # env vars).
     client: Client | None = None,
-    # Episode identification + reproducibility — same shape as the
+    # Episode identification + reproducibility - same shape as the
     # core `start_episode` call. `name` defaults to a recognisable
     # combination of repo id + episode index.
     name: str | None = None,
@@ -142,7 +142,7 @@ def upload_dataset(
 ) -> list[Episode]:
     """Walk every (or a subset of) LeRobot trajectory and upload each.
 
-    Sequential — one episode at a time. Each episode is encoded into
+    Sequential - one episode at a time. Each episode is encoded into
     a fresh tempdir that's cleaned up after upload; total disk use
     stays at one episode's worth at any moment.
 
@@ -162,7 +162,7 @@ def upload_dataset(
     stop_on_error
         If True, the first failure aborts the loop and re-raises. If
         False (default), per-episode errors are reported via
-        ``on_progress`` and the loop continues — large dataset uploads
+        ``on_progress`` and the loop continues - large dataset uploads
         shouldn't die on a single corrupted parquet.
     """
     summary = scan_dataset(repo_id_or_path, revision=revision)
@@ -286,7 +286,7 @@ def _merge_metadata(
 
 
 def _default_episode_name(repo_id_or_path: str, episode_index: int) -> str:
-    """``<repo_id> #<episode_index>`` — recognisable in the portal list."""
+    """``<repo_id> #<episode_index>`` - recognisable in the portal list."""
     return f"{repo_id_or_path} #{episode_index}"
 
 
@@ -299,14 +299,14 @@ def _format_episode_name(
         return template.format(repo_id=repo_id, episode_index=episode_index)
     except (KeyError, IndexError, ValueError):
         # Fall back rather than crashing the whole bulk upload on a
-        # malformed template — the user almost certainly mistyped.
+        # malformed template - the user almost certainly mistyped.
         return _default_episode_name(repo_id, episode_index)
 
 
 def _get_default_client() -> Client:
     """Resolve the module-level default client lazily.
 
-    Same circular-import dance as the ROS 2 adapter — see its
+    Same circular-import dance as the ROS 2 adapter - see its
     `_get_default_client` for the rationale.
     """
     from ... import _ensure_default_client

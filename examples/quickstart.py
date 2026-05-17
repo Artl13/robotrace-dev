@@ -9,7 +9,7 @@ Run from inside `packages/sdk-python/`:
     python examples/quickstart.py
 
 The episode appears in /admin/episodes immediately. Without R2
-configured on the deployment, this still works — `storage` will be
+configured on the deployment, this still works - `storage` will be
 "unconfigured" in the response and no artifacts get uploaded
 (the example doesn't pass any).
 """
@@ -28,7 +28,7 @@ def main() -> None:
         name="quickstart smoke run",
         source="sim",
         robot="example-rig",
-        # Reproducibility — fill these in real code, even when seeded
+        # Reproducibility - fill these in real code, even when seeded
         # from a notebook. Future you re-rolling this run depends on it.
         policy_version="quickstart-v0.0.1",
         env_version="example-env",

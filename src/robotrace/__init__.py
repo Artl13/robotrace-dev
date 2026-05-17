@@ -1,10 +1,10 @@
-"""RoboTrace — observability and evals for AI robots.
+"""RoboTrace - observability and evals for AI robots.
 
 The public API in 30 seconds:
 
     import robotrace as rt
 
-    # 1. Quickstart — one call per run.
+    # 1. Quickstart - one call per run.
     rt.init(api_key="rt_…", base_url="https://app.robotrace.dev")
     rt.log_episode(
         name="pick_and_place v3 morning warmup",
@@ -20,16 +20,16 @@ The public API in 30 seconds:
         metadata={"task": "pick_and_place"},
     )
 
-    # 2. Streaming — explicit control of the lifecycle.
+    # 2. Streaming - explicit control of the lifecycle.
     with rt.start_episode(name="…", policy_version="…") as ep:
         ep.upload_video("/tmp/run.mp4")
         # auto-finalize: ready on clean exit, failed on exception.
 
-    # 3. Multiple deployments at once — explicit Client.
+    # 3. Multiple deployments at once - explicit Client.
     with rt.Client(api_key="…", base_url="…") as client:
         client.log_episode(...)
 
-`log_episode` is the **sacred** signature per AGENTS.md — once 1.0
+`log_episode` is the **sacred** signature per AGENTS.md - once 1.0
 ships, breakages require a major bump and at least one minor of
 deprecation warnings.
 """
@@ -101,7 +101,7 @@ __all__ = [
 
 # ── module-level "default client" plumbing ──────────────────────────
 #
-# Mirrors what `requests.get(...)` does — convenient for scripts, but
+# Mirrors what `requests.get(...)` does - convenient for scripts, but
 # we explicitly support and document `Client(...)` for tests and any
 # multi-deployment setup. The default client is constructed lazily on
 # first use, so importing `robotrace` never hits the network or

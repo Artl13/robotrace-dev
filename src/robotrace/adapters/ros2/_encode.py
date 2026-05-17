@@ -1,4 +1,4 @@
-"""`encode_bag(...)` — write artifacts to disk from a rosbag2.
+"""`encode_bag(...)` - write artifacts to disk from a rosbag2.
 
 Walks the bag once, encoding every classified topic into the shape the
 RoboTrace ingest endpoints expect:
@@ -16,7 +16,7 @@ Dependency strategy:
   * `rosbags` is required (pulled in by `[ros2]`).
   * `numpy` is required for the NPZ writers.
   * `cv2` (opencv) is required *only* if at least one Image /
-    CompressedImage topic actually gets encoded — sensor-only bags
+    CompressedImage topic actually gets encoded - sensor-only bags
     don't pay the cost. Missing-opencv error points at the
     `[ros2,video]` extras combination.
 """
@@ -36,7 +36,7 @@ from ._scan import BagSummary, scan_bag
 # Default frame rate when an Image topic has no usable timestamps
 # (rare, but happens with synthesised bags that all share one stamp).
 # 10 fps is slow enough that the resulting MP4 is obviously a fallback
-# and not silently wrong — production bags with real stamps override.
+# and not silently wrong - production bags with real stamps override.
 _FALLBACK_FPS: float = 10.0
 
 
@@ -106,7 +106,7 @@ def encode_bag(
     `output_dir` is created if it doesn't exist. Three filenames are
     reserved inside it: ``video.mp4``, ``sensors.npz``, ``actions.npz``.
 
-    Parameters mirror the auto-classifier — pass an explicit topic list
+    Parameters mirror the auto-classifier - pass an explicit topic list
     to override the heuristic for one slot. Pass an empty list (`[]`)
     to deliberately *exclude* a slot. ``canonical_video_topic`` picks
     one camera as the only video output (skipping the multi-cam tile)
@@ -201,9 +201,9 @@ def _resolve_slot(
     """Pick the topics that go into one slot.
 
     `explicit=None` means "use the auto-classified set". `explicit=[]`
-    is the explicit "none" — caller wants to skip this slot. Any other
+    is the explicit "none" - caller wants to skip this slot. Any other
     list overrides the classifier entirely (including topics the
-    classifier put in a different slot — useful for projects that use
+    classifier put in a different slot - useful for projects that use
     non-standard message types for commands).
     """
     if explicit is not None:
@@ -225,7 +225,7 @@ def _encode_video(
     """Walk Image / CompressedImage messages and write one MP4.
 
     Single topic → frames are passed through.
-    Multi-topic   → frames are aligned by index (not by timestamp — bags
+    Multi-topic   → frames are aligned by index (not by timestamp - bags
                     rarely have synced cameras at the message level) and
                     tiled horizontally, padded with black if heights
                     differ. The resulting MP4's fps is computed from the
@@ -252,7 +252,7 @@ def _encode_video(
         return None, None
 
     # Per-topic ordered (timestamp, BGR-frame) lists. We materialize
-    # all frames in memory — rosbag2s rarely exceed a few minutes per
+    # all frames in memory - rosbag2s rarely exceed a few minutes per
     # camera and the alternative (two-pass + temp files) is markedly
     # more complex for first cut. Document the limit; punt larger bags
     # to the live-record path planned for 0.2.
@@ -311,7 +311,7 @@ def _encode_video(
         ordered_frames = gen()
         out_topics = topics_in_order
 
-    # Write MP4 with the mp4v fourcc — most portable codec opencv ships
+    # Write MP4 with the mp4v fourcc - most portable codec opencv ships
     # everywhere (avc1 / h264 isn't always linked into the wheel). The
     # server transcodes for browser playback if needed.
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
@@ -320,7 +320,7 @@ def _encode_video(
         raise ConfigurationError(
             f"opencv VideoWriter failed to open {output_path}. "
             "Most often: the output codec mp4v isn't compiled into your "
-            "opencv wheel — try `pip install --upgrade opencv-python`."
+            "opencv wheel - try `pip install --upgrade opencv-python`."
         )
     try:
         for frame in ordered_frames:
@@ -339,12 +339,12 @@ def _encode_video(
 def _decode_image(msg: Any, msgtype: str, *, np: Any, cv2: Any) -> Any:
     """Turn one ROS Image / CompressedImage message into a BGR ndarray.
 
-    Returns a `np.uint8` (H, W, 3) array — opencv's `VideoWriter`
+    Returns a `np.uint8` (H, W, 3) array - opencv's `VideoWriter`
     contract. Raises `ValueError` for encodings we can't (or won't)
     handle so the caller can skip the topic with a useful reason.
     """
     if msgtype == "sensor_msgs/msg/CompressedImage":
-        # `data` is a complete encoded image (jpeg/png) — opencv
+        # `data` is a complete encoded image (jpeg/png) - opencv
         # recognises both via imdecode.
         buf = np.frombuffer(bytes(msg.data), dtype=np.uint8)
         frame = cv2.imdecode(buf, cv2.IMREAD_COLOR)
@@ -352,7 +352,7 @@ def _decode_image(msg: Any, msgtype: str, *, np: Any, cv2: Any) -> Any:
             raise ValueError(f"imdecode returned None for format={msg.format!r}")
         return frame
 
-    # Raw `sensor_msgs/Image` — interpret bytes per-encoding.
+    # Raw `sensor_msgs/Image` - interpret bytes per-encoding.
     encoding = str(getattr(msg, "encoding", "")).lower()
     height = int(msg.height)
     width = int(msg.width)
@@ -370,7 +370,7 @@ def _decode_image(msg: Any, msgtype: str, *, np: Any, cv2: Any) -> Any:
         return cv2.cvtColor(raw.reshape(height, width, 4), cv2.COLOR_RGBA2BGR)
     if encoding in {"mono16", "16uc1"}:
         # Promote 16-bit grayscale to 8-bit by truncating the high byte.
-        # Lossy but acceptable for a video stream — preserves what the
+        # Lossy but acceptable for a video stream - preserves what the
         # human eye picks out without producing a 16bpp mp4.
         arr16 = np.frombuffer(bytes(msg.data), dtype="<u2").reshape(height, width)
         arr8 = (arr16 >> 8).astype(np.uint8)
@@ -468,7 +468,7 @@ def _encode_messages(
 
         # Union of keys across rows. Variable-shape rows are fine for
         # the per-row dict, but at NPZ stack time every row has to
-        # agree. We enforce same-shape by failing loud — silently
+        # agree. We enforce same-shape by failing loud - silently
         # padding would hide a real bag-recording bug.
         keys = sorted({k for _t, row in rows for k in row.keys()})
         for key in keys:
@@ -523,7 +523,7 @@ def _encode_messages(
 # flat `dict[str, scalar | ndarray]`. Fixed-length fields (e.g.
 # `Twist.linear` is always (x, y, z)) become arrays; truly free-form
 # fields (variable-length lists, strings) get stringified for metadata
-# or skipped — we don't try to NPZ-pack them.
+# or skipped - we don't try to NPZ-pack them.
 #
 # Specific flatteners are registered by msgtype; everything else falls
 # through to `_flatten_generic`, which walks the dataclass and pulls
@@ -623,7 +623,7 @@ def _flatten_generic(msg: Any, *, np: Any) -> dict[str, Any]:
     Walks the dataclass-like structure and pulls out numeric scalars
     and fixed-shape numeric arrays. Any field that's a string,
     variable-length list of complex objects, or nested message we
-    don't recognise gets dropped silently — the caller can always
+    don't recognise gets dropped silently - the caller can always
     register a specific flattener if those fields matter.
     """
     out: dict[str, Any] = {}
@@ -645,7 +645,7 @@ def _walk_into(node: Any, prefix: str, out: dict[str, Any], np: Any) -> None:
         out[prefix or "value"] = float(node)
         return
     # numpy arrays from rosbags `.data` for variable-length numeric
-    # fields — only keep them if they're 1-D and fixed-length looking.
+    # fields - only keep them if they're 1-D and fixed-length looking.
     if hasattr(node, "shape") and getattr(node, "ndim", None) == 1:
         out[prefix or "value"] = np.asarray(node, dtype=np.float32)
         return
@@ -710,7 +710,7 @@ def _import_cv2() -> Any:
         raise ConfigurationError(
             "encoding ROS 2 Image topics into MP4 needs OpenCV. "
             "Install with `pip install 'robotrace-dev[ros2,video]==0.1.0a6'` "
-            "(both extras together — the [video] extra carries "
+            "(both extras together - the [video] extra carries "
             "opencv-python so a sensor-only bag doesn't pay the "
             "install cost)."
         ) from exc

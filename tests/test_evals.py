@@ -1,10 +1,10 @@
-"""Tests for the replay regression harness — `robotrace.evals`.
+"""Tests for the replay regression harness - `robotrace.evals`.
 
 Two scopes covered here:
 
   • Metric math (`action_l2_distance`, `ood_action_share`,
     `materialize_observations`, `extract_outcome`) tested with
-    in-memory dict-of-arrays — no network, no MockTransport.
+    in-memory dict-of-arrays - no network, no MockTransport.
   • End-to-end loop (`create_run` → `run_against` → `complete_run`)
     against an httpx MockTransport, exercising the wire shape the
     Web API expects and the failure paths (policy raises, baseline
@@ -241,7 +241,7 @@ def _make_runner_fixture(
                     "updated_at": "2026-05-17T00:00:00Z",
                 },
             )
-        # Artifact resolver — returns the NPZ bytes directly.
+        # Artifact resolver - returns the NPZ bytes directly.
         if request.method == "GET" and path.startswith("/api/episodes/"):
             parts = path.split("/")
             if len(parts) >= 6 and parts[4] == "artifact":
@@ -468,7 +468,7 @@ def test_run_against_dry_run_skips_uploads() -> None:
 
 def test_run_against_handles_pickled_object_arrays_in_npz() -> None:
     """Regression: an NPZ that ``np.savez`` had to pickle (because one
-    of the arrays is dtype=object — e.g. variable-length strings or a
+    of the arrays is dtype=object - e.g. variable-length strings or a
     ragged column the encoder couldn't flatten) must load cleanly.
 
     numpy 2.x defaults to ``allow_pickle=False`` on load, so the

@@ -1,4 +1,4 @@
-"""The `Client` class — owns transport config and exposes the public API.
+"""The `Client` class - owns transport config and exposes the public API.
 
 `Client` is the explicit, dependency-injection-friendly entry point.
 For one-off scripts the top-level `robotrace.init(...)` /
@@ -13,7 +13,7 @@ Auth + base_url resolve in this order:
   3. ``~/.robotrace/credentials`` (written by ``robotrace login``)
   4. Raise `ConfigurationError` (no silent default)
 
-We never default `base_url` to a hardcoded production URL — the SDK
+We never default `base_url` to a hardcoded production URL - the SDK
 ships before the URL is locked in, and silently routing user data to
 the wrong place is a worse failure mode than refusing to start.
 
@@ -22,7 +22,7 @@ Episode-create hook
 
 Every call to ``start_episode`` (and therefore ``log_episode``) prints
 a clickable link to the new episode's portal page. This is the
-"feels alive" loop — engineers see the URL the moment the run is
+"feels alive" loop - engineers see the URL the moment the run is
 created, not after the upload finishes. Suppress with
 ``ROBOTRACE_QUIET=1`` (or pass ``verbose=False`` to ``Client``).
 """
@@ -75,7 +75,7 @@ class Client:
         base_url: str | None = None,
         timeout: float | httpx.Timeout | None = None,
         verbose: bool | None = None,
-        # Test hook — production callers leave this None.
+        # Test hook - production callers leave this None.
         transport: httpx.BaseTransport | None = None,
     ) -> None:
         # 1. Explicit kwarg → 2. env var → 3. ~/.robotrace/credentials.
@@ -157,7 +157,7 @@ class Client:
         name: str | None = None,
         source: EpisodeSource = "real",
         robot: str | None = None,
-        # Reproducibility — load-bearing per AGENTS.md
+        # Reproducibility - load-bearing per AGENTS.md
         policy_version: str | None = None,
         env_version: str | None = None,
         git_sha: str | None = None,
@@ -196,7 +196,7 @@ class Client:
             payload["metadata"] = dict(metadata)
 
         # OTel trace correlation. `capture_trace_context()` is a soft
-        # import — returns None when (a) `[otel]` extra isn't
+        # import - returns None when (a) `[otel]` extra isn't
         # installed, (b) no active span, or (c) any unexpected error.
         # Never raises; never logs; never affects the request body
         # outside of attaching its own `otel` key. If the customer
@@ -240,7 +240,7 @@ class Client:
         )
         episode._client = self
 
-        # The "feels alive" loop — the engineer running their first
+        # The "feels alive" loop - the engineer running their first
         # script sees a clickable link to the just-created episode
         # before bytes finish uploading. Suppress with verbose=False
         # or ROBOTRACE_QUIET=1.
@@ -252,7 +252,7 @@ class Client:
     def _print_episode_link(self, episode_id: str) -> None:
         """Best-effort `[robotrace] → <url>` line on episode create.
 
-        Never raises — printing failures (closed stdout, weird TTYs)
+        Never raises - printing failures (closed stdout, weird TTYs)
         must not break the user's training run.
         """
         try:
@@ -265,7 +265,7 @@ class Client:
         except Exception:
             pass
 
-    # ── one-shot convenience — the "sacred" log_episode ─────────────
+    # ── one-shot convenience - the "sacred" log_episode ─────────────
 
     def log_episode(
         self,
@@ -279,7 +279,7 @@ class Client:
         env_version: str | None = None,
         git_sha: str | None = None,
         seed: int | None = None,
-        # Artifacts — local file paths, uploaded inline.
+        # Artifacts - local file paths, uploaded inline.
         video: str | Path | None = None,
         sensors: str | Path | None = None,
         actions: str | Path | None = None,
@@ -287,13 +287,13 @@ class Client:
         duration_s: float | None = None,
         fps: float | None = None,
         metadata: Mapping[str, Any] | None = None,
-        # Final state — defaults to "ready". Pass "failed" when the
+        # Final state - defaults to "ready". Pass "failed" when the
         # run errored before producing usable data.
         status: EpisodeFinalStatus = "ready",
     ) -> Episode:
         """Log a complete episode in one call.
 
-        This is the **sacred** entrypoint per AGENTS.md — keep the
+        This is the **sacred** entrypoint per AGENTS.md - keep the
         signature stable. New params land as keyword-only with a
         backward-compatible default; old params get deprecation
         warnings for at least one minor before removal.
@@ -318,7 +318,7 @@ class Client:
             if path is not None:
                 # Sanity check: warn the user if the file extension
                 # doesn't match the slot they put it in. Doesn't
-                # block — we trust the explicit kwarg.
+                # block - we trust the explicit kwarg.
                 guessed = kind_from_extension(path)
                 if guessed is not None and guessed != slot:
                     raise ConfigurationError(
@@ -342,7 +342,7 @@ class Client:
         )
 
         # Upload everything the caller handed us. Any failure here
-        # propagates to the caller — log_episode is "all or nothing"
+        # propagates to the caller - log_episode is "all or nothing"
         # by design, finer-grained recovery requires start_episode.
         try:
             if video is not None:
@@ -381,7 +381,7 @@ def _stdout_supports_osc8() -> bool:
 
     Returns True only when stdout is a real TTY *and* the terminal
     looks like one of the modern emulators that render OSC 8.
-    Mirror the helper in ``cli.py`` — kept duplicated to keep the
+    Mirror the helper in ``cli.py`` - kept duplicated to keep the
     Client import surface minimal (no circular dep on the CLI).
     """
     try:

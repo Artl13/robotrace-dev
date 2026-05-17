@@ -25,7 +25,7 @@ from robotrace import RobotraceError
 def main() -> None:
     rt.init()
 
-    # Simulate two runs — one that succeeds, one that crashes.
+    # Simulate two runs - one that succeeds, one that crashes.
     for i in range(2):
         try:
             with rt.start_episode(
@@ -37,7 +37,7 @@ def main() -> None:
                 seed=1000 + i,
                 fps=60,
                 metadata={"trial": i},
-                # Don't request signed URLs — we're not uploading
+                # Don't request signed URLs - we're not uploading
                 # any files in this example.
                 artifacts=[],
             ) as ep:
@@ -47,15 +47,15 @@ def main() -> None:
                 if random.random() < 0.5:
                     raise RuntimeError("policy diverged at step 12")
 
-                print(f"[{i}] clean exit — context manager will mark ready")
+                print(f"[{i}] clean exit - context manager will mark ready")
 
         except RobotraceError:
-            # Anything from the SDK itself — auth, transport, server.
+            # Anything from the SDK itself - auth, transport, server.
             raise
         except RuntimeError as exc:
             # Our own simulated failure. The context manager already
             # marked the episode failed; we just log and continue.
-            print(f"[{i}] crashed: {exc} — episode auto-flipped to 'failed'")
+            print(f"[{i}] crashed: {exc} - episode auto-flipped to 'failed'")
 
 
 if __name__ == "__main__":

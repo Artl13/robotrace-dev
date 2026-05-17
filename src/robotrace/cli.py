@@ -111,7 +111,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="robotrace",
         description=(
-            "RoboTrace command-line interface — log in, check who "
+            "RoboTrace command-line interface - log in, check who "
             "you are, log out."
         ),
     )
@@ -179,13 +179,13 @@ def _build_parser() -> argparse.ArgumentParser:
     # version (subcommand alias for `--version`)
     sub.add_parser("version", help="Print the SDK version and exit.")
 
-    # replay — group for the regression harness verbs. Only `run`
+    # replay - group for the regression harness verbs. Only `run`
     # ships in 0.1.0a4; reserving the `replay` namespace now so
     # future verbs (`replay status`, `replay cancel`) slot in
     # without flipping the existing CLI surface.
     p_replay = sub.add_parser(
         "replay",
-        help="Replay regression harness — re-roll a candidate policy against history.",
+        help="Replay regression harness - re-roll a candidate policy against history.",
     )
     p_replay_sub = p_replay.add_subparsers(dest="replay_command", metavar="<verb>")
     p_replay_sub.required = True
@@ -260,11 +260,11 @@ def _cmd_login(args: argparse.Namespace) -> int:
     print()
     if _ansi_enabled():
         print(_bold("Welcome to RoboTrace!"))
-        print(f"{_bold('RoboTrace')} {_dim('— sign in via your browser')}")
+        print(f"{_bold('RoboTrace')} {_dim('- sign in via your browser')}")
         print(f"{_dim(base_url)}\n")
     else:
         print("Welcome to RoboTrace!")
-        print("RoboTrace — sign in via your browser")
+        print("RoboTrace - sign in via your browser")
         print(f"{base_url}\n")
 
     try:
@@ -413,7 +413,7 @@ def _poll_until_resolved(
                 headers={"User-Agent": _user_agent()},
             )
         except httpx.HTTPError:
-            # Transient network blip — back off a bit and try again.
+            # Transient network blip - back off a bit and try again.
             time.sleep(min(interval * 2, 5.0))
             continue
 
@@ -459,7 +459,7 @@ def _poll_until_resolved(
         # infrequent so we don't peg the terminal redraw on slow links.
         if use_carriage and (now - last_print) >= 0.6:
             spin = spin_chars[frame_idx % len(spin_chars)]
-            line = f"{spin} Waiting — authorize this device in the browser…"
+            line = f"{spin} Waiting - authorize this device in the browser…"
             sys.stdout.write(f"\r\033[K{_dim(line)}")
             sys.stdout.flush()
             frame_idx += 1
@@ -508,7 +508,7 @@ def _cmd_whoami(args: argparse.Namespace) -> int:
 # ── logout ─────────────────────────────────────────────────────────────
 
 
-# Tight budget — logout should never hang a wrap-up shell on a
+# Tight budget - logout should never hang a wrap-up shell on a
 # slow API. If we can't reach the server within this window we
 # surface the failure and still let the user delete locally.
 LOGOUT_REVOKE_TIMEOUT_S = 15.0
@@ -517,7 +517,7 @@ LOGOUT_REVOKE_TIMEOUT_S = 15.0
 def _cmd_logout(args: argparse.Namespace) -> int:
     """`robotrace logout [--profile NAME] [--revoke]`.
 
-    Without `--revoke` this is a local-only operation — drop the
+    Without `--revoke` this is a local-only operation - drop the
     credentials file and remind the user that the underlying key
     still authenticates until revoked from the portal.
 
@@ -539,7 +539,7 @@ def _cmd_logout(args: argparse.Namespace) -> int:
             # the network call and fall through to the local-delete
             # branch (which will tell the user nothing was there).
             print(
-                f"No saved credentials for profile '{args.profile}' — "
+                f"No saved credentials for profile '{args.profile}' - "
                 "nothing to revoke on the server. Removing local file "
                 "if present…",
                 file=sys.stderr,
@@ -649,7 +649,7 @@ def _revoke_key_server_side(
     if resp.status_code == 401:
         # Most likely cause: the local key was already revoked from
         # the portal. The user's intent (kill that key) is satisfied
-        # either way, so treat it as a soft-success — print a hint
+        # either way, so treat it as a soft-success - print a hint
         # and still nuke the local file.
         return (
             True,
@@ -713,7 +713,7 @@ def _describe_http_error(resp: httpx.Response, intent: str) -> str:
     if len(body) > 240:
         body = body[:240] + "…"
     if body:
-        return f"Could not {intent}: HTTP {resp.status_code} — {body}"
+        return f"Could not {intent}: HTTP {resp.status_code} - {body}"
     return f"Could not {intent}: HTTP {resp.status_code}."
 
 
@@ -738,7 +738,7 @@ def _supports_osc8() -> bool:
     term = os.environ.get("TERM", "").lower()
     if term in {"dumb", ""}:
         return False
-    # Conservative allowlist — every other modern terminal renders
+    # Conservative allowlist - every other modern terminal renders
     # OSC 8 the same way.
     if "xterm" in term or "screen" in term or "tmux" in term:
         return True
@@ -782,16 +782,16 @@ def _green(text: str) -> str:
 
 
 def _cmd_replay_run(args: argparse.Namespace) -> int:
-    """`robotrace replay run …` — drive the replay regression harness.
+    """`robotrace replay run …` - drive the replay regression harness.
 
     Wires the customer's policy callable into ``robotrace.evals`` and
     prints per-episode progress as the runner walks the baseline set.
     The hot loop lives in :mod:`robotrace.evals`; this command is
-    100% I/O orchestration — argparse → import callable → call
+    100% I/O orchestration - argparse → import callable → call
     ``create_run`` / ``run_against`` / ``complete_run`` → render
     summary.
     """
-    # Late imports keep the CLI startup lean — `numpy` is the heavy
+    # Late imports keep the CLI startup lean - `numpy` is the heavy
     # one, only paid when the user actually runs the harness.
     from . import evals
     from .client import Client
@@ -888,7 +888,7 @@ def _cmd_replay_run(args: argparse.Namespace) -> int:
 def _import_callable(spec: str) -> object:
     """Resolve `module.path:fn` into a callable.
 
-    Mirrors the convention used by gunicorn / hypercorn — `module:attr`,
+    Mirrors the convention used by gunicorn / hypercorn - `module:attr`,
     where `attr` may itself be dotted (e.g. `pkg.mod:cls.method`).
     """
     if ":" not in spec:
@@ -959,7 +959,7 @@ def _print_summary(summary: object) -> None:
     """Render the finalize-response summary as a small ASCII table.
 
     Mirrors the 5-metric layout the portal DiffCard shows so the CLI
-    output reads the same way as the web UI — "Recommend: ship vN"
+    output reads the same way as the web UI - "Recommend: ship vN"
     in both places, no cognitive translation step.
     """
     if not isinstance(summary, dict):
@@ -1001,11 +1001,11 @@ def _fmt(value: object, *, signed: bool = False) -> str:
     `signed=True` prepends `+` to non-negative numerics so deltas
     line up visually (``+0.123`` / ``-0.045`` / ``+0.000``). We
     can't get the same effect with an f-string spec like ``:>+10``
-    in the caller — that's only legal on numeric inputs, and the
+    in the caller - that's only legal on numeric inputs, and the
     helper already coerces None / bool / strings to text earlier.
     """
     if value is None:
-        return "—"
+        return "-"
     if isinstance(value, bool):
         return "yes" if value else "no"
     if isinstance(value, (int, float)):
@@ -1020,7 +1020,7 @@ def _fmt(value: object, *, signed: bool = False) -> str:
 # ── module-level run hook ──────────────────────────────────────────────
 
 
-def main() -> NoReturn:  # pragma: no cover — thin wrapper
+def main() -> NoReturn:  # pragma: no cover - thin wrapper
     sys.exit(cli_main())
 
 

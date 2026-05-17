@@ -24,7 +24,7 @@ def _isolate_credentials(
 
     Without the `ROBOTRACE_HOME` override these tests silently pass
     on a dev machine but fail on any laptop where the developer ran
-    `robotrace login` — the SDK reads `~/.robotrace/credentials` as
+    `robotrace login` - the SDK reads `~/.robotrace/credentials` as
     the third-tier fallback (after kwargs, after env vars), so a
     real saved login satisfies the constructor and the
     `pytest.raises` clause never fires.

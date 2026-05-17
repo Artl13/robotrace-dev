@@ -5,7 +5,7 @@ Pins two contracts:
   1. Plain ``logout`` removes only the local credentials file and
      prints a hint about server-side revoke. The API key is left
      alive on the server because the user may have moved it to
-     another machine — this is the same trade-off documented at
+     another machine - this is the same trade-off documented at
      ``/docs/sdk/cli-login``.
 
   2. ``logout --revoke`` hits ``POST /api/cli/auth/revoke`` with the
@@ -15,7 +15,7 @@ Pins two contracts:
      (the local guarantee) but exits non-zero so CI scripts notice.
 
 The HTTP boundary is exercised via ``httpx.MockTransport``-style
-``monkeypatch`` of ``httpx.post`` — the CLI uses a one-shot httpx
+``monkeypatch`` of ``httpx.post`` - the CLI uses a one-shot httpx
 call there instead of the long-lived ``HTTPClient`` wrapper, so the
 monkey-patch is the simplest seam.
 """
@@ -168,7 +168,7 @@ def test_logout_revoke_treats_401_as_soft_success(
     out = capsys.readouterr()
 
     assert rc == 0
-    # The user sees the situation framed honestly — the prefix may
+    # The user sees the situation framed honestly - the prefix may
     # be None on 401 so we just look for the explanation string.
     assert "already revoked" in out.out
     assert not credentials_path().exists()
@@ -199,7 +199,7 @@ def test_logout_revoke_network_failure_still_deletes_local(
     # The error path warns and tells the user how to recover manually.
     assert "Could not revoke" in cap.err
     assert "Portal" in cap.err
-    # Local file gone — local guarantee still holds.
+    # Local file gone - local guarantee still holds.
     assert not path.exists()
 
 
@@ -243,7 +243,7 @@ def test_fmt_signed_prepends_plus_for_non_negative_numbers() -> None:
     # Default `signed=False` keeps the original behaviour.
     assert cli._fmt(0.5) == "0.500"
     # Non-numeric values are unaffected by `signed`.
-    assert cli._fmt(None, signed=True) == "—"
+    assert cli._fmt(None, signed=True) == "-"
     assert cli._fmt(True, signed=True) == "yes"
 
 

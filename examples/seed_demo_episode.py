@@ -12,10 +12,10 @@ What you'll see in the portal:
     - A "gripper" rectangle that drives to the cube, closes,
       carries it to the target zone, releases, then returns home
     - A HUD overlay with policy_version / env_version / seed and
-      a frame counter — same fields the reproducibility section
+      a frame counter - same fields the reproducibility section
       surfaces, so the video matches the metadata 1:1
     - Episode detail also lists **sensors** (`.npz`) and **actions**
-      (`.csv`) blobs — synthetic tabular traces aligned to the timeline
+      (`.csv`) blobs - synthetic tabular traces aligned to the timeline
     - A subtle "RoboTrace · SAMPLE" watermark so nobody mistakes
       it for production data
 
@@ -40,14 +40,14 @@ After it finishes:
     2. Ctrl+C the dev server and re-run `npm run dev` so the new
        env is picked up.
     3. Open `/portal/episodes` with no real episodes in the table
-       — the "Sample run" row is now clickable, and the detail
+       - the "Sample run" row is now clickable, and the detail
        page plays this clip via the auth-gated signed-GET-URL
        route.
 
 Re-run any time you want a fresher-looking demo; each run uploads
 to a new R2 key, so update `DEMO_EPISODE_VIDEO_KEY` after each
 re-seed (we don't reach into the user's R2 to delete the old one
-— that's a manual sweep through the Cloudflare dashboard if
+- that's a manual sweep through the Cloudflare dashboard if
 needed).
 """
 
@@ -63,7 +63,7 @@ from robotrace import APIError
 
 # ── canvas / animation constants ─────────────────────────────────────
 #
-# Kept small on purpose — 480×270 keeps the upload under ~150 KB even
+# Kept small on purpose - 480×270 keeps the upload under ~150 KB even
 # with the longer duration, which means the smoke flow over the demo
 # stays fast on residential connections. The portal player scales it
 # up cleanly because the chrome is composed of solid geometry, not
@@ -82,12 +82,12 @@ TRANSPORT_END = int(TOTAL_FRAMES * 0.70)  # 2.4 – 4.2 s
 RELEASE_END = int(TOTAL_FRAMES * 0.80)    # 4.2 – 4.8 s
 # Frames after RELEASE_END are the retreat back to home.
 
-# ── colors (BGR — opencv uses BGR not RGB) ───────────────────────────
+# ── colors (BGR - opencv uses BGR not RGB) ───────────────────────────
 BG = (28, 30, 34)            # slate background
 TABLE = (45, 50, 58)
 GRID = (62, 70, 80)
 TARGET_ZONE = (60, 100, 60)  # muted green
-CUBE = (55, 165, 230)        # warm orange — high contrast vs target
+CUBE = (55, 165, 230)        # warm orange - high contrast vs target
 GRIPPER = (235, 235, 240)
 GRIPPER_DARK = (180, 180, 190)
 TEXT = (220, 220, 225)
@@ -96,7 +96,7 @@ ACCENT = (210, 160, 80)      # cyan-ish, used for the watermark
 
 
 def _ease_in_out(t: float) -> float:
-    """Smooth-step easing — keeps the gripper from teleporting between
+    """Smooth-step easing - keeps the gripper from teleporting between
     waypoints. Standard 3t² − 2t³ formula on [0, 1]."""
     t = max(0.0, min(1.0, t))
     return t * t * (3.0 - 2.0 * t)
@@ -124,7 +124,7 @@ def _make_demo_mp4(out_path: Path) -> None:
     if not writer.isOpened():
         sys.stderr.write(
             f"opencv VideoWriter failed to open {out_path}. most often "
-            "the mp4v codec isn't compiled into your opencv wheel — try "
+            "the mp4v codec isn't compiled into your opencv wheel - try "
             "`pip install --upgrade opencv-python`.\n"
         )
         sys.exit(2)
@@ -266,7 +266,7 @@ def _make_demo_mp4(out_path: Path) -> None:
                 cv2.FONT_HERSHEY_SIMPLEX, 0.36, TEXT_DIM, 1, cv2.LINE_AA,
             )
 
-            # Phase chip — top-right
+            # Phase chip - top-right
             chip_pad = 6
             (tw, th), _ = cv2.getTextSize(
                 phase_label, cv2.FONT_HERSHEY_SIMPLEX, 0.36, 1,
@@ -283,14 +283,14 @@ def _make_demo_mp4(out_path: Path) -> None:
                 cv2.FONT_HERSHEY_SIMPLEX, 0.36, TEXT, 1, cv2.LINE_AA,
             )
 
-            # Watermark — top-left, intentionally subtle
+            # Watermark - top-left, intentionally subtle
             cv2.putText(
                 frame, "ROBOTRACE  •  SAMPLE",
                 (12, 22),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.36, ACCENT, 1, cv2.LINE_AA,
             )
 
-            # Recording dot — pulses while in non-RETREAT phases, like
+            # Recording dot - pulses while in non-RETREAT phases, like
             # a sim viewer's record indicator. Tiny touch but reads as
             # "this is live data" instead of a static composition.
             if phase_label != "RETREAT":
@@ -304,7 +304,7 @@ def _make_demo_mp4(out_path: Path) -> None:
 
 
 def _write_demo_sensors_npz(path: Path, *, fps: float, n_frames: int) -> None:
-    """One row per video frame — enough to exercise the sensors slot."""
+    """One row per video frame - enough to exercise the sensors slot."""
     import numpy as np
 
     t = np.arange(n_frames, dtype=np.float64) / float(fps)
@@ -330,7 +330,7 @@ def _write_demo_sensors_npz(path: Path, *, fps: float, n_frames: int) -> None:
 
 
 def _write_demo_actions_csv(path: Path, *, fps: float, n_frames: int) -> None:
-    """Tiny CSV — `.csv` is not heuristically `sensors`, so `actions=` is valid."""
+    """Tiny CSV - `.csv` is not heuristically `sensors`, so `actions=` is valid."""
     lines = ["t_s,cmd_vx,cmd_vy,gripper_target\n"]
     for i in range(n_frames):
         ts = i / fps
@@ -383,7 +383,7 @@ def main() -> None:
             },
         )
     except APIError as exc:
-        # Surface the R2 XML body if this 4xxs — without it,
+        # Surface the R2 XML body if this 4xxs - without it,
         # diagnosing a NoSuchBucket / SignatureDoesNotMatch is awful.
         print()
         print(f"x APIError: {exc}")
@@ -406,9 +406,9 @@ def main() -> None:
 
     if episode.storage != "r2":
         print()
-        print("x storage is not 'r2' — R2 env vars likely not picked up.")
+        print("x storage is not 'r2' - R2 env vars likely not picked up.")
         print("  check apps/web/.env.local has R2_ACCOUNT_ID, R2_ACCESS_KEY_ID,")
-        print("  R2_SECRET_ACCESS_KEY, R2_BUCKET_EPISODES — then restart")
+        print("  R2_SECRET_ACCESS_KEY, R2_BUCKET_EPISODES - then restart")
         print("  `npm run dev` so the new env is loaded.")
         sys.exit(1)
 
@@ -437,7 +437,7 @@ def _extract_object_key(episode: rt.Episode) -> str | None:
 
     The Episode dataclass doesn't carry the canonical key directly
     (the SDK only tracks the signed URL it was handed). The key is
-    deterministic — `episodes/<client>/<episode>/video.mp4` — and
+    deterministic - `episodes/<client>/<episode>/video.mp4` - and
     appears verbatim in the URL path after the bucket segment, so
     we just split on `/episodes/` and reattach the prefix.
 

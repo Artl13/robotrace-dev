@@ -2,7 +2,7 @@
 
 LeRobot v2.1 episode parquet schemas use dotted column names that
 encode the slot. The mapping is mechanical because LeRobot has a
-strong convention — the only ambiguity is custom user fields, which
+strong convention - the only ambiguity is custom user fields, which
 we route to ``sensors`` as the safe default (same call as ROS 2's
 unknown-msgtype fallback).
 
@@ -18,7 +18,7 @@ Routing rules (ordered, first match wins):
        → ``actions``.
 
     3. ``next.reward`` / ``next.done`` / ``next.success`` /
-       ``next.<x>`` → ``episode_meta`` — these describe the episode
+       ``next.<x>`` → ``episode_meta`` - these describe the episode
        outcome, not a per-frame stream. The encoder rolls them into
        the episode-level metadata block instead of into actions.npz.
 
@@ -30,13 +30,13 @@ Routing rules (ordered, first match wins):
        Kept available to the encoder so it can compute duration.
 
     5. ``observation.state`` → ``sensors``. The canonical robot
-       proprioception vector — joint positions for an arm, end-
+       proprioception vector - joint positions for an arm, end-
        effector pose for a teleop dataset.
 
     6. ``observation.<x>`` (anything else: ``observation.environment_state``,
        ``observation.force``, ``observation.imu.*``) → ``sensors``.
 
-    7. Anything else → ``sensors`` (the safe default — same logic
+    7. Anything else → ``sensors`` (the safe default - same logic
        as the ROS 2 unknown-msgtype fallback).
 
 Pure function. No IO, no numpy, no pyarrow. Tests can call it with
@@ -56,7 +56,7 @@ from typing import Literal
 Slot = Literal["video", "sensors", "actions", "episode_meta", "internal"]
 
 
-# Internal columns — LeRobot v2.1 default features per
+# Internal columns - LeRobot v2.1 default features per
 # `src/lerobot/utils/constants.py`. Listed here verbatim so a custom
 # user feature accidentally named `timestamp` doesn't quietly route
 # to internal. We match the *full* column name, not a prefix.
