@@ -26,10 +26,11 @@ Design choices
   like it supports the hyperlink escape, we emit clickable links.
   Plain text fallback otherwise.
 
-* **Friendly polling output.** A small spinner-style status line
-  updates in place during ``robotrace login`` so the user knows
-  the CLI is alive, then collapses to a single ``✓ Logged in``
-  on completion.
+* **Friendly polling output.** During ``robotrace login`` we keep a
+  single trimmed status line under the URL / user code that updates
+  in place (carriage return plus clear-to-EOL) so tails and wide
+  terminals don't show stale padding characters. On ANSI-capable ttys
+  unless ``NO_COLOR`` is set, headings and success use light styling.
 
 * **No interactive prompts.** ``--base-url`` defaults to
   ``ROBOTRACE_BASE_URL`` if set, else ``https://app.robotrace.dev``.
@@ -256,8 +257,15 @@ def _cmd_login(args: argparse.Namespace) -> int:
     base_url = _resolve_base_url(args.base_url)
     profile = args.profile
 
-    print(f"\nWelcome to RoboTrace ({base_url}).")
-    print("Logging in this machine via your browser…\n")
+    print()
+    if _ansi_enabled():
+        print(_bold("Welcome to RoboTrace!"))
+        print(f"{_bold('RoboTrace')} {_dim('— sign in via your browser')}")
+        print(f"{_dim(base_url)}\n")
+    else:
+        print("Welcome to RoboTrace!")
+        print("RoboTrace — sign in via your browser")
+        print(f"{base_url}\n")
 
     try:
         start = _start_device_session(base_url)
@@ -269,13 +277,21 @@ def _cmd_login(args: argparse.Namespace) -> int:
     verification_full = start.get("verification_uri_complete") or start["verification_uri"]
     interval = float(start.get("interval", DEFAULT_POLL_INTERVAL_S))
 
-    print("To authorize this device, open:")
-    print(f"  {_hyperlink(verification_full)}\n")
-    print(f"Confirmation code: {user_code}")
-    print(
-        "Make sure the same code shows up on the page before you click "
-        "Authorize.\n"
+    print(_dim("Verification link (already includes your user code):"))
+    print(f"  {_hyperlink(verification_full)}")
+    print()
+
+    hint = (
+        "Opening your default browser…"
+        if not args.no_browser
+        else "Open the link above in a trusted browser (--no-browser mode)."
     )
+    print(_dim(hint))
+    print(_dim("If nothing opens, copy the verification link above.\n"))
+
+    print(_dim("Confirm this matches the page before Authorize"))
+    uc = user_code if not _ansi_enabled() else _bold(user_code)
+    print(f"  {uc}\n")
 
     if not args.no_browser:
         try:
@@ -304,10 +320,17 @@ def _cmd_login(args: argparse.Namespace) -> int:
     saved_path = write_credentials(creds, profile=profile)
 
     email = creds.user_email or "your account"
-    print(f"\n✓ Logged in as {email}.")
-    print(f"  Credentials saved to {saved_path} (profile: {profile}).")
+    print()
+    if _ansi_enabled():
+        print(f"{_green('✓ Signed in')} as {_bold(email)}.")
+    else:
+        print(f"✓ Signed in as {email}.")
+    print(_dim(f"  Credentials · {saved_path}"))
+    print(_dim(f"  Profile · {profile}"))
     portal = approved.get("portal_url") or f"{creds.base_url.rstrip('/')}/portal"
-    print(f"  Portal: {_hyperlink(portal)}")
+    sys.stdout.write(_dim("  Portal · "))
+    sys.stdout.write(_hyperlink(portal))
+    sys.stdout.write("\n")
     return 0
 
 
@@ -362,9 +385,9 @@ def _poll_until_resolved(
     last_print = 0.0
     interval = max(0.5, float(interval_s))
 
-    # Tiny in-place "spinner" — three dots cycling — to make it
-    # obvious the CLI is alive while the user authorizes.
-    frames = ["", ".", "..", "..."]
+    # In-place spinner + clear-to-EOL so tails and resized terminals don't
+    # keep stale padding characters from older frames.
+    spin_chars = "|/-\\"
     frame_idx = 0
 
     use_carriage = sys.stdout.isatty()
@@ -402,7 +425,7 @@ def _poll_until_resolved(
             status = data.get("status")
             if status == "approved":
                 if use_carriage:
-                    sys.stdout.write("\r")
+                    sys.stdout.write("\r\033[K")
                     sys.stdout.flush()
                 return data
             if status == "denied":
@@ -432,12 +455,14 @@ def _poll_until_resolved(
         else:
             raise _CliError(_describe_http_error(resp, "poll for approval"))
 
-        # Cosmetic live-status; keep updates infrequent so we don't
-        # peg the terminal redraw on slow links.
+        # Cosmetic live-status; clear the line each tick and keep updates
+        # infrequent so we don't peg the terminal redraw on slow links.
         if use_carriage and (now - last_print) >= 0.6:
-            sys.stdout.write(f"\rWaiting for browser approval{frames[frame_idx]:<4}")
+            spin = spin_chars[frame_idx % len(spin_chars)]
+            line = f"{spin} Waiting — authorize this device in the browser…"
+            sys.stdout.write(f"\r\033[K{_dim(line)}")
             sys.stdout.flush()
-            frame_idx = (frame_idx + 1) % len(frames)
+            frame_idx += 1
             last_print = now
 
         time.sleep(interval)
@@ -720,6 +745,37 @@ def _supports_osc8() -> bool:
     if os.environ.get("TERM_PROGRAM"):
         return True
     return False
+
+
+def _ansi_enabled() -> bool:
+    """Whether to emit SGR colors (never on non-tty; honors ``NO_COLOR``)."""
+    import os
+    if os.environ.get("NO_COLOR", "").strip():
+        return False
+    if not sys.stdout.isatty():
+        return False
+    term = os.environ.get("TERM", "").lower()
+    if term in {"dumb", ""}:
+        return False
+    return True
+
+
+def _bold(text: str) -> str:
+    if not _ansi_enabled():
+        return text
+    return f"\033[1m{text}\033[0m"
+
+
+def _dim(text: str) -> str:
+    if not _ansi_enabled():
+        return text
+    return f"\033[2m{text}\033[0m"
+
+
+def _green(text: str) -> str:
+    if not _ansi_enabled():
+        return text
+    return f"\033[32m{text}\033[0m"
 
 
 # ── replay regression harness ──────────────────────────────────────────
