@@ -11,6 +11,19 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a5.post1] — 2026-05-22
+
+### Fixed
+
+- **README-only republish** (PEP 440 post-release; same code as
+  `0.1.0a5`). PyPI project description now documents **CLI login**
+  (`robotrace login`), **`robotrace whoami`** / **`logout`**, a
+  **command-line interface** table, credential resolution vs env
+  vars, and refreshed **`[project]`** `description` / `keywords`
+  (`cli`). Pin installs with `pip install robotrace-dev==0.1.0a5.post1`
+  to match this doc refresh, or keep `==0.1.0a5` for the original wheel
+  — behavior is unchanged.
+
 ## [0.1.0a5] — 2026-05-21
 
 ### Fixed

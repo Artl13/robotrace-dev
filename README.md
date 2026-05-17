@@ -16,16 +16,21 @@ pip install robotrace-dev
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual — `pip install robotrace-dev==0.1.0a5` pulls the exact
-> alpha you've validated against.
+> as usual — `pip install robotrace-dev==0.1.0a5.post1` pulls this
+> README revision; `==0.1.0a5` is the same runtime as before this
+> post-release.
 
-> **Status:** alpha (`0.1.0a5`). The public API in this README is the
+> **Status:** alpha (`0.1.0a5.post1`). The public API in this README is the
 > shape we're iterating against; once we cut `1.0.0`, the
 > [`log_episode`](#log_episode-the-sacred-call) signature is locked
 > and breakages require a major bump (per `AGENTS.md` in the
 > RoboTrace monorepo).
 
 ## Quickstart
+
+You need an API key on this machine **once**. Pick one path:
+
+### A) Portal — create a key
 
 Sign in at
 [**app.robotrace.dev/login?next=/portal/api-keys**](https://app.robotrace.dev/login?next=/portal/api-keys)
@@ -64,6 +69,47 @@ git / seed) front-and-center on the detail page. The SDK also
 prints a clickable URL to the run as soon as `start_episode` /
 `log_episode` opens it — usually before the bytes finish uploading.
 
+### B) CLI — browser login (no copy-paste)
+
+Use the `robotrace` executable installed with the package:
+
+```bash
+robotrace login
+```
+
+This opens your default browser (or prints a link to open). After you
+authorize in the portal, the CLI writes **`~/.robotrace/credentials`**
+with your API key and base URL (`chmod 0600`). From Python you can
+skip `init()` — the default client loads that file when `ROBOTRACE_API_KEY`
+is not set:
+
+```python
+import robotrace as rt
+
+rt.log_episode(
+    name="pick_and_place v3 morning warmup",
+    policy_version="pap-v3.2.1",
+    env_version="halcyon-cell-rev4",
+    git_sha="abc1234",
+    seed=8124,
+    video="/tmp/run.mp4",
+    sensors="/tmp/sensors.bin",
+    actions="/tmp/actions.parquet",
+    duration_s=47.2,
+    fps=30,
+    metadata={"task": "pick_and_place", "scene": "tabletop"},
+)
+```
+
+Point at a **local** web stack (same machine as the SDK):
+
+```bash
+robotrace login --base-url http://localhost:3000
+# or: export ROBOTRACE_BASE_URL=http://localhost:3000 && robotrace login
+```
+
+See also `robotrace whoami`, `robotrace logout`, and the [CLI login](https://robotrace.dev/docs/sdk/cli-login) reference (browser flow, `--base-url`, and security notes).
+
 ### From environment variables
 
 Same call without hardcoding the key:
@@ -84,6 +130,23 @@ rt.log_episode(
     video="/tmp/run.mp4",
 )
 ```
+
+If you already ran `robotrace login`, a credentials file usually takes
+precedence when env vars are unset — see [CLI login](https://robotrace.dev/docs/sdk/cli-login).
+
+## Command-line interface
+
+Installing the wheel adds the **`robotrace`** executable:
+
+| Command | What it does |
+| ------- | ------------ |
+| `robotrace login` | Browser authorization; writes `~/.robotrace/credentials` (`chmod 0600`) |
+| `robotrace whoami` | Print signed-in email and base URL for the active profile |
+| `robotrace logout` | Drop local credentials; optional `--revoke` invalidates the key on the server |
+| `robotrace replay run …` | Customer-side [replay regression](https://robotrace.dev/docs/sdk/evals) against baseline episodes |
+
+Global flags: `robotrace --help`, and `--base-url` / `--profile` on
+commands that talk to the API. Full CLI reference: [CLI login](https://robotrace.dev/docs/sdk/cli-login) and [Evals](https://robotrace.dev/docs/sdk/evals).
 
 ## API
 
@@ -217,13 +280,13 @@ stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.1.0a5'
+pip install 'robotrace-dev[ros2]==0.1.0a5.post1'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.1.0a5'
+pip install 'robotrace-dev[lerobot]==0.1.0a5.post1'
 
 # Multi-camera mp4 encoding (opencv) — combine with [ros2] or [lerobot]
-pip install 'robotrace-dev[ros2,video]==0.1.0a5'
+pip install 'robotrace-dev[ros2,video]==0.1.0a5.post1'
 ```
 
 ```python
