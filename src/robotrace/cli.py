@@ -4,7 +4,7 @@ Subcommands today, all built on the same device-code login flow
 served by ``/api/cli/auth/start`` + ``/api/cli/auth/poll`` on the
 RoboTrace web app:
 
-    robotrace login   [--base-url URL] [--profile NAME] [--no-browser]
+    robotrace login   [--base-url URL] [--profile NAME] [--no-browser] [--force]
     robotrace whoami  [--profile NAME]
     robotrace logout  [--profile NAME] [--revoke]
     robotrace replay run --policy <module:fn>
@@ -147,6 +147,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print the URL but don't try to open a browser automatically.",
     )
+    p_login.add_argument(
+        "--force",
+        action="store_true",
+        help="Start a new browser login even if this profile is already saved.",
+    )
 
     # whoami
     p_whoami = sub.add_parser(
@@ -257,6 +262,19 @@ def _cmd_login(args: argparse.Namespace) -> int:
     base_url = _resolve_base_url(args.base_url)
     profile = args.profile
 
+    if not args.force:
+        existing = read_credentials(profile=profile)
+        if existing is not None:
+            if _normalize_base_url(existing.base_url) == _normalize_base_url(base_url):
+                return _print_already_logged_in(existing, profile=profile)
+            print(
+                f"Profile '{profile}' is logged in to {existing.base_url!r} "
+                f"({existing.user_email or 'unknown user'}).\n"
+                f"You asked to sign in to {base_url!r} - continuing will "
+                f"replace those credentials.",
+                file=sys.stderr,
+            )
+
     print()
     if _ansi_enabled():
         print(_bold("Welcome to RoboTrace!"))
@@ -331,6 +349,27 @@ def _cmd_login(args: argparse.Namespace) -> int:
     sys.stdout.write(_dim("  Portal · "))
     sys.stdout.write(_hyperlink(portal))
     sys.stdout.write("\n")
+    return 0
+
+
+def _print_already_logged_in(creds: StoredCredentials, *, profile: str) -> int:
+    """Tell the user this machine is already authorized - skip the browser flow."""
+    email = creds.user_email or "your account"
+    print()
+    if _ansi_enabled():
+        print(f"{_green('✓ Already signed in')} as {_bold(email)}.")
+    else:
+        print(f"✓ Already signed in as {email}.")
+    print(_dim(f"  Base URL · {creds.base_url}"))
+    print(_dim(f"  Profile · {profile}"))
+    print(_dim(f"  Credentials · {credentials_path()}"))
+    portal = f"{creds.base_url.rstrip('/')}/portal"
+    sys.stdout.write(_dim("  Portal · "))
+    sys.stdout.write(_hyperlink(portal))
+    sys.stdout.write("\n")
+    print()
+    print(_dim("Run `robotrace login --force` to authorize again (mints a new key)."))
+    print(_dim("Run `robotrace logout` first if you want to drop this machine's credentials."))
     return 0
 
 
@@ -680,6 +719,10 @@ def _resolve_base_url(explicit: str | None) -> str:
     if env:
         return env
     return DEFAULT_BASE_URL
+
+
+def _normalize_base_url(url: str) -> str:
+    return url.rstrip("/").lower()
 
 
 def _user_agent() -> str:

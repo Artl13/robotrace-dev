@@ -10,6 +10,7 @@ Today:
   * `robotrace.adapters.ros2` - rosbag2 (sqlite3 + mcap) → episode.
   * `robotrace.adapters.lerobot` - Hugging Face LeRobot v2.1
     datasets → one episode per trajectory.
+  * `robotrace.adapters.gymnasium` - Gymnasium env rollout → episode.
 
 Soon: MuJoCo, Genesis, Isaac Sim, LeRobot v3.0.
 

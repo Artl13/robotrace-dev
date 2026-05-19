@@ -70,7 +70,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a6"
+version = "0.1.0a7"
 description = "RoboTrace - Python SDK and CLI for observability and evals on AI robots."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -84,7 +84,7 @@ requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "RoboTrace", email = "hello@robotrace.dev" }]
-keywords = ["robotics", "observability", "evals", "ros2", "lerobot", "vla", "cli"]
+keywords = ["robotics", "observability", "evals", "ros2", "lerobot", "gymnasium", "vla", "cli"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -143,6 +143,11 @@ lerobot = [
     "pyarrow>=14",
     "numpy>=1.26",
 ]
+# `[gymnasium]` runs env rollouts and packs observations/actions into
+# NPZ. Video from env.render() uses opencv via the separate `[video]`
+# extra. MuJoCo and other sim deps are intentionally NOT pinned here -
+# users install `gymnasium[mujoco]` (or similar) for their env id.
+gymnasium = ["gymnasium>=1.0,<2", "numpy>=1.26"]
 video = ["opencv-python>=4.10"]
 numpy = ["numpy>=1.26"]
 
@@ -207,6 +212,7 @@ select = ["E", "F", "I", "B", "UP", "RUF"]
 "src/robotrace/__init__.py" = ["RUF022"]
 "src/robotrace/adapters/ros2/__init__.py" = ["RUF022"]
 "src/robotrace/adapters/lerobot/__init__.py" = ["RUF022"]
+"src/robotrace/adapters/gymnasium/__init__.py" = ["RUF022"]
 
 [tool.mypy]
 python_version = "3.10"
@@ -224,6 +230,8 @@ module = [
     "rosbags.*",
     "cv2",
     "cv2.*",
+    "gymnasium",
+    "gymnasium.*",
     "opentelemetry",
     "opentelemetry.*",
     "huggingface_hub",

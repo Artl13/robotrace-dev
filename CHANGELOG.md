@@ -11,6 +11,25 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a7] - 2026-05-19
+
+### Added
+
+- **`robotrace.adapters.gymnasium`** - first runtime adapter. Three
+  verbs mirror ROS 2 / LeRobot: `scan_env`, `encode_rollout`,
+  `upload_rollout`. Runs a Gymnasium env loop, packs observations into
+  `sensors.npz`, actions into `actions.npz`, optional `video.mp4` from
+  `env.render()` when `render_mode="rgb_array"`. Install via
+  `pip install 'robotrace-dev[gymnasium]'`; add `[video]` for mp4
+  encoding. MuJoCo and other sims work through Gymnasium env ids once
+  users install their optional deps.
+
+- **`examples/gymnasium_smoke.py`** - CartPole rollout against a local
+  dev server.
+
+- **6 new unit tests** (`tests/test_gymnasium_adapter.py`) with a
+  fake rgb_array env for video tests (no pygame in CI).
+
 ## [0.1.0a6] - 2026-05-16
 
 ### Changed

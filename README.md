@@ -274,19 +274,22 @@ for testing the SDK contract end-to-end before R2 is provisioned.
 ## Adapters
 
 Framework adapters slurp third-party recording / dataset formats
-into the canonical `log_episode` contract. None are loaded by
-default - each lives behind an extras pin so the base install
-stays slim:
+(or run live env loops) into the canonical `log_episode` contract.
+None are loaded by default - each lives behind an extras pin so the
+base install stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.1.0a6'
+pip install 'robotrace-dev[ros2]==0.1.0a7'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.1.0a6'
+pip install 'robotrace-dev[lerobot]==0.1.0a7'
 
-# Multi-camera mp4 encoding (opencv) - combine with [ros2] or [lerobot]
-pip install 'robotrace-dev[ros2,video]==0.1.0a6'
+# Gymnasium env rollout → episode
+pip install 'robotrace-dev[gymnasium]==0.1.0a7'
+
+# Multi-camera mp4 encoding (opencv) - combine with any adapter that writes video
+pip install 'robotrace-dev[ros2,video]==0.1.0a7'
 ```
 
 ```python
@@ -306,13 +309,28 @@ lerobot.upload_dataset(
     policy_version="aloha-v1",
     env_version="aloha-cell-1",
 )
+
+# Gymnasium: one env rollout → one episode
+import gymnasium as gym
+from robotrace.adapters import gymnasium as rt_gym
+
+env = gym.make("CartPole-v1", render_mode="rgb_array")
+rt_gym.upload_rollout(
+    env,
+    policy=lambda obs, info: 1,
+    policy_version="cartpole-v1",
+    env_version="CartPole-v1",
+    seed=42,
+)
+env.close()
 ```
 
-Both adapters mirror the same surface: `scan_*` for read-only
+All three adapters mirror the same surface: `scan_*` for read-only
 introspection, `encode_*` to write artifacts to disk without
 uploading, and `upload_*` for the one-shot pipeline. Full reference
-at [robotrace.dev/docs/sdk/ros2](https://robotrace.dev/docs/sdk/ros2)
-and [robotrace.dev/docs/sdk/lerobot](https://robotrace.dev/docs/sdk/lerobot).
+at [robotrace.dev/docs/sdk/ros2](https://robotrace.dev/docs/sdk/ros2),
+[robotrace.dev/docs/sdk/lerobot](https://robotrace.dev/docs/sdk/lerobot),
+and [robotrace.dev/docs/sdk/gymnasium](https://robotrace.dev/docs/sdk/gymnasium).
 
 The LeRobot adapter deliberately does **not** depend on the heavy
 `lerobot` PyPI package (which would pull torch + torchvision +
@@ -342,16 +360,23 @@ src/robotrace/
     │   ├── _scan.py
     │   ├── _encode.py
     │   └── _upload.py
-    └── lerobot/         # HF LeRobot v2.1 → episode (since 0.1.0a3)
+    ├── lerobot/         # HF LeRobot v2.1 → episode (since 0.1.0a3)
+    │   ├── __init__.py
+    │   ├── _classify.py
+    │   ├── _meta.py
+    │   ├── _encode.py
+    │   └── _upload.py
+    └── gymnasium/       # env rollout → episode (since 0.1.0a7)
         ├── __init__.py
-        ├── _classify.py
-        ├── _meta.py
+        ├── _scan.py
+        ├── _flatten.py
         ├── _encode.py
         └── _upload.py
 ```
 
-Next adapter targets (not yet shipped): MuJoCo, Genesis, Isaac Sim,
-LeRobot v3.0.
+Next adapter targets (not yet shipped): MuJoCo (standalone), Genesis,
+Isaac Sim, LeRobot v3.0. MuJoCo envs already work through Gymnasium
+when users install `gymnasium[mujoco]`.
 
 ## Contributing
 
