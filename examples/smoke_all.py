@@ -150,7 +150,13 @@ def _section_episodes(tag: str, base_url: str) -> EpisodesResult:
     _info(f"wrote synthetic sensors → {sensors.name} ({sensors.stat().st_size:,} B)")
     _info(f"wrote synthetic actions → {actions.name} ({actions.stat().st_size:,} B)")
 
-    baseline = rt.log_episode(
+    # We use `start_episode(...)` + explicit uploads instead of the
+    # one-shot `log_episode(...)` because both artifact slots get
+    # `.npz` files - the SDK's heuristic in `log_episode` (rightly)
+    # rejects `.npz` in the `actions=` kwarg as a likely typo. The
+    # eval harness needs `np.load`-able bytes in both slots, so we
+    # opt out of the heuristic and write NPZ to both.
+    ep = rt.start_episode(
         name=f"smoke baseline · {tag}",
         source="sim",
         robot="smoke-rig",
@@ -158,8 +164,13 @@ def _section_episodes(tag: str, base_url: str) -> EpisodesResult:
         env_version="smoke-env-v1",
         git_sha="smoke000",
         seed=42,
-        sensors=str(sensors),
-        actions=str(actions),
+        fps=30,
+        artifacts=("sensors", "actions"),
+    )
+    ep.upload_sensors(str(sensors))
+    ep.upload_actions(str(actions))
+    ep.finalize(
+        status="ready",
         duration_s=2.1,
         fps=30,
         metadata={
@@ -170,9 +181,9 @@ def _section_episodes(tag: str, base_url: str) -> EpisodesResult:
             "outcome": {"success": True, "reward_total": 1.0},
             "_smoke_tag": tag,
         },
-        status="ready",
     )
-    _ok(f"baseline episode: {baseline.id}  ({baseline.status}, storage={baseline.storage})")
+    _ok(f"baseline episode: {ep.id}  ({ep.status}, storage={ep.storage})")
+    baseline = ep
 
     failed = rt.log_episode(
         name=f"smoke failure · {tag}",
