@@ -13,6 +13,20 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.1.0a10 - live `ros2.record(topics=[...])` ships. Subscribes to a
+# set of ROS 2 topics via rclpy during a run, writes every message
+# into a tempdir rosbag2 directory, then encodes + uploads + finalizes
+# as one episode on context-manager exit. Same artifact contract as
+# the offline `upload_bag(...)` path - the only difference is which
+# side wrote the bag. rclpy is NOT pinned (ships with the distro via
+# apt; PyPI wheels are unreliable for rmw compatibility); lazy-import
+# with a friendly ConfigurationError pointing at the apt command when
+# missing. New `_BagWriter` (typestore-aware rosbag2 writer) + new
+# `LiveRecording` handle. Topics validated against the live ROS 2
+# graph at start() so typos fail loudly. P1b closes: the offline
+# rosbag adapter plus the live record bridge cover both shapes the
+# marketing site claims. 7 new SDK tests; suite is now 112 passing.
+#
 # 0.1.0a9 - `robotrace.types` ships. Typed metadata classes promote the
 # half-dozen payloads that show up in every ROS 2 / LeRobot / Gymnasium
 # integration (`JointState`, `Pose3D`, `Twist`, `Imu`, `Battery`,
@@ -104,7 +118,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a9"
+version = "0.1.0a10"
 description = "RoboTrace - Python SDK and CLI for observability and evals on AI robots."
 readme = "README.md"
 requires-python = ">=3.10"

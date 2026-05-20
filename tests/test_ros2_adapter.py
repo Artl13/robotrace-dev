@@ -368,3 +368,186 @@ def test_classify_topic_defaults_to_sensors() -> None:
     decision = ros2.classify_topic("/some/other/topic", "my_pkg/msg/Reading")
     assert decision.slot == "sensors"
     assert decision.reason == "default"
+
+
+# ── live record() / _BagWriter ────────────────────────────────────────
+
+
+def test_bag_writer_round_trips_to_scan_and_encode(tmp_path: Path) -> None:
+    """`_BagWriter` writes a real rosbag2 directory.
+
+    We feed it CDR-serialized JointState + Twist messages (no rclpy
+    needed - the typestore already does the serialization), close the
+    writer, then assert that `scan_bag` + `encode_bag` accept the
+    result and classify topics exactly the same as for a bag produced
+    via `rosbags.Writer` directly. If this passes, the live recorder
+    path is wired up correctly - the only piece left untested is the
+    actual rclpy subscription, which we can't run in CI.
+    """
+    from robotrace.adapters.ros2._record import _BagWriter
+
+    bag_path = tmp_path / "live_bag"
+    typestore = get_typestore(Stores.ROS2_HUMBLE)
+    JointState = typestore.types["sensor_msgs/msg/JointState"]
+    Twist = typestore.types["geometry_msgs/msg/Twist"]
+    Header = typestore.types["std_msgs/msg/Header"]
+    Time = typestore.types["builtin_interfaces/msg/Time"]
+    Vector3 = typestore.types["geometry_msgs/msg/Vector3"]
+
+    def header(t_ns: int) -> Any:
+        return Header(
+            stamp=Time(sec=t_ns // NS_PER_S, nanosec=t_ns % NS_PER_S),
+            frame_id="world",
+        )
+
+    with _BagWriter(bag_path, ros_distro="humble") as writer:
+        for i in range(4):
+            t_ns = (i + 1) * NS_PER_S // 4
+            js = JointState(
+                header=header(t_ns),
+                name=["j1", "j2", "j3"],
+                position=np.array([0.1 * (i + 1), 0.0, -0.2], dtype=np.float64),
+                velocity=np.zeros(3, dtype=np.float64),
+                effort=np.zeros(3, dtype=np.float64),
+            )
+            writer.write_message(
+                topic="/joint_states",
+                typename="sensor_msgs/msg/JointState",
+                t_ns=t_ns,
+                raw_bytes=typestore.serialize_cdr(js, JointState.__msgtype__),
+            )
+        for i in range(2):
+            t_ns = (i + 1) * NS_PER_S // 2
+            twist = Twist(
+                linear=Vector3(x=float(i + 1) * 0.1, y=0.0, z=0.0),
+                angular=Vector3(x=0.0, y=0.0, z=0.0),
+            )
+            writer.write_message(
+                topic="/cmd_vel",
+                typename="geometry_msgs/msg/Twist",
+                t_ns=t_ns,
+                raw_bytes=typestore.serialize_cdr(twist, Twist.__msgtype__),
+            )
+
+    assert writer.message_count == 6
+    assert writer.ros_distro == "humble"
+    assert (bag_path / "metadata.yaml").is_file()
+
+    # Round-trip: the bag we just wrote scans + encodes like any
+    # other rosbag2.
+    summary = ros2.scan_bag(bag_path)
+    assert summary.message_count == 6
+    by_topic = {t.topic: t for t in summary.topics}
+    assert by_topic["/joint_states"].slot == "sensors"
+    assert by_topic["/cmd_vel"].slot == "actions"
+
+    encoded = ros2.encode_bag(bag_path, tmp_path / "encoded")
+    assert encoded.sensors is not None
+    assert encoded.actions is not None
+    assert encoded.video is None  # no image topic captured
+
+    sensors = np.load(encoded.sensors.path)
+    assert sensors["/joint_states/position"].shape == (4, 3)
+
+
+def test_bag_writer_lazy_connection_creation(tmp_path: Path) -> None:
+    """Connections are added on first message, not declared up-front."""
+    from robotrace.adapters.ros2._record import _BagWriter
+
+    bag_path = tmp_path / "lazy_bag"
+    typestore = get_typestore(Stores.ROS2_HUMBLE)
+    Twist = typestore.types["geometry_msgs/msg/Twist"]
+    Vector3 = typestore.types["geometry_msgs/msg/Vector3"]
+
+    twist = Twist(linear=Vector3(x=1.0, y=0.0, z=0.0), angular=Vector3(x=0.0, y=0.0, z=0.0))
+    raw = typestore.serialize_cdr(twist, Twist.__msgtype__)
+
+    with _BagWriter(bag_path) as writer:
+        # First write creates the connection.
+        writer.write_message(
+            topic="/cmd_vel",
+            typename="geometry_msgs/msg/Twist",
+            t_ns=1_000_000_000,
+            raw_bytes=raw,
+        )
+        # Second write reuses it.
+        writer.write_message(
+            topic="/cmd_vel",
+            typename="geometry_msgs/msg/Twist",
+            t_ns=2_000_000_000,
+            raw_bytes=raw,
+        )
+
+    assert writer.message_count == 2
+    summary = ros2.scan_bag(bag_path)
+    # Exactly one connection per unique topic, regardless of how
+    # many messages came through.
+    assert len(summary.topics) == 1
+    assert summary.topics[0].topic == "/cmd_vel"
+    assert summary.topics[0].msgcount == 2
+
+
+def test_bag_writer_close_is_idempotent(tmp_path: Path) -> None:
+    """Double-close must not raise - matches the stop() contract."""
+    from robotrace.adapters.ros2._record import _BagWriter
+
+    bag_path = tmp_path / "idempotent_bag"
+    writer = _BagWriter(bag_path)
+    writer.close()
+    writer.close()  # no exception
+
+
+def test_bag_writer_drops_writes_after_close(tmp_path: Path) -> None:
+    """Late-arriving callbacks after stop() don't corrupt the bag."""
+    from robotrace.adapters.ros2._record import _BagWriter
+
+    bag_path = tmp_path / "post_close_bag"
+    typestore = get_typestore(Stores.ROS2_HUMBLE)
+    Twist = typestore.types["geometry_msgs/msg/Twist"]
+    Vector3 = typestore.types["geometry_msgs/msg/Vector3"]
+    twist = Twist(linear=Vector3(x=0.0, y=0.0, z=0.0), angular=Vector3(x=0.0, y=0.0, z=0.0))
+    raw = typestore.serialize_cdr(twist, Twist.__msgtype__)
+
+    writer = _BagWriter(bag_path)
+    writer.write_message(
+        topic="/cmd_vel", typename="geometry_msgs/msg/Twist", t_ns=0, raw_bytes=raw
+    )
+    writer.close()
+    # No-op after close.
+    writer.write_message(
+        topic="/cmd_vel", typename="geometry_msgs/msg/Twist", t_ns=1, raw_bytes=raw
+    )
+    assert writer.message_count == 1
+
+
+def test_record_rejects_empty_topics() -> None:
+    with pytest.raises(rt.ConfigurationError, match="at least one topic"):
+        ros2.record(topics=[])
+
+
+def test_record_rejects_existing_output_dir(tmp_path: Path) -> None:
+    existing = tmp_path / "already_here"
+    existing.mkdir()
+    with pytest.raises(rt.ConfigurationError, match="already exists"):
+        ros2.record(topics=["/cmd_vel"], output_dir=existing)
+
+
+def test_record_constructor_does_not_require_rclpy(tmp_path: Path) -> None:
+    """Constructing the recorder must NOT import rclpy.
+
+    rclpy ships with the ROS 2 distro and isn't available in CI - we
+    can only check that the lazy-import path is preserved. start()
+    would fail; record() itself must not.
+    """
+    output = tmp_path / "preflight" / "bag"
+    recording = ros2.record(
+        topics=["/joint_states", "/cmd_vel"],
+        output_dir=output,
+        name="preflight",
+    )
+    assert recording.bag_path == output
+    assert recording.topics == ("/joint_states", "/cmd_vel")
+    # Bag has been created on disk by the writer constructor (it
+    # writes metadata as soon as it opens). Tear down so subsequent
+    # tests aren't affected.
+    recording._writer.close()  # type: ignore[union-attr]

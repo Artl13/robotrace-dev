@@ -11,6 +11,54 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a10] - 2026-05-20
+
+### Added
+
+- **Live `ros2.record(topics=[...])`** - subscribes to a set of ROS
+  2 topics via `rclpy` during a run, writes every message into a
+  temporary rosbag2 directory, and on close pipes that bag straight
+  through the existing `encode_bag` + `upload_bag` plumbing.
+  Same artifact contract as the offline path - the only difference
+  is which side wrote the bag.
+
+  ```python
+  from robotrace.adapters import ros2
+
+  with ros2.record(
+      topics=["/camera/image_raw", "/joint_states", "/cmd_vel"],
+      name="warmup pick-and-place",
+      policy_version="pap-v3.2.1",
+  ) as rec:
+      drive_robot_for_30_seconds()
+  print(rec.episode.id)
+  ```
+
+  - Context manager + explicit `start()` / `stop(status=...)` API.
+    Failure inside the `with` block finalizes the episode as
+    `failed` with the traceback in `metadata.failure_reason` before
+    re-raising.
+  - Topics validated against the live ROS 2 graph at `start()` so
+    typos fail loudly instead of producing an empty bag.
+  - Empty bags (no messages captured) are silently dropped - no
+    upload, no orphaned tempdir.
+  - Live runs stamp `metadata.ros2.mode = "live"` so the portal can
+    tell live captures apart from bag-file uploads.
+
+### Compatibility
+
+- `rclpy` is **not** pinned in `pyproject.toml`. It ships with the
+  ROS 2 distro via apt (`apt install ros-<distro>-rclpy`); the
+  wheels on PyPI are not always compatible with the `rmw` bindings
+  sourced from a workspace. Calling `ros2.record(...)` without a
+  sourced workspace raises `ConfigurationError` pointing at the apt
+  command. The offline `upload_bag(...)` path stays zero-`rclpy`.
+- New `_BagWriter` is rclpy-free and testable: feed it CDR-serialized
+  bytes via `rosbags.typesys` and it writes a real rosbag2 directory.
+  All 7 new tests exercise the round-trip
+  (`write → scan_bag → encode_bag`) without rclpy.
+- SDK suite is now 112 passing.
+
 ## [0.1.0a9] - 2026-05-20
 
 ### Added

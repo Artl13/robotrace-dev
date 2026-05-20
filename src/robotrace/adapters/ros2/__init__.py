@@ -33,29 +33,44 @@ bag with `canonical_video_topic="/camera/image_raw"`.
 Storage: `rosbags` reads both sqlite3 and mcap rosbag2 backends out
 of the box. ROS 1 (`rosbag1`) is **out of scope** per AGENTS.md.
 
-Coming next in `robotrace 0.2`: a live `ros2.record(topics=[...])`
-context manager that subscribes to topics during a run and ships the
-result as an episode on exit. The encoder/uploader plumbing here
-will back it.
+A fourth verb lives next to those three for **live** capture:
+
+    # 4. Subscribe to topics during a running ROS 2 stack; on close
+    #    encode + upload the captured messages as one episode. Same
+    #    artifact contract as the offline path - the only difference
+    #    is which side wrote the bag.
+    with ros2.record(
+        topics=["/camera/image_raw", "/joint_states", "/cmd_vel"],
+        name="warmup pick-and-place",
+        policy_version="pap-v3.2.1",
+    ) as rec:
+        drive_robot_for_30_seconds()
+    print(rec.episode.id)
+
+Storage: `rosbags` reads both sqlite3 and mcap rosbag2 backends out
+of the box. ROS 1 (`rosbag1`) is **out of scope** per AGENTS.md.
 """
 
 from __future__ import annotations
 
 from ._classify import TopicClass, classify_topic
 from ._encode import EncodedArtifact, EncodedBag, encode_bag
+from ._record import LiveRecording, record
 from ._scan import BagSummary, TopicInfo, scan_bag
 from ._upload import upload_bag
 
 __all__ = [
-    # Primary surface - the three verbs.
+    # Primary surface - the four verbs.
     "scan_bag",
     "encode_bag",
     "upload_bag",
+    "record",
     # Result types.
     "BagSummary",
     "TopicInfo",
     "EncodedBag",
     "EncodedArtifact",
+    "LiveRecording",
     # Classifier (exposed so users can sanity-check or extend it).
     "TopicClass",
     "classify_topic",
