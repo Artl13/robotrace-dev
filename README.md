@@ -1,7 +1,27 @@
-# robotrace-dev (Python SDK)
+<div align="center">
 
-> The official Python SDK for [RoboTrace](https://robotrace.dev) -
-> observability and evals for AI-powered robots.
+# robotrace-dev
+
+**Observability and evals for AI-powered robots.**
+
+Log episodes (synchronized video, sensors, actions), replay them, version
+datasets, and re-roll new policy versions against historical observations
+to measure regressions - without rolling another in-house dashboard.
+
+[![PyPI](https://img.shields.io/pypi/v/robotrace-dev?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/robotrace-dev/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white)](https://www.python.org)
+[![import robotrace](https://img.shields.io/badge/import-robotrace-3776ab?logo=python&logoColor=white)](#api)
+[![httpx](https://img.shields.io/badge/httpx-HTTP%20client-000000)](https://www.python-httpx.org/)
+[![Cloudflare R2](https://img.shields.io/badge/Cloudflare-R2%20uploads-f6821f?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/r2/)
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Alpha](https://img.shields.io/badge/Status-alpha-7c3aed)](#status)
+[![ROS 2](https://img.shields.io/badge/ROS%202-optional%20extra-22314e?logo=ros)](https://robotrace.dev/docs/sdk/ros2)
+[![LeRobot](https://img.shields.io/badge/LeRobot-optional%20extra-ff6f00)](https://robotrace.dev/docs/sdk/lerobot)
+[![Gymnasium](https://img.shields.io/badge/Gymnasium-optional%20extra-008170)](https://robotrace.dev/docs/sdk/gymnasium)
+
+</div>
+
+---
 
 ```bash
 pip install robotrace-dev
@@ -20,11 +40,15 @@ pip install robotrace-dev
 > Older pins (`0.1.0a10`, `0.1.0a9`, `0.1.0a8`, …) are prior alphas on
 > the same pre-1.0 API surface.
 
-> **Status:** alpha (`0.1.0a11`). The public API in this README is the
-> shape we're iterating against; once we cut `1.0.0`, the
-> [`log_episode`](#log_episode-the-sacred-call) signature is locked
-> and breakages require a major bump (per `AGENTS.md` in the
-> RoboTrace monorepo).
+## Status
+
+**Alpha (`0.1.0a11`).** The public API in this README is the shape we're
+iterating against; once we cut `1.0.0`, the
+[`log_episode`](#log_episode---the-sacred-call) signature is locked and
+breakages require a major bump (per `AGENTS.md` in the RoboTrace monorepo).
+
+Official product site: [robotrace.dev](https://robotrace.dev). Docs:
+[robotrace.dev/docs](https://robotrace.dev/docs).
 
 ## Quickstart
 
