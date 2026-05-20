@@ -534,3 +534,26 @@ def test_complete_run_posts_finalize() -> None:
         r for r in captured if r.url.path.endswith("/finalize")
     ]
     assert len(finalize_calls) == 1
+
+
+def test_complete_run_accepts_client_kwarg() -> None:
+    """`complete_run(run, client=c)` must not TypeError.
+
+    The verify module forwards its `client=` through; regressed in
+    0.1.0a11 when the explicit-client path landed without the
+    corresponding kwarg on complete_run. See verify.run_check.
+    """
+    client, _ = _make_runner_fixture(
+        baseline_ids=["00000000-0000-0000-0000-0000000000cc"],
+    )
+    try:
+        run = evals_mod.create_run(
+            candidate_policy_version="v7",
+            baseline_episode_ids=["00000000-0000-0000-0000-0000000000cc"],
+            client=client,
+        )
+        body = evals_mod.complete_run(run, client=client)
+    finally:
+        client.close()
+
+    assert body["status"] == "completed"

@@ -270,6 +270,7 @@ def complete_run(
     *,
     status: str = "completed",
     metadata: Mapping[str, Any] | None = None,
+    client: Client | None = None,
 ) -> dict[str, Any]:
     """Close out the campaign and trigger the server-side rollup.
 
@@ -279,8 +280,14 @@ def complete_run(
 
         out = rt.evals.complete_run(run)
         success_delta = out["summary"]["success_rate"]["delta"]
+
+    `client=` is accepted for symmetry with :func:`create_run` /
+    :func:`run_against` (the verify module forwards it through) - we
+    still prefer ``run._client`` when present so a run created
+    against deployment A doesn't accidentally finalize against
+    deployment B.
     """
-    c = run._client or _resolve_client()
+    c = run._client or _resolve_client(client)
     payload: dict[str, Any] = {"status": status}
     if metadata is not None:
         payload["metadata"] = dict(metadata)
