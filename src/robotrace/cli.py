@@ -102,6 +102,11 @@ def cli_main(argv: list[str] | None = None) -> int:
             return _cmd_replay_run(args)
         parser.print_help()
         return 2
+    if args.command == "verify":
+        if args.verify_command == "check":
+            return _cmd_verify_check(args)
+        parser.print_help()
+        return 2
 
     parser.print_help()
     return 2
@@ -247,6 +252,45 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     p_replay_run.add_argument(
+        "--profile",
+        default=DEFAULT_PROFILE,
+        help="Credentials profile to authenticate with (default: 'default').",
+    )
+
+    # verify - regression verification scenario gates
+    p_verify = sub.add_parser(
+        "verify",
+        help="Regression verification scenarios - mandatory replay gates.",
+    )
+    p_verify_sub = p_verify.add_subparsers(dest="verify_command", metavar="<verb>")
+    p_verify_sub.required = True
+
+    p_verify_check = p_verify_sub.add_parser(
+        "check",
+        help="Replay critical scenarios for a candidate and evaluate the deploy gate.",
+    )
+    p_verify_check.add_argument(
+        "--candidate",
+        required=True,
+        dest="candidate_version",
+        metavar="VERSION",
+        help="Candidate policy version to verify (e.g. `pap-v13`).",
+    )
+    p_verify_check.add_argument(
+        "--policy",
+        default=None,
+        metavar="MODULE:FN",
+        help=(
+            "Policy callable to replay scenarios that haven't passed yet. "
+            "Omit to only report gate status without running replays."
+        ),
+    )
+    p_verify_check.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Replay locally without uploading verification results.",
+    )
+    p_verify_check.add_argument(
         "--profile",
         default=DEFAULT_PROFILE,
         help="Credentials profile to authenticate with (default: 'default').",
@@ -924,6 +968,84 @@ def _cmd_replay_run(args: argparse.Namespace) -> int:
         _print_summary(summary_body.get("summary"))
         print(f"\nView in portal: {_hyperlink(portal)}")
         return 0 if all(r.status == "complete" for r in results) else 1
+    finally:
+        client.close()
+
+
+# ── verification scenario gates ────────────────────────────────────────
+
+
+def _cmd_verify_check(args: argparse.Namespace) -> int:
+    """`robotrace verify check …` - CI gate for critical scenarios."""
+    from typing import cast
+
+    from . import verify
+    from .client import Client
+    from .errors import ConfigurationError, RobotraceError
+
+    creds = read_credentials(profile=args.profile)
+    if not creds:
+        return _bail(
+            f"Not logged in (profile: {args.profile}).\n"
+            "Run `robotrace login` first."
+        )
+
+    client = Client(api_key=creds.api_key, base_url=creds.base_url, verbose=False)
+    try:
+        if args.policy:
+            try:
+                policy_callable = _import_callable(args.policy)
+            except _CliError as exc:
+                return _bail(str(exc))
+
+            print(
+                f"Verify check: candidate={args.candidate_version} "
+                f"policy={args.policy}"
+            )
+            if args.dry_run:
+                print("Dry-run mode: verification results will NOT be uploaded.")
+
+            try:
+                from .evals import PolicyCallable
+
+                exit_code, gate = verify.run_check(
+                    candidate_policy_version=args.candidate_version,
+                    policy_callable=cast(PolicyCallable, policy_callable),
+                    dry_run=args.dry_run,
+                    client=client,
+                )
+            except (ConfigurationError, RobotraceError) as exc:
+                return _bail(str(exc))
+        else:
+            print(f"Verify gate: candidate={args.candidate_version}")
+            try:
+                gate = verify.check_gate(
+                    candidate_policy_version=args.candidate_version,
+                    client=client,
+                )
+            except RobotraceError as exc:
+                return _bail(str(exc))
+            exit_code = 0 if gate.get("passed") else 1
+
+        passed = gate.get("passed")
+        critical_total = gate.get("critical_total", 0)
+        critical_passed = gate.get("critical_passed", 0)
+        critical_failed = gate.get("critical_failed", 0)
+        critical_pending = gate.get("critical_pending", 0)
+
+        tag = "✓ PASS" if passed else "✗ BLOCKED"
+        print(
+            f"\n{tag}: {critical_passed}/{critical_total} critical scenarios pass "
+            f"({critical_failed} failed, {critical_pending} pending)"
+        )
+        for blocker in gate.get("blockers") or []:
+            print(f"  · {blocker}")
+
+        portal = (
+            f"{creds.base_url.rstrip('/')}/portal/verify"
+        )
+        print(f"\nView scenarios: {_hyperlink(portal)}")
+        return exit_code
     finally:
         client.close()
 

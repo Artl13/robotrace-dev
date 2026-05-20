@@ -40,7 +40,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from . import evals
+from . import evals, verify
 from ._version import __version__
 from .client import (
     ENV_API_KEY,
@@ -94,6 +94,8 @@ __all__ = [
     "log_episode",
     # Replay regression harness (`rt.evals.create_run`, `rt.evals.run_against`, …)
     "evals",
+    # Regression verification scenarios (`rt.verify.check_gate`, …)
+    "verify",
     # Env-var names exposed for tooling that wants to validate them
     "ENV_API_KEY",
     "ENV_BASE_URL",
