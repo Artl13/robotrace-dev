@@ -13,6 +13,20 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.1.0a9 - `robotrace.types` ships. Typed metadata classes promote the
+# half-dozen payloads that show up in every ROS 2 / LeRobot / Gymnasium
+# integration (`JointState`, `Pose3D`, `Twist`, `Imu`, `Battery`,
+# `EpisodeOutcome`) into first-class dataclasses. Pass them straight
+# into `log_episode(metadata={...})` / `start_episode(metadata={...})`
+# and the SDK serializes each one to a `__type`-tagged dict the portal
+# renders with a per-shape widget (joint sparklines, pose grids,
+# battery pills, outcome stats). Pure superset of the existing
+# free-form metadata bag - plain dicts continue to work. Server-side:
+# new shared validator `lib/metadata/typed-values.ts` runs in the
+# create + finalize ingest routes; unknown `__type` values pass
+# through so newer SDKs ship new types against older servers without
+# coordination. 21 new SDK tests; suite is now 88 passing.
+#
 # 0.1.0a8 - `robotrace.verify` ships. Promote a failed episode (portal
 # button or `rt.verify.promote(...)`) and the next candidate has to
 # replay it without re-failing before it can ship. New CLI verb
@@ -90,7 +104,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a8"
+version = "0.1.0a9"
 description = "RoboTrace - Python SDK and CLI for observability and evals on AI robots."
 readme = "README.md"
 requires-python = ">=3.10"

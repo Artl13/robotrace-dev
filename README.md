@@ -280,16 +280,16 @@ base install stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.1.0a8'
+pip install 'robotrace-dev[ros2]==0.1.0a9'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.1.0a8'
+pip install 'robotrace-dev[lerobot]==0.1.0a9'
 
 # Gymnasium env rollout → episode
-pip install 'robotrace-dev[gymnasium]==0.1.0a8'
+pip install 'robotrace-dev[gymnasium]==0.1.0a9'
 
 # Multi-camera mp4 encoding (opencv) - combine with any adapter that writes video
-pip install 'robotrace-dev[ros2,video]==0.1.0a8'
+pip install 'robotrace-dev[ros2,video]==0.1.0a9'
 ```
 
 ```python

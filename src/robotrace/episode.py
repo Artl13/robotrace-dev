@@ -167,7 +167,13 @@ class Episode:
         if rolled_up > 0:
             payload["bytes_total"] = int(rolled_up)
         if metadata is not None:
-            payload["metadata"] = dict(metadata)
+            # Same typed-value encoding contract as start_episode -
+            # callers can pass `JointState(...)`, `EpisodeOutcome(...)`,
+            # etc. inside the finalize metadata bag and the SDK
+            # flattens them to the `__type`-tagged wire format here.
+            from .types import encode as _encode_typed
+            encoded = _encode_typed(dict(metadata))
+            payload["metadata"] = encoded if isinstance(encoded, dict) else dict(metadata)
 
         response = client._http.request(
             "POST",

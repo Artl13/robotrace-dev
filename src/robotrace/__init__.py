@@ -40,8 +40,16 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from . import evals, verify
+from . import evals, types, verify
 from ._version import __version__
+from .types import (
+    Battery,
+    EpisodeOutcome,
+    Imu,
+    JointState,
+    Pose3D,
+    Twist,
+)
 from .client import (
     ENV_API_KEY,
     ENV_BASE_URL,
@@ -96,6 +104,15 @@ __all__ = [
     "evals",
     # Regression verification scenarios (`rt.verify.check_gate`, …)
     "verify",
+    # Typed metadata classes — pass into `metadata={...}` directly
+    # (`rt.JointState(positions=…)`, `rt.Pose3D(...)`, etc.).
+    "types",
+    "JointState",
+    "Pose3D",
+    "Twist",
+    "Imu",
+    "Battery",
+    "EpisodeOutcome",
     # Env-var names exposed for tooling that wants to validate them
     "ENV_API_KEY",
     "ENV_BASE_URL",

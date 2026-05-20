@@ -11,6 +11,48 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a9] - 2026-05-20
+
+### Added
+
+- **`robotrace.types`** - typed metadata classes for the half-dozen
+  payloads that show up in every ROS 2 / LeRobot / Gymnasium
+  integration. Pass them straight into `log_episode(metadata={...})`
+  / `start_episode(metadata={...})` and the SDK serializes each one
+  to a `__type`-tagged dict the portal renders with a per-shape
+  widget (joint sparklines, pose grids, battery pills, outcome
+  stats). New classes:
+  - `JointState(positions, velocities=None, efforts=None, names=None)`
+    - mirrors `sensor_msgs/JointState`. Parallel-array contract
+      enforced (matching lengths) so a typo doesn't reach the wire.
+  - `Pose3D(translation, rotation)` - Cartesian pose. Translation
+    in meters, rotation as a `[x, y, z, w]` quaternion (ROS 2 /
+    Eigen order - **not** `[w, x, y, z]`).
+  - `Twist(linear, angular)` - linear m/s + angular rad/s.
+  - `Imu(linear_acceleration, angular_velocity, orientation=None)`
+    - mirrors `sensor_msgs/Imu`. Orientation optional - many IMUs
+      publish only accel + gyro.
+  - `Battery(percent=None, voltage_v=None, current_a=None, charging=None)`
+    - all fields optional; `percent` is in `[0, 100]`.
+  - `EpisodeOutcome(success=None, reward_total=None, collision_count=None, time_to_goal_s=None)`
+    - episode-level outcome; mirrors the eval harness `_outcome`
+      sentinel so non-replay episodes can report the same numbers.
+- **`robotrace.types.encode(value)`** - the recursive encoder used
+  internally by `log_episode` / `start_episode` / `Episode.finalize`.
+  Exported for callers who want to round-trip a typed value through a
+  non-SDK path. Plain dicts / lists / scalars pass through unchanged.
+
+### Compatibility
+
+- Pure superset: existing customers passing free-form `metadata=`
+  dicts see zero behaviour change. The new typed classes are an
+  *additive* convenience on top of the same `metadata jsonb` column.
+- Forward-compat: the server validates known `__type` values but
+  passes unknown ones through. A future SDK release that adds, say,
+  `robotrace.Wrench` will work against today's server without a
+  coordinated release.
+- 21 new tests; SDK suite is now 88 passing.
+
 ## [0.1.0a8] - 2026-05-20
 
 ### Added

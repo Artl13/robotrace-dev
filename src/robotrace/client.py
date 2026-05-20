@@ -49,6 +49,18 @@ from .episode import (
     kind_from_extension,
 )
 from .errors import ConfigurationError
+from .types import encode as _encode_metadata_value
+
+
+def _encode_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
+    """Recursively encode typed values inside a metadata mapping.
+
+    Thin wrapper around `robotrace.types.encode` that always returns
+    a plain dict so the HTTP client can serialize it directly.
+    """
+    encoded = _encode_metadata_value(dict(metadata))
+    # encode() of a Mapping always returns a dict (see types.encode).
+    return encoded if isinstance(encoded, dict) else dict(metadata)
 
 EpisodeSource = Literal["real", "sim", "replay"]
 
@@ -193,7 +205,12 @@ class Client:
         if fps is not None:
             payload["fps"] = fps
         if metadata is not None:
-            payload["metadata"] = dict(metadata)
+            # Run the metadata mapping through the typed-value encoder so
+            # `JointState(...)`, `Pose3D(...)`, `EpisodeOutcome(...)`, etc.
+            # serialize to their `__type`-tagged wire format on the way
+            # out. Plain dicts pass through untouched. See
+            # `robotrace.types` for the encoding contract.
+            payload["metadata"] = _encode_metadata(metadata)
 
         # OTel trace correlation. `capture_trace_context()` is a soft
         # import - returns None when (a) `[otel]` extra isn't
