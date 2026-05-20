@@ -13,6 +13,11 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.1.0a11 - doc-only release: refresh PyPI README (status + adapter
+# pins were stuck at 0.1.0a6), sync web docs install pins, and route
+# SDK ConfigurationError hints through `_version.install_command()` so
+# future bumps don't drift again. No code or API changes vs 0.1.0a10.
+#
 # 0.1.0a10 - live `ros2.record(topics=[...])` ships. Subscribes to a
 # set of ROS 2 topics via rclpy during a run, writes every message
 # into a tempdir rosbag2 directory, then encodes + uploads + finalizes
@@ -118,7 +123,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a10"
+version = "0.1.0a11"
 description = "RoboTrace - Python SDK and CLI for observability and evals on AI robots."
 readme = "README.md"
 requires-python = ">=3.10"

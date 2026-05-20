@@ -11,6 +11,19 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a11] - 2026-05-20
+
+### Changed
+
+- **PyPI README + docs pin sweep** — the project description on PyPI
+  no longer references `0.1.0a6`. Status line, adapter install pins,
+  and web docs quickstart/SDK pages now point at `0.1.0a11`.
+- **ConfigurationError install hints** — adapter and eval extras
+  messages now call `_version.install_command(...)` so the suggested
+  pin tracks `__version__` automatically.
+
+No code or API changes vs `0.1.0a10`.
+
 ## [0.1.0a10] - 2026-05-20
 
 ### Added

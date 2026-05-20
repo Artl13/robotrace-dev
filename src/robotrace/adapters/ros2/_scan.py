@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from ...errors import ConfigurationError
+from ..._version import install_command
 from ._classify import Slot, TopicClass, classify_topic
 
 
@@ -181,7 +182,7 @@ def _import_anyreader() -> type:
     except ImportError as exc:
         raise ConfigurationError(
             "the ROS 2 adapter needs the `rosbags` library. "
-            "Install with `pip install 'robotrace-dev[ros2]==0.1.0a6'`."
+            f"Install with `{install_command('ros2')}`."
         ) from exc
     return AnyReader
 

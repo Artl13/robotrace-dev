@@ -45,6 +45,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from .errors import APIError, ConfigurationError, NotFoundError
+from ._version import install_command
 
 if TYPE_CHECKING:
 
@@ -789,7 +790,7 @@ def _import_numpy() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "the replay regression harness needs `numpy`. "
-            "Install with `pip install 'robotrace-dev[numpy]==0.1.0a6'`."
+            f"Install with `{install_command('numpy')}`."
         ) from exc
     return np
 

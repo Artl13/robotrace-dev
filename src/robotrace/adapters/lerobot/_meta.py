@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from ...errors import ConfigurationError
+from ..._version import install_command
 
 # Datasets we know how to read end-to-end. v2.1 is the on-disk format
 # used by virtually every public `lerobot/*` Hub dataset as of
@@ -392,7 +393,7 @@ def _import_huggingface_hub() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "the LeRobot adapter needs `huggingface_hub` to talk to the HF Hub. "
-            "Install with `pip install 'robotrace-dev[lerobot]==0.1.0a6'`. "
+            f"Install with `{install_command('lerobot')}`. "
             "If you only ever pass local dataset paths you can install "
             "`pip install huggingface_hub` separately and skip the rest of "
             "the extra."

@@ -6,4 +6,16 @@ hit 1.0 the contract is locked per AGENTS.md and breakages require
 a major bump.
 """
 
-__version__ = "0.1.0a10"
+__version__ = "0.1.0a11"
+
+
+def install_command(*extras: str, pin: bool = True) -> str:
+    """Suggested pip line for ConfigurationError hints and docs."""
+    if extras:
+        tag = ",".join(extras)
+        if pin:
+            return f"pip install 'robotrace-dev[{tag}]=={__version__}'"
+        return f"pip install 'robotrace-dev[{tag}]'"
+    if pin:
+        return f"pip install robotrace-dev=={__version__}"
+    return "pip install robotrace-dev"

@@ -16,11 +16,11 @@ pip install robotrace-dev
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual - `pip install robotrace-dev==0.1.0a6` pulls this README.
-> Older pins (`0.1.0a5.post1`, `0.1.0a5`) are prior alphas - same core
-> SDK, but omit the refreshed `robotrace login` UX from `0.1.0a6`.
+> as usual - `pip install robotrace-dev==0.1.0a11` pulls this README.
+> Older pins (`0.1.0a10`, `0.1.0a9`, `0.1.0a8`, …) are prior alphas on
+> the same pre-1.0 API surface.
 
-> **Status:** alpha (`0.1.0a6`). The public API in this README is the
+> **Status:** alpha (`0.1.0a11`). The public API in this README is the
 > shape we're iterating against; once we cut `1.0.0`, the
 > [`log_episode`](#log_episode-the-sacred-call) signature is locked
 > and breakages require a major bump (per `AGENTS.md` in the
@@ -280,16 +280,16 @@ base install stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.1.0a10'
+pip install 'robotrace-dev[ros2]==0.1.0a11'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.1.0a10'
+pip install 'robotrace-dev[lerobot]==0.1.0a11'
 
 # Gymnasium env rollout → episode
-pip install 'robotrace-dev[gymnasium]==0.1.0a10'
+pip install 'robotrace-dev[gymnasium]==0.1.0a11'
 
 # Multi-camera mp4 encoding (opencv) - combine with any adapter that writes video
-pip install 'robotrace-dev[ros2,video]==0.1.0a10'
+pip install 'robotrace-dev[ros2,video]==0.1.0a11'
 ```
 
 ```python

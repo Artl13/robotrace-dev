@@ -37,6 +37,7 @@ from pathlib import Path
 from typing import Any
 
 from ...errors import ConfigurationError
+from ..._version import install_command
 from ._classify import Slot, classify_column
 from ._meta import DatasetSummary, EpisodeMeta, scan_dataset
 
@@ -330,7 +331,7 @@ def _encode_video(
             {
                 "reason": (
                     "multi-camera tile needs opencv - install "
-                    "`pip install 'robotrace-dev[lerobot,video]==0.1.0a6'`. "
+                    f"`{install_command('lerobot', 'video')}`. "
                     f"Falling back to canonical_camera={resolved[0][0]!r}."
                 ),
                 "exc": str(exc),
@@ -613,7 +614,7 @@ def _import_pyarrow() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "the LeRobot adapter needs `pyarrow` to read parquet files. "
-            "Install with `pip install 'robotrace-dev[lerobot]==0.1.0a6'`."
+            f"Install with `{install_command('lerobot')}`."
         ) from exc
 
 
@@ -623,7 +624,7 @@ def _import_numpy() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "the LeRobot adapter needs `numpy`. Install with "
-            "`pip install 'robotrace-dev[lerobot]==0.1.0a6'` (which pulls it in)."
+            f"`{install_command('lerobot')}` (which pulls it in)."
         ) from exc
     return np
 
@@ -634,7 +635,7 @@ def _import_cv2() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "tiling multi-camera LeRobot videos needs OpenCV. "
-            "Install with `pip install 'robotrace-dev[lerobot,video]==0.1.0a6'`. "
+            f"Install with `{install_command('lerobot', 'video')}`. "
             "Or pass `canonical_camera=...` to encode/upload one camera only "
             "(no opencv needed in that path)."
         ) from exc
