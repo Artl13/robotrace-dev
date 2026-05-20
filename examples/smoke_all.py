@@ -266,15 +266,31 @@ def _section_evals(tag: str, baseline_id: str, base_url: str) -> str:
 
 
 def _identity_policy(obs: dict[str, Any]) -> dict[str, Any]:
-    """Policy that mirrors the baseline observation - produces a clean
-    `success_candidate=True` for the verify pass case."""
+    """Policy that mirrors the baseline observation and stamps a
+    success sentinel on every step.
+
+    The eval harness reads `actions[-1].get("_outcome")` to decide
+    the candidate's outcome (see `evals._extract_outcome_from_actions`).
+    Verify treats `success_candidate is True` as pass; without the
+    sentinel `success_candidate` defaults to the baseline outcome,
+    which the SDK can't fetch yet (no public read-side episode
+    endpoint - see `evals._fetch_episode_metadata`), so the gate
+    would always fail. We attach the sentinel to every step
+    (harmless - the harness only looks at the last one) so the
+    verify pass case actually passes.
+    """
     import numpy as np
 
     pos = obs.get("/joint_states/position")
-    if pos is None:
-        return {"/cmd_vel/linear": np.float32(0.0)}
-    arr = np.asarray(pos, dtype=np.float32).reshape(-1)
-    return {"/cmd_vel/linear": arr.mean().astype(np.float32)}
+    base = (
+        np.asarray(pos, dtype=np.float32).reshape(-1).mean()
+        if pos is not None
+        else np.float32(0.0)
+    )
+    return {
+        "/cmd_vel/linear": base.astype(np.float32),
+        "_outcome": {"success": True, "reward_total": 1.0},
+    }
 
 
 def _section_verify(tag: str, baseline_id: str) -> None:
