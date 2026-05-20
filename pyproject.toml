@@ -13,6 +13,26 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.1.0a8 - `robotrace.verify` ships. Promote a failed episode (portal
+# button or `rt.verify.promote(...)`) and the next candidate has to
+# replay it without re-failing before it can ship. New CLI verb
+# `robotrace verify check --candidate <version>` is a CI deploy gate
+# that exits non-zero until every critical scenario passes for that
+# candidate. The Python surface is `robotrace.verify` with four
+# verbs: `promote`, `check_gate`, `record_result`, `run_check`
+# (replay + record + re-check, one call). Same customer-side runner
+# and weight-stays-local guarantees as `robotrace.evals`. Server side:
+# new `verification_scenarios` + `verification_results` tables
+# (migration 0015), three ingest routes (POST /api/verify/promote +
+# /check + /result), an auto-sync hook on eval-run finalize that
+# mirrors matching baseline results onto active scenarios, and the
+# new portal section under /portal/verify (list + detail).
+#
+# 0.1.0a7 - Gymnasium env rollouts are first-class. Three verbs mirror
+# ROS 2 / LeRobot - scan_env, encode_rollout, upload_rollout. NPZ for
+# obs/actions, optional mp4 from env.render(). MuJoCo via Gymnasium env
+# ids on the user side; no separate adapter.
+#
 # 0.1.0a6 - `robotrace login` terminal UX: friendly welcome line, clearer
 # verification/spinner affordances, ANSI hints when tty + NO_COLOR unset.
 #
@@ -70,7 +90,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a7"
+version = "0.1.0a8"
 description = "RoboTrace - Python SDK and CLI for observability and evals on AI robots."
 readme = "README.md"
 requires-python = ">=3.10"

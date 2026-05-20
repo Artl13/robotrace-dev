@@ -11,6 +11,58 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a8] - 2026-05-20
+
+### Added
+
+- **`robotrace.verify`** - promote a failed episode to a verification
+  scenario and the next candidate has to replay it without re-failing
+  before it can ship. Four public verbs:
+  - `verify.promote(baseline_episode_id, *, name=None, severity="warning", description=None) → dict`
+    - turn an episode into a scenario. Idempotent: re-promoting the
+      same episode returns the existing `scenario_id` with
+      `promoted=False`.
+  - `verify.check_gate(*, candidate_policy_version) → dict` - read
+    the current deploy gate state for a candidate. Returns
+    `{"passed": bool, "critical_passed": int, "critical_failed": int,
+    "critical_pending": int, "scenarios": [...], "blockers": [...]}`.
+    `HTTP 422` is the blocked response; the body shape is identical
+    to `200`.
+  - `verify.record_result(*, scenario_id, candidate_policy_version,
+    status=None, metrics=None, candidate_episode_id=None,
+    eval_run_id=None, error=None) → dict` - upload one
+    pass/fail/error result. When `status` is omitted, the server
+    derives it from `metrics` (matches the replay-harness rollup
+    conventions).
+  - `verify.run_check(*, candidate_policy_version, policy_callable=None,
+    dry_run=False) → tuple[int, dict]` - one call that reads the
+    gate, opens a small replay run for every pending critical
+    scenario (when `policy_callable` is provided), records the
+    results, re-checks the gate, and returns `(exit_code, gate_body)`.
+    Same customer-side runner as `robotrace.evals.run_against` -
+    weights never touch RoboTrace infra.
+- **CLI verb `robotrace verify check`** - the CI entry point. Pass
+  `--candidate <version>` and (when needed) `--policy module:fn`;
+  the command runs the replays + records the results + re-checks the
+  gate. Exits `0` (pass) or `1` (blocked). Prints a compact
+  pass/fail/pending summary with an OSC 8 hyperlink to the portal.
+  `--dry-run` skips the upload step (still fetches baselines, still
+  runs the policy). `--profile` honors `~/.robotrace/credentials`.
+- Verification-aware error mapping: `ConfigurationError` when a
+  critical scenario is pending and no `policy_callable` is passed;
+  `NotFoundError` for missing scenarios / baselines; `AuthError` for
+  cross-tenant or revoked-key responses; `ValidationError` for
+  rejected result payloads.
+
+### Notes
+
+- The replay-regression harness (`robotrace.evals`) was already
+  customer-side and weight-local; `robotrace.verify` reuses that
+  runner directly. Customers running `robotrace replay run` whose
+  baselines overlap their verification set don't need a second CLI
+  call - the server mirrors matching results onto scenarios on
+  finalize.
+
 ## [0.1.0a7] - 2026-05-19
 
 ### Added
