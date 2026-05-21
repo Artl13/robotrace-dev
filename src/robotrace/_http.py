@@ -128,6 +128,7 @@ class HTTPClient:
             timeout=timeout if timeout is not None else DEFAULT_TIMEOUT,
             headers={
                 "User-Agent": USER_AGENT,
+                "X-RoboTrace-SDK-Version": _version.__version__,
                 "Authorization": f"Bearer {api_key}",
                 "Accept": "application/json",
             },
@@ -235,6 +236,7 @@ class HTTPClient:
                             "Content-Type": content_type,
                             "Content-Length": str(size),
                             "User-Agent": USER_AGENT,
+                "X-RoboTrace-SDK-Version": _version.__version__,
                         },
                     )
             except httpx.TimeoutException as exc:
