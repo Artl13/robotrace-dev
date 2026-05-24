@@ -11,6 +11,52 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a12] - 2026-05-25
+
+### Added
+
+- **`failure_time_s` on `Episode.finalize(...)` and `Client.log_episode(...)`**
+  - a canonical frame-accurate failure-instant column on the episode
+  row. When the SDK knows exactly when a run went wrong (collision
+  watchdog tripped, goal-deadline missed, e-stop pressed), it can
+  pin that timestamp into the database directly instead of leaving
+  the portal to guess from a fuzzy end-of-run heuristic.
+
+  ```python
+  ep.finalize(
+      status="failed",
+      duration_s=18.4,
+      failure_time_s=12.34,            # collision watchdog at 12.34 s
+      metadata={"failure_reason": "wrist collision"},
+  )
+  ```
+
+  - Validated **client-side** before the request leaves the
+    process: `failure_time_s` must be non-negative, and the SDK
+    raises `ValueError` if you combine it with `status="ready"`
+    (so mis-wired error handlers fail loudly instead of silently
+    pinning a `success` run).
+  - Validated **server-side** too: the ingest finalize route
+    clamps the value to `[0, duration_s + 0.001]` before persist,
+    defending against floating-point edge cases that would
+    otherwise trip the new `episodes_failure_time_window` CHECK
+    constraint (migration `0021_episodes_failure_time`).
+  - The portal's replay scrubber promotes `failure_time_s` to a
+    thicker amber pin so SDK truth visually outranks the V1
+    end-of-run heuristic marker, and the "Failed at X.Ys" stat
+    card on the episode detail page reads from the same column.
+  - `failure_time_s` is also the canonical input for Failure
+    Intelligence V2's seek-hint chain - rules that don't know the
+    timestamp themselves (joint-limit breach, sensor flatline)
+    now share the same scrubber-marker plumbing.
+
+### Compatibility
+
+- Pure additive change. Omitting `failure_time_s` keeps the V1
+  behaviour bit-for-bit identical. SDK suite green (3 new tests
+  in `tests/test_request_shape.py` cover the happy path plus the
+  two ValueErrors).
+
 ## [0.1.0a11] - 2026-05-20
 
 ### Changed

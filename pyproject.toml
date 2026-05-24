@@ -245,7 +245,7 @@ Documentation = "https://robotrace.dev/docs"
 Repository = "https://github.com/Artl13/robotrace-dev"
 Issues = "https://github.com/Artl13/robotrace-dev/issues"
 Changelog = "https://robotrace.dev/docs/changelog"
-"Early access" = "mailto:hello@robotrace.dev"
+"Early access" = "https://robotrace.dev/request-access"
 
 # `pip install robotrace-dev` exposes a `robotrace` console command,
 # implemented in `src/robotrace/cli.py`. It's intentionally tiny
