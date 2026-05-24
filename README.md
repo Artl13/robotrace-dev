@@ -43,13 +43,13 @@ pip install robotrace-dev
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual - `pip install robotrace-dev==0.1.0a11` pulls this README.
-> Older pins (`0.1.0a10`, `0.1.0a9`, `0.1.0a8`, …) are prior alphas on
+> as usual - `pip install robotrace-dev==0.1.0a12` pulls this README.
+> Older pins (`0.1.0a11`, `0.1.0a10`, `0.1.0a9`, …) are prior alphas on
 > the same pre-1.0 API surface.
 
 ## Status
 
-**Alpha (`0.1.0a11`).** The public API in this README is the shape we're
+**Alpha (`0.1.0a12`).** The public API in this README is the shape we're
 iterating against; once we cut `1.0.0`, the
 [`log_episode`](#log_episode---the-sacred-call) signature is locked and
 breakages require a major bump (per `AGENTS.md` in the RoboTrace monorepo).
@@ -250,6 +250,24 @@ ep.upload_video("/tmp/run.mp4")
 ep.finalize(status="ready", duration_s=47.2, fps=30)
 ```
 
+Failed runs can pin a frame-accurate failure instant so the portal's
+replay scrubber lands on the right frame (added in `0.1.0a12`):
+
+```python
+ep = rt.start_episode(name="…", policy_version="…", artifacts=["video"])
+ep.upload_video("/tmp/run.mp4")
+ep.finalize(
+    status="failed",
+    duration_s=18.4,
+    failure_time_s=12.34,           # collision watchdog tripped at 12.34 s
+    metadata={"failure_reason": "wrist collision"},
+)
+```
+
+`failure_time_s` is also valid on `log_episode(...)`. It's only
+accepted with `status="failed"` - the SDK raises `ValueError` early
+otherwise so mis-wired error handlers fail loudly.
+
 ### `Client` - explicit instance
 
 Skip the module-level default when you need multiple deployments at
@@ -314,16 +332,16 @@ base install stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.1.0a11'
+pip install 'robotrace-dev[ros2]==0.1.0a12'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.1.0a11'
+pip install 'robotrace-dev[lerobot]==0.1.0a12'
 
 # Gymnasium env rollout → episode
-pip install 'robotrace-dev[gymnasium]==0.1.0a11'
+pip install 'robotrace-dev[gymnasium]==0.1.0a12'
 
 # Multi-camera mp4 encoding (opencv) - combine with any adapter that writes video
-pip install 'robotrace-dev[ros2,video]==0.1.0a11'
+pip install 'robotrace-dev[ros2,video]==0.1.0a12'
 ```
 
 ```python

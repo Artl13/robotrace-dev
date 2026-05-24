@@ -127,6 +127,34 @@ def test_finalize_sends_minimal_payload(fix: StubFixture) -> None:
     assert payload["metadata"] == {"ok": True}
 
 
+def test_finalize_forwards_failure_time_s(fix: StubFixture) -> None:
+    # SDK 0.1.0a12: canonical failure timestamp lands on the
+    # finalize payload. Drives the portal's amber "Failure" marker.
+    episode = fix.client.start_episode(name="failure time", artifacts=[])
+    episode.finalize(status="failed", duration_s=12.5, failure_time_s=9.875)
+
+    finalize_req = fix.requests[1]
+    payload = json.loads(finalize_req.content)
+    assert payload["status"] == "failed"
+    assert payload["duration_s"] == 12.5
+    assert payload["failure_time_s"] == 9.875
+
+
+def test_finalize_rejects_failure_time_on_ready(fix: StubFixture) -> None:
+    # `failure_time_s` is only valid with status="failed" - mis-wired
+    # error handlers should fail loud at the SDK boundary, not write
+    # nonsense markers to the DB.
+    episode = fix.client.start_episode(name="bad combo", artifacts=[])
+    with pytest.raises(ValueError, match="failure_time_s"):
+        episode.finalize(status="ready", failure_time_s=1.0)
+
+
+def test_finalize_rejects_negative_failure_time(fix: StubFixture) -> None:
+    episode = fix.client.start_episode(name="neg", artifacts=[])
+    with pytest.raises(ValueError, match="non-negative"):
+        episode.finalize(status="failed", failure_time_s=-0.5)
+
+
 def test_context_manager_marks_failed_on_exception(fix: StubFixture) -> None:
     with pytest.raises(RuntimeError, match="boom"):
         with fix.client.start_episode(name="ctx fail", artifacts=[]) as ep:

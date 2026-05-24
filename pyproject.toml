@@ -13,6 +13,17 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.1.0a12 - `failure_time_s` lands on `Episode.finalize(...)` and
+# `Client.log_episode(...)`. Pass the seconds-from-start instant where
+# the run actually broke (collision, watchdog trip, manual abort) and
+# the portal pins a frame-accurate "Failure" marker on the replay
+# scrubber, ahead of any heuristic findings. Server-side: new column
+# `episodes.failure_time_s numeric(12,3)` (migration 0021) with a
+# CHECK constraint that keeps the value inside `[0, duration_s]`. The
+# SDK refuses `failure_time_s` when `status != "failed"` to surface
+# mis-wired error handlers loudly. Additive change - older SDK call
+# sites keep working unchanged.
+#
 # 0.1.0a11 - doc-only release: refresh PyPI README (status + adapter
 # pins were stuck at 0.1.0a6), sync web docs install pins, and route
 # SDK ConfigurationError hints through `_version.install_command()` so
@@ -123,7 +134,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a11"
+version = "0.1.0a12"
 description = "Official RoboTrace Python SDK and CLI - observability and evals for AI-powered robots (pip install robotrace-dev, import robotrace)."
 readme = "README.md"
 requires-python = ">=3.10"

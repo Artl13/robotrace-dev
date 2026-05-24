@@ -143,6 +143,7 @@ class Episode:
         duration_s: float | None = None,
         fps: float | None = None,
         bytes_total: int | None = None,
+        failure_time_s: float | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> None:
         """Flip the run to `ready` or `failed` and roll up the stats.
@@ -151,9 +152,32 @@ class Episode:
         payload but does not roll back state. The SDK still guards
         against double-calls so accidental re-finalize doesn't
         clobber the bytes_total computed from upload_video / etc.
+
+        `failure_time_s` is the canonical failure timestamp written
+        to ``episodes.failure_time_s`` (migration 0021). Pass the
+        seconds-from-start where the run actually broke (collision,
+        watchdog trip, manual abort). The replay scrubber prefers
+        this over Failure Intelligence heuristics, so passing it
+        gives users frame-accurate jump markers. Server-side it is
+        clamped into ``[0, duration_s]`` if it slightly overshoots
+        the rolled-up duration.
         """
         if self._finalized:
             return
+        if failure_time_s is not None:
+            if failure_time_s < 0:
+                raise ValueError("failure_time_s must be non-negative.")
+            if status != "failed":
+                # Surface the inconsistency early - the DB will accept
+                # it (the CHECK only enforces the window) but having a
+                # failure timestamp on a ready run is almost always a
+                # mis-wired error handler. Force the caller to be
+                # explicit by raising rather than silently flipping
+                # status.
+                raise ValueError(
+                    "failure_time_s is only valid when status='failed'. "
+                    "Either pass status='failed' or omit failure_time_s."
+                )
         client = self._require_client()
         payload: dict[str, Any] = {"status": status}
         if duration_s is not None:
@@ -166,6 +190,8 @@ class Episode:
         rolled_up = bytes_total if bytes_total is not None else self._bytes_uploaded
         if rolled_up > 0:
             payload["bytes_total"] = int(rolled_up)
+        if failure_time_s is not None:
+            payload["failure_time_s"] = float(failure_time_s)
         if metadata is not None:
             # Same typed-value encoding contract as start_episode -
             # callers can pass `JointState(...)`, `EpisodeOutcome(...)`,

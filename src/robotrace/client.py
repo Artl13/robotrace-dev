@@ -307,6 +307,10 @@ class Client:
         # Final state - defaults to "ready". Pass "failed" when the
         # run errored before producing usable data.
         status: EpisodeFinalStatus = "ready",
+        # Canonical failure timestamp (seconds from start). Only valid
+        # with status="failed". Drives frame-accurate replay markers
+        # in the portal - see `Episode.finalize` for the contract.
+        failure_time_s: float | None = None,
     ) -> Episode:
         """Log a complete episode in one call.
 
@@ -386,6 +390,7 @@ class Client:
             duration_s=duration_s,
             fps=fps,
             metadata=metadata,
+            failure_time_s=failure_time_s,
         )
         return episode
 
