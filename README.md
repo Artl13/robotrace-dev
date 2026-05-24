@@ -11,6 +11,10 @@ Log episodes (synchronized video, sensors, actions), replay them, version
 datasets, and re-roll new policy versions against historical observations
 to measure regressions - without rolling another in-house dashboard.
 
+**Early access** - portal signup is invite-only during alpha. Contact
+[hello@robotrace.dev](mailto:hello@robotrace.dev) or request access at
+[robotrace.dev](https://robotrace.dev).
+
 [![PyPI](https://img.shields.io/pypi/v/robotrace-dev?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/robotrace-dev/)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white)](https://www.python.org)
 [![import robotrace](https://img.shields.io/badge/import-robotrace-3776ab?logo=python&logoColor=white)](#api)
@@ -52,6 +56,9 @@ breakages require a major bump (per `AGENTS.md` in the RoboTrace monorepo).
 
 Official product site: [robotrace.dev](https://robotrace.dev). Docs:
 [robotrace.dev/docs](https://robotrace.dev/docs).
+
+**Early access:** email [hello@robotrace.dev](mailto:hello@robotrace.dev) for
+portal invites, pilot onboarding, or SDK support during alpha.
 
 ## Quickstart
 
