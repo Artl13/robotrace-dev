@@ -1,12 +1,15 @@
 <div align="center">
 
-# robotrace-dev
+# RoboTrace SDK
 
-**Observability and evals for AI-powered robots.**
+**Official Python SDK for [RoboTrace](https://robotrace.dev)** — observability
+and evals for AI-powered robots.
+
+`pip install robotrace-dev` · `import robotrace`
 
 Log episodes (synchronized video, sensors, actions), replay them, version
 datasets, and re-roll new policy versions against historical observations
-to measure regressions - without rolling another in-house dashboard.
+to measure regressions — without rolling another in-house dashboard.
 
 [![PyPI](https://img.shields.io/pypi/v/robotrace-dev?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/robotrace-dev/)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white)](https://www.python.org)
