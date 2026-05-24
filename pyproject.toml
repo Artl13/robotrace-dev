@@ -124,7 +124,7 @@ name = "robotrace-dev"
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
 version = "0.1.0a11"
-description = "Official RoboTrace Python SDK and CLI — observability and evals for AI-powered robots (pip install robotrace-dev, import robotrace)."
+description = "Official RoboTrace Python SDK and CLI - observability and evals for AI-powered robots (pip install robotrace-dev, import robotrace)."
 readme = "README.md"
 requires-python = ">=3.10"
 # PEP 639 (Metadata 2.4): use SPDX `license` string + `license-files`
