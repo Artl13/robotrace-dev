@@ -1,0 +1,4416 @@
+{
+  "$comment": "Auto-generated SDK public-surface snapshot. Regenerate via `python packages/sdk-python/scripts/snapshot_api_surface.py` after intentional additive changes; never hand-edit.",
+  "modules": {
+    "robotrace": {
+      "symbols": {
+        "APIError": {
+          "attributes": [],
+          "bases": [
+            "RobotraceError"
+          ],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "message"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": false,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status_code"
+                },
+                {
+                  "annotation": "object | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "response_body"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "ArtifactKind": {
+          "kind": "constant",
+          "type": "_LiteralGenericAlias"
+        },
+        "AuthError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "Battery": {
+          "attributes": [
+            "charging",
+            "current_a",
+            "percent",
+            "voltage_v"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "percent"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "voltage_v"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "current_a"
+                },
+                {
+                  "annotation": "bool | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "charging"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "Client": {
+          "attributes": [
+            "base_url"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "api_key"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "base_url"
+                },
+                {
+                  "annotation": "float | httpx.Timeout | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "timeout"
+                },
+                {
+                  "annotation": "bool | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "verbose"
+                },
+                {
+                  "annotation": "httpx.BaseTransport | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "transport"
+                }
+              ],
+              "return": "None"
+            },
+            "close": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "None"
+            },
+            "log_episode": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "name"
+                },
+                {
+                  "annotation": "EpisodeSource",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "source"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "robot"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "policy_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "env_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "git_sha"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "seed"
+                },
+                {
+                  "annotation": "str | Path | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "video"
+                },
+                {
+                  "annotation": "str | Path | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "sensors"
+                },
+                {
+                  "annotation": "str | Path | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "actions"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "duration_s"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "fps"
+                },
+                {
+                  "annotation": "Mapping[str, Any] | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "metadata"
+                },
+                {
+                  "annotation": "EpisodeFinalStatus",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "failure_time_s"
+                }
+              ],
+              "return": "Episode"
+            },
+            "start_episode": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "name"
+                },
+                {
+                  "annotation": "EpisodeSource",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "source"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "robot"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "policy_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "env_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "git_sha"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "seed"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "fps"
+                },
+                {
+                  "annotation": "Mapping[str, Any] | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "metadata"
+                },
+                {
+                  "annotation": "Sequence[ArtifactKind]",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "artifacts"
+                }
+              ],
+              "return": "Episode"
+            }
+          }
+        },
+        "ConfigurationError": {
+          "attributes": [],
+          "bases": [
+            "RobotraceError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "ConflictError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "ENV_API_KEY": {
+          "kind": "constant",
+          "type": "str"
+        },
+        "ENV_BASE_URL": {
+          "kind": "constant",
+          "type": "str"
+        },
+        "Episode": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "id"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "status"
+                },
+                {
+                  "annotation": "Literal['r2', 'unconfigured']",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "storage"
+                },
+                {
+                  "annotation": "dict[ArtifactKind, UploadUrl]",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "upload_urls"
+                },
+                {
+                  "annotation": "Client | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_client"
+                },
+                {
+                  "annotation": "bool",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_finalized"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_bytes_uploaded"
+                }
+              ],
+              "return": "None"
+            },
+            "finalize": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "EpisodeFinalStatus",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "duration_s"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "fps"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "bytes_total"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "failure_time_s"
+                },
+                {
+                  "annotation": "Mapping[str, Any] | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "metadata"
+                }
+              ],
+              "return": "None"
+            },
+            "upload": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "ArtifactKind",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "kind"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_actions": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_sensors": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_video": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            }
+          }
+        },
+        "EpisodeFinalStatus": {
+          "kind": "constant",
+          "type": "_LiteralGenericAlias"
+        },
+        "EpisodeOutcome": {
+          "attributes": [
+            "collision_count",
+            "reward_total",
+            "success",
+            "time_to_goal_s"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "bool | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "success"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "reward_total"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "collision_count"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "time_to_goal_s"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "EpisodeSource": {
+          "kind": "constant",
+          "type": "_LiteralGenericAlias"
+        },
+        "Imu": {
+          "attributes": [
+            "orientation"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "linear_acceleration"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "angular_velocity"
+                },
+                {
+                  "annotation": "Sequence[float] | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "orientation"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "JointState": {
+          "attributes": [
+            "efforts",
+            "names",
+            "velocities"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "positions"
+                },
+                {
+                  "annotation": "Sequence[float] | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "velocities"
+                },
+                {
+                  "annotation": "Sequence[float] | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "efforts"
+                },
+                {
+                  "annotation": "Sequence[str] | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "names"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "NotFoundError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "Pose3D": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "translation"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "rotation"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "RateLimitError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "message"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": false,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status_code"
+                },
+                {
+                  "annotation": "object | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "response_body"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "retry_after"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "RobotraceError": {
+          "attributes": [],
+          "bases": [
+            "Exception"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "ServerError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "TransportError": {
+          "attributes": [],
+          "bases": [
+            "RobotraceError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "Twist": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "linear"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "angular"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "UploadUrl": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "ArtifactKind",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "kind"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "url"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "expires_at"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "public_url"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "ValidationError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "__version__": {
+          "kind": "constant",
+          "type": "str"
+        },
+        "close": {
+          "kind": "function",
+          "signature": {
+            "parameters": [],
+            "return": "None"
+          }
+        },
+        "evals": {
+          "kind": "module",
+          "target": "robotrace.evals"
+        },
+        "init": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "api_key"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "base_url"
+              },
+              {
+                "annotation": "float | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "timeout"
+              }
+            ],
+            "return": "None"
+          }
+        },
+        "log_episode": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "name"
+              },
+              {
+                "annotation": "EpisodeSource",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "source"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "robot"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "policy_version"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "env_version"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "git_sha"
+              },
+              {
+                "annotation": "int | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "seed"
+              },
+              {
+                "annotation": "str | Path | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "video"
+              },
+              {
+                "annotation": "str | Path | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "sensors"
+              },
+              {
+                "annotation": "str | Path | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "actions"
+              },
+              {
+                "annotation": "float | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "duration_s"
+              },
+              {
+                "annotation": "float | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "fps"
+              },
+              {
+                "annotation": "Mapping[str, Any] | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "metadata"
+              },
+              {
+                "annotation": "EpisodeFinalStatus",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "status"
+              }
+            ],
+            "return": "Episode"
+          }
+        },
+        "start_episode": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "name"
+              },
+              {
+                "annotation": "EpisodeSource",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "source"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "robot"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "policy_version"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "env_version"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "git_sha"
+              },
+              {
+                "annotation": "int | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "seed"
+              },
+              {
+                "annotation": "float | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "fps"
+              },
+              {
+                "annotation": "Mapping[str, Any] | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "metadata"
+              },
+              {
+                "annotation": "Sequence[ArtifactKind]",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "artifacts"
+              }
+            ],
+            "return": "Episode"
+          }
+        },
+        "types": {
+          "kind": "module",
+          "target": "robotrace.types"
+        },
+        "verify": {
+          "kind": "module",
+          "target": "robotrace.verify"
+        }
+      }
+    },
+    "robotrace.client": {
+      "symbols": {
+        "Any": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {}
+        },
+        "ArtifactKind": {
+          "kind": "constant",
+          "type": "_LiteralGenericAlias"
+        },
+        "Client": {
+          "attributes": [
+            "base_url"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "api_key"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "base_url"
+                },
+                {
+                  "annotation": "float | httpx.Timeout | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "timeout"
+                },
+                {
+                  "annotation": "bool | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "verbose"
+                },
+                {
+                  "annotation": "httpx.BaseTransport | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "transport"
+                }
+              ],
+              "return": "None"
+            },
+            "close": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "None"
+            },
+            "log_episode": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "name"
+                },
+                {
+                  "annotation": "EpisodeSource",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "source"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "robot"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "policy_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "env_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "git_sha"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "seed"
+                },
+                {
+                  "annotation": "str | Path | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "video"
+                },
+                {
+                  "annotation": "str | Path | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "sensors"
+                },
+                {
+                  "annotation": "str | Path | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "actions"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "duration_s"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "fps"
+                },
+                {
+                  "annotation": "Mapping[str, Any] | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "metadata"
+                },
+                {
+                  "annotation": "EpisodeFinalStatus",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "failure_time_s"
+                }
+              ],
+              "return": "Episode"
+            },
+            "start_episode": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "name"
+                },
+                {
+                  "annotation": "EpisodeSource",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "source"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "robot"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "policy_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "env_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "git_sha"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "seed"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "fps"
+                },
+                {
+                  "annotation": "Mapping[str, Any] | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "metadata"
+                },
+                {
+                  "annotation": "Sequence[ArtifactKind]",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "artifacts"
+                }
+              ],
+              "return": "Episode"
+            }
+          }
+        },
+        "ConfigurationError": {
+          "attributes": [],
+          "bases": [
+            "RobotraceError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "ENV_API_KEY": {
+          "kind": "constant",
+          "type": "str"
+        },
+        "ENV_BASE_URL": {
+          "kind": "constant",
+          "type": "str"
+        },
+        "ENV_QUIET": {
+          "kind": "constant",
+          "type": "str"
+        },
+        "Episode": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "id"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "status"
+                },
+                {
+                  "annotation": "Literal['r2', 'unconfigured']",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "storage"
+                },
+                {
+                  "annotation": "dict[ArtifactKind, UploadUrl]",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "upload_urls"
+                },
+                {
+                  "annotation": "Client | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_client"
+                },
+                {
+                  "annotation": "bool",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_finalized"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_bytes_uploaded"
+                }
+              ],
+              "return": "None"
+            },
+            "finalize": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "EpisodeFinalStatus",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "duration_s"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "fps"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "bytes_total"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "failure_time_s"
+                },
+                {
+                  "annotation": "Mapping[str, Any] | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "metadata"
+                }
+              ],
+              "return": "None"
+            },
+            "upload": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "ArtifactKind",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "kind"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_actions": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_sensors": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_video": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            }
+          }
+        },
+        "EpisodeFinalStatus": {
+          "kind": "constant",
+          "type": "_LiteralGenericAlias"
+        },
+        "EpisodeSource": {
+          "kind": "constant",
+          "type": "_LiteralGenericAlias"
+        },
+        "HTTPClient": {
+          "attributes": [
+            "base_url"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "api_key"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "base_url"
+                },
+                {
+                  "annotation": "httpx.Timeout | float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "timeout"
+                },
+                {
+                  "annotation": "httpx.BaseTransport | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "transport"
+                }
+              ],
+              "return": "None"
+            },
+            "close": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "None"
+            },
+            "request": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "method"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                },
+                {
+                  "annotation": "Mapping[str, Any] | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "json"
+                },
+                {
+                  "annotation": "bool",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "retry_safe"
+                }
+              ],
+              "return": "dict[str, Any]"
+            },
+            "upload_file": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "url"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "content_type"
+                }
+              ],
+              "return": "int"
+            }
+          }
+        },
+        "Literal": {
+          "kind": "constant",
+          "type": "_TypedCacheSpecialForm"
+        },
+        "Mapping": {
+          "attributes": [],
+          "bases": [
+            "Collection"
+          ],
+          "kind": "class",
+          "methods": {
+            "get": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "key"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "default"
+                }
+              ],
+              "return": ""
+            },
+            "items": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "keys": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "values": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            }
+          }
+        },
+        "Path": {
+          "attributes": [],
+          "bases": [
+            "PathBase",
+            "PurePath"
+          ],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "VAR_POSITIONAL",
+                  "name": "args"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "VAR_KEYWORD",
+                  "name": "kwargs"
+                }
+              ],
+              "return": ""
+            },
+            "absolute": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "as_uri": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "chmod": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "mode"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "expanduser": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "from_uri": null,
+            "glob": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "pattern"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "case_sensitive"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "recurse_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "group": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "hardlink_to": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target"
+                }
+              ],
+              "return": ""
+            },
+            "is_junction": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "is_mount": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "iterdir": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "mkdir": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "mode"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "parents"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "exist_ok"
+                }
+              ],
+              "return": ""
+            },
+            "open": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "mode"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "buffering"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "encoding"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "errors"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "newline"
+                }
+              ],
+              "return": ""
+            },
+            "owner": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "read_text": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "encoding"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "errors"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "newline"
+                }
+              ],
+              "return": ""
+            },
+            "readlink": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "rename": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target"
+                }
+              ],
+              "return": ""
+            },
+            "replace": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target"
+                }
+              ],
+              "return": ""
+            },
+            "resolve": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "strict"
+                }
+              ],
+              "return": ""
+            },
+            "rglob": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "pattern"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "case_sensitive"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "recurse_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "rmdir": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "stat": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "symlink_to": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target_is_directory"
+                }
+              ],
+              "return": ""
+            },
+            "touch": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "mode"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "exist_ok"
+                }
+              ],
+              "return": ""
+            },
+            "unlink": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "missing_ok"
+                }
+              ],
+              "return": ""
+            },
+            "walk": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "top_down"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "on_error"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "write_text": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "data"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "encoding"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "errors"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "newline"
+                }
+              ],
+              "return": ""
+            }
+          }
+        },
+        "Self": {
+          "kind": "constant",
+          "type": "_SpecialForm"
+        },
+        "Sequence": {
+          "attributes": [],
+          "bases": [
+            "Reversible",
+            "Collection"
+          ],
+          "kind": "class",
+          "methods": {
+            "count": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "value"
+                }
+              ],
+              "return": ""
+            },
+            "index": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "value"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "start"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "stop"
+                }
+              ],
+              "return": ""
+            }
+          }
+        },
+        "TracebackType": {
+          "attributes": [
+            "tb_frame",
+            "tb_lasti",
+            "tb_lineno",
+            "tb_next"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {}
+        },
+        "UploadUrl": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "ArtifactKind",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "kind"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "url"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "expires_at"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "public_url"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "annotations": {
+          "kind": "constant",
+          "type": "_Feature"
+        },
+        "capture_trace_context": {
+          "kind": "function",
+          "signature": {
+            "parameters": [],
+            "return": "TraceContext | None"
+          }
+        },
+        "httpx": {
+          "kind": "module",
+          "target": "httpx"
+        },
+        "kind_from_extension": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str | Path",
+                "has_default": false,
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "name": "path"
+              }
+            ],
+            "return": "ArtifactKind | None"
+          }
+        },
+        "os": {
+          "kind": "module",
+          "target": "os"
+        },
+        "read_credentials": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "profile"
+              }
+            ],
+            "return": "StoredCredentials | None"
+          }
+        },
+        "sys": {
+          "kind": "module",
+          "target": "sys"
+        }
+      }
+    },
+    "robotrace.episode": {
+      "symbols": {
+        "Any": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {}
+        },
+        "ArtifactKind": {
+          "kind": "constant",
+          "type": "_LiteralGenericAlias"
+        },
+        "ConfigurationError": {
+          "attributes": [],
+          "bases": [
+            "RobotraceError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "Episode": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "id"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "status"
+                },
+                {
+                  "annotation": "Literal['r2', 'unconfigured']",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "storage"
+                },
+                {
+                  "annotation": "dict[ArtifactKind, UploadUrl]",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "upload_urls"
+                },
+                {
+                  "annotation": "Client | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_client"
+                },
+                {
+                  "annotation": "bool",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_finalized"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_bytes_uploaded"
+                }
+              ],
+              "return": "None"
+            },
+            "finalize": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "EpisodeFinalStatus",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "duration_s"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "fps"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "bytes_total"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "failure_time_s"
+                },
+                {
+                  "annotation": "Mapping[str, Any] | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "metadata"
+                }
+              ],
+              "return": "None"
+            },
+            "upload": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "ArtifactKind",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "kind"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_actions": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_sensors": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            },
+            "upload_video": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str | Path",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "path"
+                }
+              ],
+              "return": "int"
+            }
+          }
+        },
+        "EpisodeFinalStatus": {
+          "kind": "constant",
+          "type": "_LiteralGenericAlias"
+        },
+        "Literal": {
+          "kind": "constant",
+          "type": "_TypedCacheSpecialForm"
+        },
+        "Mapping": {
+          "attributes": [],
+          "bases": [
+            "Collection"
+          ],
+          "kind": "class",
+          "methods": {
+            "get": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "key"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "default"
+                }
+              ],
+              "return": ""
+            },
+            "items": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "keys": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "values": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            }
+          }
+        },
+        "Path": {
+          "attributes": [],
+          "bases": [
+            "PathBase",
+            "PurePath"
+          ],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "VAR_POSITIONAL",
+                  "name": "args"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "VAR_KEYWORD",
+                  "name": "kwargs"
+                }
+              ],
+              "return": ""
+            },
+            "absolute": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "as_uri": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "chmod": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "mode"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "expanduser": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "from_uri": null,
+            "glob": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "pattern"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "case_sensitive"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "recurse_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "group": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "hardlink_to": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target"
+                }
+              ],
+              "return": ""
+            },
+            "is_junction": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "is_mount": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "iterdir": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "mkdir": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "mode"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "parents"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "exist_ok"
+                }
+              ],
+              "return": ""
+            },
+            "open": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "mode"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "buffering"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "encoding"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "errors"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "newline"
+                }
+              ],
+              "return": ""
+            },
+            "owner": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "read_text": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "encoding"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "errors"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "newline"
+                }
+              ],
+              "return": ""
+            },
+            "readlink": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "rename": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target"
+                }
+              ],
+              "return": ""
+            },
+            "replace": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target"
+                }
+              ],
+              "return": ""
+            },
+            "resolve": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "strict"
+                }
+              ],
+              "return": ""
+            },
+            "rglob": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "pattern"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "case_sensitive"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "recurse_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "rmdir": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": ""
+            },
+            "stat": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "symlink_to": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "target_is_directory"
+                }
+              ],
+              "return": ""
+            },
+            "touch": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "mode"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "exist_ok"
+                }
+              ],
+              "return": ""
+            },
+            "unlink": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "missing_ok"
+                }
+              ],
+              "return": ""
+            },
+            "walk": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "top_down"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "on_error"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "follow_symlinks"
+                }
+              ],
+              "return": ""
+            },
+            "write_text": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "data"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "encoding"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "errors"
+                },
+                {
+                  "annotation": "",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "newline"
+                }
+              ],
+              "return": ""
+            }
+          }
+        },
+        "TYPE_CHECKING": {
+          "kind": "constant",
+          "type": "bool"
+        },
+        "TracebackType": {
+          "attributes": [
+            "tb_frame",
+            "tb_lasti",
+            "tb_lineno",
+            "tb_next"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {}
+        },
+        "UploadUrl": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "ArtifactKind",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "kind"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "url"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "expires_at"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "public_url"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "annotations": {
+          "kind": "constant",
+          "type": "_Feature"
+        },
+        "dataclass": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "POSITIONAL_ONLY",
+                "name": "cls"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "init"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "repr"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "eq"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "order"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "unsafe_hash"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "frozen"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "match_args"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "kw_only"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "slots"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "weakref_slot"
+              }
+            ],
+            "return": ""
+          }
+        },
+        "field": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "default"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "default_factory"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "init"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "repr"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "hash"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "compare"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "metadata"
+              },
+              {
+                "annotation": "",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "kw_only"
+              }
+            ],
+            "return": ""
+          }
+        },
+        "kind_from_extension": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str | Path",
+                "has_default": false,
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "name": "path"
+              }
+            ],
+            "return": "ArtifactKind | None"
+          }
+        },
+        "os": {
+          "kind": "module",
+          "target": "os"
+        }
+      }
+    },
+    "robotrace.errors": {
+      "symbols": {
+        "APIError": {
+          "attributes": [],
+          "bases": [
+            "RobotraceError"
+          ],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "message"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": false,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status_code"
+                },
+                {
+                  "annotation": "object | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "response_body"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "AuthError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "ConfigurationError": {
+          "attributes": [],
+          "bases": [
+            "RobotraceError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "ConflictError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "NotFoundError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "RateLimitError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "message"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": false,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "status_code"
+                },
+                {
+                  "annotation": "object | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "response_body"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "KEYWORD_ONLY",
+                  "name": "retry_after"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "RobotraceError": {
+          "attributes": [],
+          "bases": [
+            "Exception"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "ServerError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "TransportError": {
+          "attributes": [],
+          "bases": [
+            "RobotraceError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "ValidationError": {
+          "attributes": [],
+          "bases": [
+            "APIError"
+          ],
+          "kind": "class",
+          "methods": {}
+        },
+        "annotations": {
+          "kind": "constant",
+          "type": "_Feature"
+        }
+      }
+    },
+    "robotrace.evals": {
+      "symbols": {
+        "Action": {
+          "kind": "constant",
+          "type": "GenericAlias"
+        },
+        "EvalResult": {
+          "attributes": [
+            "error"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "baseline_episode_id"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "candidate_episode_id"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "status"
+                },
+                {
+                  "annotation": "dict[str, Any]",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "metrics"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "error"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "EvalRun": {
+          "attributes": [
+            "episodes_completed",
+            "episodes_failed",
+            "runner_kind",
+            "status"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "id"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "candidate_policy_version"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "baseline_policy_version"
+                },
+                {
+                  "annotation": "list[str]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "baseline_episode_ids"
+                },
+                {
+                  "annotation": "str | None",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "name"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "runner_kind"
+                },
+                {
+                  "annotation": "str",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "status"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "episodes_completed"
+                },
+                {
+                  "annotation": "int",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "episodes_failed"
+                },
+                {
+                  "annotation": "Client | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "_client"
+                }
+              ],
+              "return": "None"
+            }
+          }
+        },
+        "Observation": {
+          "kind": "constant",
+          "type": "GenericAlias"
+        },
+        "PolicyCallable": {
+          "kind": "constant",
+          "type": "_CallableGenericAlias"
+        },
+        "complete_run": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "EvalRun",
+                "has_default": false,
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "name": "run"
+              },
+              {
+                "annotation": "str",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "status"
+              },
+              {
+                "annotation": "Mapping[str, Any] | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "metadata"
+              },
+              {
+                "annotation": "Client | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "client"
+              }
+            ],
+            "return": "dict[str, Any]"
+          }
+        },
+        "create_run": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str",
+                "has_default": false,
+                "kind": "KEYWORD_ONLY",
+                "name": "candidate_policy_version"
+              },
+              {
+                "annotation": "Sequence[str]",
+                "has_default": false,
+                "kind": "KEYWORD_ONLY",
+                "name": "baseline_episode_ids"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "baseline_policy_version"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "name"
+              },
+              {
+                "annotation": "Mapping[str, Any] | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "metadata"
+              },
+              {
+                "annotation": "Client | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "client"
+              }
+            ],
+            "return": "EvalRun"
+          }
+        },
+        "run_against": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "EvalRun",
+                "has_default": false,
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "name": "run"
+              },
+              {
+                "annotation": "PolicyCallable",
+                "has_default": false,
+                "kind": "KEYWORD_ONLY",
+                "name": "policy_callable"
+              },
+              {
+                "annotation": "Callable[[EvalResult], None] | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "on_episode"
+              },
+              {
+                "annotation": "bool",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "dry_run"
+              }
+            ],
+            "return": "list[EvalResult]"
+          }
+        }
+      }
+    },
+    "robotrace.types": {
+      "symbols": {
+        "Battery": {
+          "attributes": [
+            "charging",
+            "current_a",
+            "percent",
+            "voltage_v"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "percent"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "voltage_v"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "current_a"
+                },
+                {
+                  "annotation": "bool | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "charging"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "EpisodeOutcome": {
+          "attributes": [
+            "collision_count",
+            "reward_total",
+            "success",
+            "time_to_goal_s"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "bool | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "success"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "reward_total"
+                },
+                {
+                  "annotation": "int | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "collision_count"
+                },
+                {
+                  "annotation": "float | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "time_to_goal_s"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "Imu": {
+          "attributes": [
+            "orientation"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "linear_acceleration"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "angular_velocity"
+                },
+                {
+                  "annotation": "Sequence[float] | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "orientation"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "JointState": {
+          "attributes": [
+            "efforts",
+            "names",
+            "velocities"
+          ],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "positions"
+                },
+                {
+                  "annotation": "Sequence[float] | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "velocities"
+                },
+                {
+                  "annotation": "Sequence[float] | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "efforts"
+                },
+                {
+                  "annotation": "Sequence[str] | None",
+                  "has_default": true,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "names"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "Pose3D": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "translation"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "rotation"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "Twist": {
+          "attributes": [],
+          "bases": [],
+          "kind": "class",
+          "methods": {
+            "__init__": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "linear"
+                },
+                {
+                  "annotation": "Sequence[float]",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "angular"
+                }
+              ],
+              "return": "None"
+            },
+            "to_dict": {
+              "parameters": [
+                {
+                  "annotation": "",
+                  "has_default": false,
+                  "kind": "POSITIONAL_OR_KEYWORD",
+                  "name": "self"
+                }
+              ],
+              "return": "dict[str, Any]"
+            }
+          }
+        },
+        "encode": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "Any",
+                "has_default": false,
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "name": "value"
+              }
+            ],
+            "return": "Any"
+          }
+        }
+      }
+    },
+    "robotrace.verify": {
+      "symbols": {
+        "check_gate": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str",
+                "has_default": false,
+                "kind": "KEYWORD_ONLY",
+                "name": "candidate_policy_version"
+              },
+              {
+                "annotation": "Client | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "client"
+              }
+            ],
+            "return": "dict[str, Any]"
+          }
+        },
+        "promote": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str",
+                "has_default": false,
+                "kind": "KEYWORD_ONLY",
+                "name": "baseline_episode_id"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "name"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "description"
+              },
+              {
+                "annotation": "str",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "severity"
+              },
+              {
+                "annotation": "Client | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "client"
+              }
+            ],
+            "return": "dict[str, Any]"
+          }
+        },
+        "record_result": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str",
+                "has_default": false,
+                "kind": "KEYWORD_ONLY",
+                "name": "scenario_id"
+              },
+              {
+                "annotation": "str",
+                "has_default": false,
+                "kind": "KEYWORD_ONLY",
+                "name": "candidate_policy_version"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "status"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "candidate_episode_id"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "eval_run_id"
+              },
+              {
+                "annotation": "Mapping[str, Any] | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "metrics"
+              },
+              {
+                "annotation": "str | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "error"
+              },
+              {
+                "annotation": "Client | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "client"
+              }
+            ],
+            "return": "dict[str, Any]"
+          }
+        },
+        "run_check": {
+          "kind": "function",
+          "signature": {
+            "parameters": [
+              {
+                "annotation": "str",
+                "has_default": false,
+                "kind": "KEYWORD_ONLY",
+                "name": "candidate_policy_version"
+              },
+              {
+                "annotation": "PolicyCallable | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "policy_callable"
+              },
+              {
+                "annotation": "bool",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "dry_run"
+              },
+              {
+                "annotation": "Client | None",
+                "has_default": true,
+                "kind": "KEYWORD_ONLY",
+                "name": "client"
+              }
+            ],
+            "return": "tuple[int, dict[str, Any]]"
+          }
+        }
+      }
+    }
+  }
+}
