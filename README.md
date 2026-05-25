@@ -235,8 +235,8 @@ with rt.start_episode(
     policy_version="pap-v3.2.1",
     artifacts=["video", "sensors"],     # only request the slots you'll fill
 ) as ep:
-    ep.upload_video("/tmp/run.mp4")
-    ep.upload_sensors("/tmp/sensors.bin")
+    ep.upload("video", "/tmp/run.mp4")
+    ep.upload("sensors", "/tmp/sensors.bin")
     # No explicit finalize - context manager handles it:
     #   • clean exit → status="ready"
     #   • exception  → status="failed", with metadata.failure_reason set
@@ -246,7 +246,7 @@ Or explicit:
 
 ```python
 ep = rt.start_episode(name="…", policy_version="…", artifacts=["video"])
-ep.upload_video("/tmp/run.mp4")
+ep.upload("video", "/tmp/run.mp4")
 ep.finalize(status="ready", duration_s=47.2, fps=30)
 ```
 
@@ -255,7 +255,7 @@ replay scrubber lands on the right frame (added in `0.1.0a12`):
 
 ```python
 ep = rt.start_episode(name="…", policy_version="…", artifacts=["video"])
-ep.upload_video("/tmp/run.mp4")
+ep.upload("video", "/tmp/run.mp4")
 ep.finalize(
     status="failed",
     duration_s=18.4,

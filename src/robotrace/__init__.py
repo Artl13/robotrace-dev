@@ -22,7 +22,7 @@ The public API in 30 seconds:
 
     # 2. Streaming - explicit control of the lifecycle.
     with rt.start_episode(name="…", policy_version="…") as ep:
-        ep.upload_video("/tmp/run.mp4")
+        ep.upload("video", "/tmp/run.mp4")
         # auto-finalize: ready on clean exit, failed on exception.
 
     # 3. Multiple deployments at once - explicit Client.

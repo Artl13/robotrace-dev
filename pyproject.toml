@@ -13,6 +13,19 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.1.0a13 - `robotrace._deprecation.warn_deprecated()` ships. The first
+# end-to-end exercise of the helper deprecates the three kind-specific
+# `Episode.upload_video / upload_sensors / upload_actions` shortcuts in
+# favour of the canonical `Episode.upload(kind, path)`. Shortcuts still
+# work (and continue to delegate to `upload(kind, path)` internally) but
+# emit a `DeprecationWarning` pointing at the user's call site; scheduled
+# for removal in 0.3.0. All internal callers (gymnasium / lerobot / ros2
+# adapters, `Client.log_episode`, examples, README) migrated in the same
+# release so we don't fire our own warnings on the user. Clears gate 3 of
+# the SDK 0.2.0 readiness checklist ("a real DeprecationWarning helper
+# exists and has been exercised end-to-end"). 7 new SDK tests (helper
+# format + stacklevel + per-shortcut behaviour + dedup); suite is now 115.
+#
 # 0.1.0a12 - `failure_time_s` lands on `Episode.finalize(...)` and
 # `Client.log_episode(...)`. Pass the seconds-from-start instant where
 # the run actually broke (collision, watchdog trip, manual abort) and
@@ -134,7 +147,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a12"
+version = "0.1.0a13"
 description = "Official RoboTrace Python SDK and CLI - observability and evals for AI-powered robots (pip install robotrace-dev, import robotrace)."
 readme = "README.md"
 requires-python = ">=3.10"

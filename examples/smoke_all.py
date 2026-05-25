@@ -167,8 +167,8 @@ def _section_episodes(tag: str, base_url: str) -> EpisodesResult:
         fps=30,
         artifacts=("sensors", "actions"),
     )
-    ep.upload_sensors(str(sensors))
-    ep.upload_actions(str(actions))
+    ep.upload("sensors", str(sensors))
+    ep.upload("actions", str(actions))
     ep.finalize(
         status="ready",
         duration_s=2.1,

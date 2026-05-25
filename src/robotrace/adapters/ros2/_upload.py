@@ -153,11 +153,11 @@ def _upload_encoded(
     # the admin UI doesn't show a ghost "recording" row, then re-raise.
     try:
         if encoded.video is not None:
-            episode.upload_video(encoded.video.path)
+            episode.upload("video", encoded.video.path)
         if encoded.sensors is not None:
-            episode.upload_sensors(encoded.sensors.path)
+            episode.upload("sensors", encoded.sensors.path)
         if encoded.actions is not None:
-            episode.upload_actions(encoded.actions.path)
+            episode.upload("actions", encoded.actions.path)
     except Exception as exc:
         try:
             episode.finalize(

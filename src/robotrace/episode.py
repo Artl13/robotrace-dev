@@ -9,11 +9,11 @@ Returned by `Client.start_episode(...)`. Wraps:
 Designed for two usage shapes:
 
   1. Explicit:                     ep = client.start_episode(...)
-                                   ep.upload_video("./run.mp4")
+                                   ep.upload("video", "./run.mp4")
                                    ep.finalize(status="ready")
 
   2. Context-managed:              with client.start_episode(...) as ep:
-                                       ep.upload_video("./run.mp4")
+                                       ep.upload("video", "./run.mp4")
                                    # auto-finalize: ready on clean exit,
                                    # failed on exception (with the
                                    # exception type recorded in metadata).
@@ -32,6 +32,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Literal
 
+from ._deprecation import warn_deprecated as _warn_deprecated
 from .errors import ConfigurationError
 
 if TYPE_CHECKING:
@@ -123,15 +124,52 @@ class Episode:
         self._bytes_uploaded += bytes_uploaded
         return bytes_uploaded
 
-    # Convenience wrappers - keep the call sites readable for the
-    # 95% case where users have one file per artifact kind.
+    # ── deprecated kind-specific shortcuts ──────────────────────────
+    #
+    # Originally shipped as "convenience wrappers". In practice they
+    # fragment the surface: every new artifact kind (point clouds,
+    # depth maps, lidar) would need its own wrapper, growing the
+    # public API combinatorially. The canonical form
+    # `episode.upload("video", path)` reads identically (one extra
+    # character), works for any kind, and matches the
+    # `ArtifactKind` Literal that already drives signed-URL routing.
+    #
+    # Deprecated in 0.1.0a13 → scheduled for removal in 0.3.0. They
+    # continue to delegate to `upload(kind, path)` so existing call
+    # sites still succeed; users see a `DeprecationWarning` pointing
+    # at their own line via `warn_deprecated(stacklevel=2)`.
+    #
+    # This is the first end-to-end exercise of `_deprecation.warn_deprecated`
+    # and clears gate 3 of the SDK 0.2.0 readiness checklist
+    # ("a real DeprecationWarning helper exists and has been
+    # exercised end-to-end by removing one already-deprecated thing
+    # through it").
+
     def upload_video(self, path: str | Path) -> int:
+        _warn_deprecated(
+            "Episode.upload_video",
+            since="0.1.0a13",
+            removed_in="0.3.0",
+            replacement='Episode.upload("video", path)',
+        )
         return self.upload("video", path)
 
     def upload_sensors(self, path: str | Path) -> int:
+        _warn_deprecated(
+            "Episode.upload_sensors",
+            since="0.1.0a13",
+            removed_in="0.3.0",
+            replacement='Episode.upload("sensors", path)',
+        )
         return self.upload("sensors", path)
 
     def upload_actions(self, path: str | Path) -> int:
+        _warn_deprecated(
+            "Episode.upload_actions",
+            since="0.1.0a13",
+            removed_in="0.3.0",
+            replacement='Episode.upload("actions", path)',
+        )
         return self.upload("actions", path)
 
     # ── finalize ────────────────────────────────────────────────────

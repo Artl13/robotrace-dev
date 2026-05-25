@@ -325,9 +325,9 @@ class Client:
                 name=..., source=..., ...,
                 artifacts=[k for k, p in [("video", video), ...] if p],
             )
-            if video: ep.upload_video(video)
-            if sensors: ep.upload_sensors(sensors)
-            if actions: ep.upload_actions(actions)
+            if video: ep.upload("video", video)
+            if sensors: ep.upload("sensors", sensors)
+            if actions: ep.upload("actions", actions)
             ep.finalize(status=..., duration_s=..., fps=..., metadata=...)
             return ep
         """
@@ -367,11 +367,11 @@ class Client:
         # by design, finer-grained recovery requires start_episode.
         try:
             if video is not None:
-                episode.upload_video(video)
+                episode.upload("video", video)
             if sensors is not None:
-                episode.upload_sensors(sensors)
+                episode.upload("sensors", sensors)
             if actions is not None:
-                episode.upload_actions(actions)
+                episode.upload("actions", actions)
         except Exception as exc:
             # Mark the episode failed so the admin UI doesn't show a
             # ghostly "recording" run forever. Re-raise so the caller

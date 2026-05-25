@@ -64,9 +64,9 @@ class EncodedBag:
 
         encoded = ros2.encode_bag(bag, output_dir)
         with client.start_episode(...) as ep:
-            if encoded.video:    ep.upload_video(encoded.video.path)
-            if encoded.sensors:  ep.upload_sensors(encoded.sensors.path)
-            if encoded.actions:  ep.upload_actions(encoded.actions.path)
+            if encoded.video:    ep.upload("video", encoded.video.path)
+            if encoded.sensors:  ep.upload("sensors", encoded.sensors.path)
+            if encoded.actions:  ep.upload("actions", encoded.actions.path)
             ep.finalize(duration_s=encoded.duration_s, fps=encoded.fps)
 
     `metadata` carries any per-topic notes the encoder wants the

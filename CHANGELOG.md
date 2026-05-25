@@ -11,6 +11,79 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.1.0a13] - 2026-05-26
+
+### Added
+
+- **`robotrace._deprecation.warn_deprecated()` helper.** Internal
+  helper (underscore-prefixed module, not exported from
+  `robotrace.__init__`) that wraps `warnings.warn(DeprecationWarning,
+  ...)` with the canonical message format
+
+      <Name> is deprecated since <since> and will be removed in
+      <removed_in>. Use <replacement> instead. <hint> (RoboTrace SDK)
+
+  Stacklevel is bumped internally so the warning location points at
+  the user's call site, not at the SDK wrapper. Used as part of
+  the SDK 0.2.0 readiness work (gate 3 - "a real DeprecationWarning
+  helper exists and has been exercised end-to-end"); see the
+  `Deprecated` section below for its first real exercise.
+
+- Server admin UI for the SDK surface freeze clock landed in the
+  same window (web-side, no SDK code change): `/admin/clients`
+  hosts a card showing "Day X / 14" plus the three gate conditions
+  with super-admin Start / Reset. The mechanical proof on the SDK
+  side is `tests/test_api_surface_freeze.py`, which diffs the live
+  surface against `packages/sdk-python/api-surface.json` on every
+  CI run. Additions pass silently; removals / signature narrowings
+  / required-param flips / kind changes / positional reorderings
+  fail loudly with a per-symbol report.
+
+### Deprecated
+
+- **`Episode.upload_video(path)` / `upload_sensors(path)` /
+  `upload_actions(path)`** in favour of the canonical
+  `Episode.upload(kind, path)`. The three shortcuts continue to
+  work (and continue to delegate to `upload(kind, path)`
+  internally), but each emits a `DeprecationWarning` pointing at
+  the user's call site. Scheduled for removal in `0.3.0`.
+
+  Why: the shortcuts fragment the public surface (every new
+  artifact kind - point clouds, depth maps, lidar - would need
+  its own wrapper, growing the API combinatorially). The
+  canonical form `episode.upload("video", path)` reads
+  identically (one extra character), works for any artifact kind,
+  and matches the `ArtifactKind` Literal that already drives
+  signed-URL routing.
+
+  Migration: mechanical rename.
+
+  ```python
+  # before
+  episode.upload_video("/tmp/run.mp4")
+  episode.upload_sensors("/tmp/sensors.bin")
+  episode.upload_actions("/tmp/actions.parquet")
+
+  # after
+  episode.upload("video", "/tmp/run.mp4")
+  episode.upload("sensors", "/tmp/sensors.bin")
+  episode.upload("actions", "/tmp/actions.parquet")
+  ```
+
+  All internal callers (gymnasium / lerobot / ros2 adapters,
+  `Client.log_episode`, examples, README, top-level
+  `__init__.py` docstring) migrated in this same release so the
+  SDK never fires its own deprecation warnings on the user.
+
+### Compatibility
+
+- Pure additive change. Every existing call site keeps working
+  unchanged through at least one minor version (the
+  `DeprecationWarning` is a warning, not an error). Suite is now
+  **115 passed, 1 skipped** (7 new tests cover the helper format,
+  the stacklevel contract, the three shortcut behaviours, and
+  the stdlib per-call-site dedup).
+
 ## [0.1.0a12] - 2026-05-25
 
 ### Added
