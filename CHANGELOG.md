@@ -11,6 +11,119 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.2.0 — DRAFT, NOT YET CUT] - TBD
+
+> **Draft.** This entry is a forward-looking sketch of what
+> `0.2.0` will say when it cuts. Nothing here ships until all four
+> SDK 0.2.0 readiness gates are simultaneously green - see
+> `RELEASING-0.2.0.md` at the repo root for the live checklist
+> and the at-cut commit sequence. When we actually cut, this
+> header moves up to `## [0.2.0] - <YYYY-MM-DD>`, the warning
+> banner is removed, and any items still empty get filled in.
+
+### Public commitment
+
+`0.2.0` is the **first stable contract** for `robotrace-dev`.
+From this release onward:
+
+- The public symbol set of `robotrace`, `robotrace.client`,
+  `robotrace.episode`, `robotrace.errors`, `robotrace.evals`,
+  `robotrace.types`, and `robotrace.verify` follows strict semver.
+  Breaking changes (removals, signature narrowings, required-param
+  flips, kind changes, positional reorderings) require a **major**
+  bump (`1.0.0`) and a full minor of `DeprecationWarning` first.
+  The mechanical guard for this rule is
+  `tests/test_api_surface_freeze.py` diffing the live surface
+  against `packages/sdk-python/api-surface.json` on every CI run.
+- The `0.1.0aN` alpha line is **closed**. Existing pins
+  (`robotrace-dev==0.1.0a13`) keep working forever - PyPI is
+  append-only - but new installs should drop the pin and run
+  bare `pip install robotrace-dev`, which now picks `0.2.0` by
+  default (pip stops auto-relaxing the pre-release filter the
+  moment a stable release exists).
+- The `Episode.upload(kind, path)` form is now the **canonical**
+  upload API. The legacy `upload_video` / `upload_sensors` /
+  `upload_actions` shortcuts (deprecated in `0.1.0a13`) stay
+  available with a `DeprecationWarning` through `0.2.x`; their
+  removal lands in `0.3.0` at the earliest.
+
+### Removed (alpha-era warts)
+
+- _Nothing yet._ Every alpha-era deprecation rolls forward intact:
+  the `0.2.0` cut is deliberately **bit-for-bit compatible** with
+  `0.1.0a13` at the wire and import level, so an existing pinned
+  caller upgrading to `0.2.0` sees no behavioural change beyond
+  `__version__` flipping from `"0.1.0a13"` to `"0.2.0"`.
+
+  Scheduled for removal **in `0.3.0`** (the next minor after
+  `0.2.0`), at least one minor of `DeprecationWarning` after they
+  were first marked:
+
+  - `Episode.upload_video(path)` - migrated to
+    `Episode.upload("video", path)` in `0.1.0a13`.
+  - `Episode.upload_sensors(path)` - migrated to
+    `Episode.upload("sensors", path)` in `0.1.0a13`.
+  - `Episode.upload_actions(path)` - migrated to
+    `Episode.upload("actions", path)` in `0.1.0a13`.
+
+  Their warning messages already point at the canonical
+  replacement and the planned removal version, so callers running
+  with `-W error::DeprecationWarning` (a sensible CI default) find
+  every site automatically.
+
+### Added
+
+_To be filled in at cut time._ Today the list is empty - gate 3
+(deprecation infrastructure) and gate 4 (docs alignment) both
+shipped in `0.1.0a13`; gate 1 (pilot signal) and gate 2 (freeze
+clock) are operational gates that don't change the wheel.
+
+### Compatibility
+
+- **Wire format:** unchanged from `0.1.0a13`. The dual-shape
+  `/api/ingest/episode/[id]/finalize` route added in `0.1.0a13`
+  stays in place - the server transparently accepts both the
+  pre-`0.1.0a13` failure-fields shape (`failure_time_s` +
+  `metadata.failure_reason`) and the structured
+  `failure: { time_s, reason }` shape that newer SDKs may emit.
+- **Imports:** unchanged. `from robotrace import log_episode,
+  start_episode, Client, Episode, ...` keeps working.
+- **Pip behaviour:** users running bare `pip install robotrace-dev`
+  pick up `0.2.0` automatically. Users with explicit pins
+  (`==0.1.0aN`) stay on their pinned alpha forever - we never
+  yank an alpha from PyPI.
+- **Marketing:** the portal's `SdkInstallCard` derives its
+  maturity pill from `SDK_MATURITY` in
+  `apps/web/lib/sdk/version.ts`, which is itself derived from the
+  version regex - bumping `SDK_VERSION` to `"0.2.0"` automatically
+  flips the pill from amber `ALPHA` to emerald `STABLE`. No
+  manual marketing edit required for that specific pill. The
+  broader "Phase 1 / Early access / invite-only" framing on the
+  marketing site is a **product-policy** decision (per
+  `AGENTS.md`) and survives the SDK going stable - those badges
+  stay until we open self-serve signup.
+
+### Migration
+
+- **Nothing required.** Code that runs against `0.1.0a13` without
+  emitting `DeprecationWarning`s runs unchanged against `0.2.0`.
+- If you do see warnings, each one names its canonical
+  replacement and removal version inline (the
+  `_deprecation.warn_deprecated` message format). The mechanical
+  rename for `0.1.0a13`'s `upload_*` deprecations:
+
+  ```python
+  # before
+  episode.upload_video("/tmp/run.mp4")
+  episode.upload_sensors("/tmp/sensors.bin")
+  episode.upload_actions("/tmp/actions.parquet")
+
+  # after
+  episode.upload("video", "/tmp/run.mp4")
+  episode.upload("sensors", "/tmp/sensors.bin")
+  episode.upload("actions", "/tmp/actions.parquet")
+  ```
+
 ## [0.1.0a13] - 2026-05-26
 
 ### Added
