@@ -38,6 +38,31 @@ to measure regressions - without rolling another in-house dashboard.
 
 ---
 
+**Works with** Python 3.10+ · ROS 2 (humble / jazzy) · LeRobot v2.1 · Gymnasium ≥ 1.0 · macOS & Linux. Episode bytes go straight to your object storage — **policy weights never leave your machines.**
+
+## How it works
+
+RoboTrace closes the loop from *"we recorded a run"* to *"we won't ship that regression to a real robot"*:
+
+<div align="center">
+  <img
+    src="https://raw.githubusercontent.com/Artl13/robotrace-dev/main/assets/robotrace-loop.svg"
+    alt="The RoboTrace loop: Record an episode, Replay it frame-accurate, Explain failures, then Verify and Eval a candidate policy against historical episodes — which feeds back into Record."
+    width="860"
+  />
+</div>
+
+- **Record** — `log_episode(...)` ships synchronized video + sensors + actions to object storage, keyed by the four reproducibility fields (`policy_version` / `env_version` / `git_sha` / `seed`). Heavy bytes go straight to Cloudflare R2 via signed URLs; only metadata touches our API.
+- **Replay** — scrub every run frame-accurate in the portal, with camera, sensor, and action tracks locked to one timeline. Copy a `?t=…ms` link and a teammate lands on your exact frame.
+- **Explain** — failed runs surface an auto root-cause card the moment they finalize: replay regressions, raised exceptions, battery brownouts — ranked by confidence, not a raw metadata dump.
+- **Verify & Evals** — re-roll a candidate policy against thousands of *historical* episodes, see exactly where it does better and worse, and gate the deploy — without booking another hour on the arm.
+
+## Contents
+
+[Install](#install) · [Status](#status) · [Quickstart](#quickstart) · [CLI](#command-line-interface) · [API](#api) · [Errors](#errors) · [Storage](#storage) · [Adapters](#adapters) · [Stability](#stability) · [Layout](#layout-current) · [Contributing](#contributing)
+
+## Install
+
 ```bash
 pip install robotrace-dev
 ```
@@ -51,22 +76,18 @@ pip install robotrace-dev
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual - `pip install robotrace-dev==0.1.0a12` pulls this README.
-> Older pins (`0.1.0a11`, `0.1.0a10`, `0.1.0a9`, …) are prior alphas on
+> as usual - `pip install robotrace-dev==0.1.0a13` pulls this README.
+> Older pins (`0.1.0a12`, `0.1.0a11`, `0.1.0a10`, …) are prior alphas on
 > the same pre-1.0 API surface.
 
 ## Status
 
-**Alpha (`0.1.0a12`).** The public API in this README is the shape we're
+**Alpha (`0.1.0a13`).** The public API in this README is the shape we're
 iterating against; once we cut `1.0.0`, the
 [`log_episode`](#log_episode---the-sacred-call) signature is locked and
-breakages require a major bump (per `AGENTS.md` in the RoboTrace monorepo).
-
-Official product site: [robotrace.dev](https://robotrace.dev). Docs:
+breakages require a major bump (see [Stability](#stability)). Official
+product site: [robotrace.dev](https://robotrace.dev). Docs:
 [robotrace.dev/docs](https://robotrace.dev/docs).
-
-**Early access:** email [hello@robotrace.dev](mailto:hello@robotrace.dev) for
-portal invites, pilot onboarding, or SDK support during alpha.
 
 ## Quickstart
 
@@ -340,16 +361,16 @@ base install stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.1.0a12'
+pip install 'robotrace-dev[ros2]==0.1.0a13'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.1.0a12'
+pip install 'robotrace-dev[lerobot]==0.1.0a13'
 
 # Gymnasium env rollout → episode
-pip install 'robotrace-dev[gymnasium]==0.1.0a12'
+pip install 'robotrace-dev[gymnasium]==0.1.0a13'
 
 # Multi-camera mp4 encoding (opencv) - combine with any adapter that writes video
-pip install 'robotrace-dev[ros2,video]==0.1.0a12'
+pip install 'robotrace-dev[ros2,video]==0.1.0a13'
 ```
 
 ```python
@@ -398,6 +419,29 @@ pyav + several CUDA wheels). It reads the v2.1 on-disk format
 directly via `pyarrow` + `huggingface_hub` - ~20 MB install
 footprint, comparable to `[ros2]`. LeRobot v3.0 (multi-episode
 parquet shards, late 2025) is on the roadmap.
+
+## Stability
+
+The public surface is **mechanically frozen** so a `pip install -U` can't
+silently orphan a running training job. Every CI run executes
+[`tests/test_api_surface_freeze.py`](./tests/test_api_surface_freeze.py),
+which diffs the live SDK against the committed baseline at
+[`api-surface.json`](./api-surface.json):
+
+- **Additions** pass silently.
+- **Removals, signature narrowings, required-param flips, kind changes,
+  and positional reorderings** fail the build with a per-symbol report.
+
+Breaking changes ride the deprecation path - we ship `DeprecationWarning`s
+for **at least one minor** before a removal (see `Episode.upload_video /
+upload_sensors / upload_actions`, deprecated in `0.1.0a13`). The
+[`log_episode`](#log_episode---the-sacred-call) signature is the one we
+treat as load-bearing; it's locked on the `1.0.0` cut and any breakage
+requires a major version bump.
+
+> Semantics follow [SemVer](https://semver.org). During alpha
+> (`0.1.0aN`) the surface still moves, but only *additively* between
+> patch alphas - we never tighten or remove without a deprecation cycle.
 
 ## Layout (current)
 
