@@ -11,6 +11,14 @@ Log episodes (synchronized video, sensors, actions), replay them, version
 datasets, and re-roll new policy versions against historical observations
 to measure regressions - without rolling another in-house dashboard.
 
+<a href="https://robotrace.dev">
+  <img
+    src="https://raw.githubusercontent.com/Artl13/robotrace-dev/main/assets/robotrace-demo.svg"
+    alt="Terminal demo: pip install robotrace-dev, then rt.log_episode(...) uploads an episode and prints its portal URL"
+    width="820"
+  />
+</a>
+
 **Early access** - portal signup is invite-only during alpha. Contact
 [hello@robotrace.dev](mailto:hello@robotrace.dev) or request access at
 [robotrace.dev](https://robotrace.dev).

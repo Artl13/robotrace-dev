@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 510" width="920" height="510" role="img" aria-label="Terminal demo: pip install robotrace-dev, then rt.log_episode(...) uploads an episode and prints its portal URL.">
+  <title>RoboTrace SDK &#8212; terminal demo</title>
+  <defs>
+    <linearGradient id="rtAccent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="0.5" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#fcd34d"/>
+    </linearGradient>
+    <clipPath id="win"><rect x="16" y="16" width="888" height="478" rx="14"/></clipPath>
+    <style>
+      /* Self-contained: CSS keyframes only, no JS. Loaded as an image
+         on GitHub/PyPI so scripts never run. Base (un-animated) state of
+         every element is its FINAL readable state, so if a renderer
+         ignores CSS animation the still frame shows the full terminal. */
+      :root { --loop: 17s; }
+      text {
+        font-family: 'SFMono-Regular', ui-monospace, 'Cascadia Code',
+          'Fira Code', Menlo, Consolas, 'Liberation Mono', monospace;
+        font-size: 16px;
+        white-space: pre;
+      }
+      .dim   { fill: #7d8aa0; }
+      .fg    { fill: #e6edf3; }
+      .ok    { fill: #34d399; }
+      .cyan  { fill: #22d3ee; }
+      .violet{ fill: #c4b5fd; }
+      .amber { fill: #fcd34d; }
+      .prompt{ fill: #34d399; font-weight: 700; }
+
+      .line { opacity: 1; }
+      .l1 { animation: on1 var(--loop) both infinite; }
+      .l2 { animation: on2 var(--loop) both infinite; }
+      .l3 { animation: on3 var(--loop) both infinite; }
+      .l4 { animation: on4 var(--loop) both infinite; }
+      .l5 { animation: on5 var(--loop) both infinite; }
+      .l6 { animation: on6 var(--loop) both infinite; }
+      .l7 { animation: on7 var(--loop) both infinite; }
+      .l8 { animation: on8 var(--loop) both infinite; }
+
+      /* Typing reveal: a background-coloured cover anchored to its right
+         edge shrinks to scaleX(0), uncovering the command left to right. */
+      .cover { fill: #0a0b13; transform-box: fill-box; transform-origin: 100% 50%; transform: scaleX(0); }
+      .cov1 { animation: type1 var(--loop) both infinite; }
+      .cov2 { animation: type2 var(--loop) both infinite; }
+
+      /* Progress fill grows left to right. */
+      .barfill { transform-box: fill-box; transform-origin: 0% 50%; transform: scaleX(1); animation: fill var(--loop) both infinite; }
+
+      /* Blinking caret; visibility windowed by parent .cur* group. */
+      .blink { animation: blink 1.05s steps(1, end) infinite; }
+      .cur1 { opacity: 0; animation: cw1 var(--loop) both infinite; }
+      .cur2 { opacity: 0; animation: cw2 var(--loop) both infinite; }
+      .cur8 { opacity: 0; animation: cw8 var(--loop) both infinite; }
+
+      @keyframes blink { 0%,50% { opacity: 1; } 50.01%,100% { opacity: 0; } }
+
+      /* Reveal envelopes (percent of --loop). Each line fades+rises in,
+         holds, then everyone clears at the end for a clean restart. */
+      @keyframes on1 { 0%,1.5%{opacity:0;transform:translateY(3px);} 3%,95%{opacity:1;transform:none;} 98%,100%{opacity:0;} }
+      @keyframes on2 { 0%,15%{opacity:0;transform:translateY(3px);} 17%,95%{opacity:1;transform:none;} 98%,100%{opacity:0;} }
+      @keyframes on3 { 0%,23%{opacity:0;transform:translateY(3px);} 25%,95%{opacity:1;transform:none;} 98%,100%{opacity:0;} }
+      @keyframes on4 { 0%,36%{opacity:0;transform:translateY(3px);} 38%,95%{opacity:1;transform:none;} 98%,100%{opacity:0;} }
+      @keyframes on5 { 0%,43%{opacity:0;transform:translateY(3px);} 45%,95%{opacity:1;transform:none;} 98%,100%{opacity:0;} }
+      @keyframes on6 { 0%,57%{opacity:0;transform:translateY(3px);} 59%,95%{opacity:1;transform:none;} 98%,100%{opacity:0;} }
+      @keyframes on7 { 0%,64%{opacity:0;transform:translateY(4px) scale(0.997);} 67%,95%{opacity:1;transform:none;} 98%,100%{opacity:0;} }
+      @keyframes on8 { 0%,71%{opacity:0;} 73%,95%{opacity:1;} 98%,100%{opacity:0;} }
+
+      @keyframes type1 { 0%,3%{transform:scaleX(1);} 13%,100%{transform:scaleX(0);} }
+      @keyframes type2 { 0%,25%{transform:scaleX(1);} 34%,100%{transform:scaleX(0);} }
+
+      @keyframes fill { 0%,45%{transform:scaleX(0);} 56%,95%{transform:scaleX(1);} 98%,100%{transform:scaleX(0);} }
+
+      @keyframes cw1 { 0%,2%{opacity:0;} 3%{opacity:1;} 15%{opacity:1;} 16%,100%{opacity:0;} }
+      @keyframes cw2 { 0%,24%{opacity:0;} 25%{opacity:1;} 36%{opacity:1;} 37%,100%{opacity:0;} }
+      @keyframes cw8 { 0%,72%{opacity:0;} 73%,95%{opacity:1;} 98%,100%{opacity:0;} }
+
+      @media (prefers-reduced-motion: reduce) {
+        .line,.cover,.barfill,.blink,.cur1,.cur2,.cur8 { animation: none !important; opacity: 1 !important; transform: none !important; }
+        .cover { transform: scaleX(0) !important; }
+      }
+    </style>
+  </defs>
+
+  <!-- window -->
+  <rect x="16" y="16" width="888" height="478" rx="14" fill="#0a0b13" stroke="#ffffff" stroke-opacity="0.08"/>
+  <g clip-path="url(#win)">
+    <!-- brand hairline -->
+    <rect x="16" y="16" width="888" height="2.5" fill="url(#rtAccent)" opacity="0.9"/>
+    <!-- title bar -->
+    <rect x="16" y="18.5" width="888" height="38.5" fill="#ffffff" fill-opacity="0.02"/>
+    <line x1="16" y1="57" x2="904" y2="57" stroke="#ffffff" stroke-opacity="0.07"/>
+    <circle cx="44" cy="38" r="6" fill="#ff5f57"/>
+    <circle cx="68" cy="38" r="6" fill="#febc2e"/>
+    <circle cx="92" cy="38" r="6" fill="#28c840"/>
+    <text x="460" y="43" text-anchor="middle" fill="#ffffff" fill-opacity="0.42" font-size="13">robotrace &#8212; zsh</text>
+
+    <!-- content -->
+    <!-- L1: pip install -->
+    <g class="line l1">
+      <text x="40" y="110"><tspan class="prompt">$</tspan><tspan class="fg" dx="10">pip install robotrace-dev</tspan></text>
+      <rect class="cover cov1" x="63" y="94" width="262" height="22"/>
+      <g class="cur1"><rect class="blink" x="328" y="96" width="9" height="18" fill="#e6edf3"/></g>
+    </g>
+
+    <!-- L2: install output -->
+    <g class="line l2">
+      <text x="40" y="150"><tspan class="ok">&#10003;</tspan><tspan class="dim" dx="10">Successfully installed </tspan><tspan class="fg">robotrace-dev-0.1.0a13</tspan></text>
+    </g>
+
+    <!-- L3: run the script -->
+    <g class="line l3">
+      <text x="40" y="206"><tspan class="prompt">$</tspan><tspan class="fg" dx="10">python eval_run.py</tspan></text>
+      <rect class="cover cov2" x="63" y="190" width="192" height="22"/>
+      <g class="cur2"><rect class="blink" x="258" y="192" width="9" height="18" fill="#e6edf3"/></g>
+    </g>
+
+    <!-- L4: echoed call (syntax-tinted) -->
+    <g class="line l4">
+      <text x="40" y="244"><tspan class="dim">&#8250;</tspan><tspan class="violet" dx="10">rt.log_episode</tspan><tspan class="fg">(</tspan><tspan class="dim">name=</tspan><tspan class="amber">"pick_and_place v3"</tspan><tspan class="dim">, video=</tspan><tspan class="amber">"run.mp4"</tspan><tspan class="fg">)</tspan></text>
+    </g>
+
+    <!-- L5: uploading + progress -->
+    <g class="line l5">
+      <text x="40" y="290"><tspan class="cyan">&#9656;</tspan><tspan class="dim" dx="10">uploading  </tspan><tspan class="fg">video</tspan><tspan class="dim"> &#183; </tspan><tspan class="fg">sensors</tspan><tspan class="dim"> &#183; </tspan><tspan class="fg">actions</tspan></text>
+      <rect x="64" y="304" width="300" height="10" rx="5" fill="#ffffff" fill-opacity="0.08"/>
+      <rect class="barfill" x="64" y="304" width="300" height="10" rx="5" fill="url(#rtAccent)"/>
+      <text x="378" y="313" class="dim" font-size="13">100%</text>
+    </g>
+
+    <!-- L6: ready -->
+    <g class="line l6">
+      <text x="40" y="356"><tspan class="ok">&#10003;</tspan><tspan class="fg" dx="10">episode ready</tspan><tspan class="dim"> &#183; </tspan><tspan class="fg">47.2 s</tspan><tspan class="dim"> &#183; </tspan><tspan class="fg">30 fps</tspan></text>
+    </g>
+
+    <!-- L7: portal URL (looks like a link) -->
+    <g class="line l7">
+      <text x="40" y="400"><tspan class="cyan">&#8594;</tspan><tspan class="cyan" dx="10" text-decoration="underline">app.robotrace.dev/portal/episodes/8f3c2a</tspan></text>
+    </g>
+
+    <!-- L8: fresh prompt + caret -->
+    <g class="line l8">
+      <text x="40" y="448"><tspan class="prompt">$</tspan></text>
+      <g class="cur8"><rect class="blink" x="62" y="434" width="9" height="18" fill="#e6edf3"/></g>
+    </g>
+  </g>
+</svg>
