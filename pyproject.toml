@@ -13,6 +13,11 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.1.0a14 - doc release: the README "How it works" loop now renders as a
+# native Mermaid diagram (Record -> Replay -> Explain -> Verify & Evals,
+# with the regression gate + re-roll edge) so the GitHub mirror draws it
+# theme-aware. No API or behaviour changes; surface is identical to a13.
+#
 # 0.1.0a13 - `robotrace._deprecation.warn_deprecated()` ships. The first
 # end-to-end exercise of the helper deprecates the three kind-specific
 # `Episode.upload_video / upload_sensors / upload_actions` shortcuts in
@@ -147,7 +152,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a13"
+version = "0.1.0a14"
 description = "Official RoboTrace Python SDK and CLI - observability and evals for AI-powered robots (pip install robotrace-dev, import robotrace)."
 readme = "README.md"
 requires-python = ">=3.10"
