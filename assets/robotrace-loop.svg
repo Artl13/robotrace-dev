@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 300" width="920" height="300" role="img" aria-label="The RoboTrace loop: Record an episode, Replay it, Explain failures, then Verify and Eval a candidate policy by re-rolling against historical episodes, which feeds back into Record.">
+  <title>The RoboTrace loop: record, replay, explain, verify</title>
+  <defs>
+    <linearGradient id="loopAccent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="0.5" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#fcd34d"/>
+    </linearGradient>
+    <marker id="ah" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6677"/>
+    </marker>
+    <style>
+      text { font-family: 'SFMono-Regular', ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, Consolas, 'Liberation Mono', monospace; }
+      .lbl { font-size: 15px; font-weight: 700; fill: #e6edf3; }
+      .sub { font-size: 11.5px; fill: #8b95a7; }
+      .num { font-size: 12px; font-weight: 700; }
+      .cap { font-size: 12.5px; fill: #9aa4b2; }
+    </style>
+  </defs>
+
+  <rect x="8" y="8" width="904" height="284" rx="16" fill="#0a0b13" stroke="#ffffff" stroke-opacity="0.08"/>
+  <rect x="8" y="8" width="904" height="2.5" fill="url(#loopAccent)" opacity="0.9"/>
+
+  <line x1="232" y1="136" x2="252" y2="136" stroke="#5b6677" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="450" y1="136" x2="470" y2="136" stroke="#5b6677" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="668" y1="136" x2="688" y2="136" stroke="#5b6677" stroke-width="2" marker-end="url(#ah)"/>
+
+  <path d="M 787 188 L 787 228 Q 787 240 775 240 L 145 240 Q 133 240 133 228 L 133 190"
+        fill="none" stroke="#5b6677" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#ah)"/>
+  <text x="460" y="262" text-anchor="middle" class="cap">re-roll a candidate vs. historical episodes &#183; gate the deploy</text>
+
+  <g>
+    <rect x="40" y="88" width="186" height="100" rx="12" fill="#ffffff" fill-opacity="0.025" stroke="#22d3ee" stroke-opacity="0.35"/>
+    <rect x="40" y="88" width="4" height="100" rx="2" fill="#22d3ee"/>
+    <circle cx="72" cy="116" r="12" fill="#22d3ee" fill-opacity="0.16"/>
+    <text x="72" y="120" text-anchor="middle" class="num" fill="#22d3ee">1</text>
+    <text x="94" y="120" class="lbl">Record</text>
+    <text x="62" y="152" class="sub">log_episode()</text>
+    <text x="62" y="170" class="sub">video &#183; sensors &#183; actions</text>
+  </g>
+
+  <g>
+    <rect x="258" y="88" width="186" height="100" rx="12" fill="#ffffff" fill-opacity="0.025" stroke="#a78bfa" stroke-opacity="0.35"/>
+    <rect x="258" y="88" width="4" height="100" rx="2" fill="#a78bfa"/>
+    <circle cx="290" cy="116" r="12" fill="#a78bfa" fill-opacity="0.16"/>
+    <text x="290" y="120" text-anchor="middle" class="num" fill="#a78bfa">2</text>
+    <text x="312" y="120" class="lbl">Replay</text>
+    <text x="280" y="152" class="sub">scrub frame-accurate</text>
+    <text x="280" y="170" class="sub">share ?t=&#8230;ms links</text>
+  </g>
+
+  <g>
+    <rect x="476" y="88" width="186" height="100" rx="12" fill="#ffffff" fill-opacity="0.025" stroke="#fcd34d" stroke-opacity="0.35"/>
+    <rect x="476" y="88" width="4" height="100" rx="2" fill="#fcd34d"/>
+    <circle cx="508" cy="116" r="12" fill="#fcd34d" fill-opacity="0.16"/>
+    <text x="508" y="120" text-anchor="middle" class="num" fill="#fcd34d">3</text>
+    <text x="530" y="120" class="lbl">Explain</text>
+    <text x="498" y="152" class="sub">auto root-cause</text>
+    <text x="498" y="170" class="sub">ranked by confidence</text>
+  </g>
+
+  <g>
+    <rect x="694" y="88" width="186" height="100" rx="12" fill="#ffffff" fill-opacity="0.025" stroke="#34d399" stroke-opacity="0.35"/>
+    <rect x="694" y="88" width="4" height="100" rx="2" fill="#34d399"/>
+    <circle cx="726" cy="116" r="12" fill="#34d399" fill-opacity="0.16"/>
+    <text x="726" y="120" text-anchor="middle" class="num" fill="#34d399">4</text>
+    <text x="748" y="120" class="lbl">Verify &amp; Evals</text>
+    <text x="716" y="152" class="sub">candidate vs. baseline</text>
+    <text x="716" y="170" class="sub">weights stay local</text>
+  </g>
+</svg>

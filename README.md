@@ -44,6 +44,8 @@ to measure regressions - without rolling another in-house dashboard.
 
 RoboTrace closes the loop from *"we recorded a run"* to *"we won't ship that regression to a real robot"*:
 
+<!-- loop-diagram:mermaid (the publish workflow swaps this block for assets/robotrace-loop.svg on PyPI, which has no Mermaid renderer) -->
+
 ```mermaid
 graph LR
   record["<b>Record</b><br/>log_episode()<br/>video · sensors · actions"]
@@ -68,6 +70,8 @@ graph LR
   class evals evals;
   class ship ship;
 ```
+
+<!-- /loop-diagram:mermaid -->
 
 - **Record** — `log_episode(...)` ships synchronized video + sensors + actions to object storage, keyed by the four reproducibility fields (`policy_version` / `env_version` / `git_sha` / `seed`). Heavy bytes go straight to Cloudflare R2 via signed URLs; only metadata touches our API.
 - **Replay** — scrub every run frame-accurate in the portal, with camera, sensor, and action tracks locked to one timeline. Copy a `?t=…ms` link and a teammate lands on your exact frame.
