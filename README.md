@@ -44,13 +44,30 @@ to measure regressions - without rolling another in-house dashboard.
 
 RoboTrace closes the loop from *"we recorded a run"* to *"we won't ship that regression to a real robot"*:
 
-<div align="center">
-  <img
-    src="https://raw.githubusercontent.com/Artl13/robotrace-dev/main/assets/robotrace-loop.svg"
-    alt="The RoboTrace loop: Record an episode, Replay it frame-accurate, Explain failures, then Verify and Eval a candidate policy against historical episodes — which feeds back into Record."
-    width="860"
-  />
-</div>
+```mermaid
+graph LR
+  record["<b>Record</b><br/>log_episode()<br/>video · sensors · actions"]
+  replay["<b>Replay</b><br/>frame-accurate scrub<br/>share ?t=…ms links"]
+  explain["<b>Explain</b><br/>auto root-cause<br/>ranked by confidence"]
+  evals["<b>Verify &amp; Evals</b><br/>candidate vs. baseline<br/>weights stay local"]
+  gate{"Regression<br/>gate"}
+  ship(["Ship to a real robot"])
+
+  record --> replay --> explain --> evals --> gate
+  gate -->|pass| ship
+  gate -->|"fail · re-roll vs. history"| record
+
+  classDef record stroke:#22d3ee,stroke-width:2px;
+  classDef replay stroke:#a78bfa,stroke-width:2px;
+  classDef explain stroke:#f59e0b,stroke-width:2px;
+  classDef evals stroke:#10b981,stroke-width:2px;
+  classDef ship stroke:#10b981,stroke-width:2px;
+  class record record;
+  class replay replay;
+  class explain explain;
+  class evals evals;
+  class ship ship;
+```
 
 - **Record** — `log_episode(...)` ships synchronized video + sensors + actions to object storage, keyed by the four reproducibility fields (`policy_version` / `env_version` / `git_sha` / `seed`). Heavy bytes go straight to Cloudflare R2 via signed URLs; only metadata touches our API.
 - **Replay** — scrub every run frame-accurate in the portal, with camera, sensor, and action tracks locked to one timeline. Copy a `?t=…ms` link and a teammate lands on your exact frame.
