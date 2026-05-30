@@ -1,60 +1,70 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="RoboTrace Python SDK: observability and evals for AI-powered robots. pip install robotrace-dev.">
   <title>RoboTrace SDK social preview</title>
   <defs>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#22d3ee"/>
-      <stop offset="0.4" stop-color="#a78bfa"/>
-      <stop offset="0.7" stop-color="#fcd34d"/>
-      <stop offset="1" stop-color="#34d399"/>
+    <radialGradient id="glow" cx="0.5" cy="0.16" r="0.85">
+      <stop offset="0" stop-color="#1a2542" stop-opacity="0.85"/>
+      <stop offset="0.55" stop-color="#0d1020" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#08090f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="track" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0"/>
+      <stop offset="0.12" stop-color="#22d3ee" stop-opacity="0.9"/>
+      <stop offset="0.5" stop-color="#a78bfa" stop-opacity="0.9"/>
+      <stop offset="0.88" stop-color="#34d399" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#34d399" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="scrim" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#07080e" stop-opacity="0.97"/>
-      <stop offset="0.42" stop-color="#07080e" stop-opacity="0.86"/>
-      <stop offset="0.66" stop-color="#07080e" stop-opacity="0.35"/>
-      <stop offset="0.82" stop-color="#07080e" stop-opacity="0"/>
-    </linearGradient>
-    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#07080e" stop-opacity="0"/>
-      <stop offset="1" stop-color="#07080e" stop-opacity="0.55"/>
-    </linearGradient>
+    <radialGradient id="node" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </radialGradient>
     <style>
-      text { font-family: -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif; }
+      text { font-family: -apple-system, 'SF Pro Display', 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif; }
       .mono { font-family: 'SFMono-Regular', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace; }
-      .eyebrow { font-size: 23px; font-weight: 700; letter-spacing: 7px; fill: #22d3ee; }
-      .wordmark { font-size: 94px; font-weight: 800; fill: #f5f7fa; letter-spacing: -2px; }
-      .tagline { font-size: 37px; font-weight: 600; fill: #d4dbe6; }
-      .url { font-size: 22px; font-weight: 600; fill: #aeb7c4; letter-spacing: 1px; }
+      .kicker { font-size: 19px; font-weight: 600; letter-spacing: 8px; fill: #5fd6e8; }
+      .wordmark { font-size: 104px; font-weight: 700; fill: #f6f8fb; letter-spacing: -3px; }
+      .tagline { font-size: 31px; font-weight: 400; fill: #9aa4b3; letter-spacing: 0.2px; }
+      .foot { font-size: 23px; font-weight: 500; fill: #8a93a3; letter-spacing: 0.5px; }
     </style>
   </defs>
 
-  <rect width="1280" height="640" fill="#07080e"/>
-  <image href="social-bg.png" xlink:href="social-bg.png" x="0" y="0" width="1280" height="640" preserveAspectRatio="xMidYMid slice"/>
-  <rect width="1280" height="640" fill="url(#floor)"/>
-  <rect width="1280" height="640" fill="url(#scrim)"/>
-  <rect width="1280" height="6" fill="url(#accent)"/>
+  <rect width="1280" height="640" fill="#08090f"/>
+  <rect width="1280" height="640" fill="url(#glow)"/>
 
-  <!-- project logo -->
-  <g transform="translate(88,150)">
-    <clipPath id="logoClip"><rect x="0" y="0" width="96" height="96" rx="23"/></clipPath>
-    <image href="logo.png" xlink:href="logo.png" x="0" y="0" width="96" height="96" clip-path="url(#logoClip)"/>
-    <rect x="0" y="0" width="96" height="96" rx="23" fill="none" stroke="#ffffff" stroke-opacity="0.10"/>
+  <!-- logo, centered -->
+  <g transform="translate(603,96)">
+    <clipPath id="logoClip"><rect x="0" y="0" width="74" height="74" rx="18"/></clipPath>
+    <image href="logo.png" xlink:href="logo.png" x="0" y="0" width="74" height="74" clip-path="url(#logoClip)"/>
+    <rect x="0" y="0" width="74" height="74" rx="18" fill="none" stroke="#ffffff" stroke-opacity="0.10"/>
   </g>
 
-  <text x="212" y="182" class="eyebrow">PYTHON SDK</text>
-  <text x="210" y="264" class="wordmark"><tspan>Robo</tspan><tspan fill-opacity="0.55">Trace</tspan></text>
+  <text x="640" y="214" text-anchor="middle" class="kicker">PYTHON&#160;&#160;SDK</text>
+  <text x="640" y="312" text-anchor="middle" class="wordmark"><tspan>Robo</tspan><tspan fill-opacity="0.5">Trace</tspan></text>
+  <text x="640" y="364" text-anchor="middle" class="tagline">Observability &amp; evals for AI-powered robots.</text>
 
-  <text x="212" y="332" class="tagline">Observability &amp; evals</text>
-  <text x="212" y="378" class="tagline">for AI-powered robots.</text>
+  <!-- synced streams on one timeline -->
+  <g>
+    <path d="M360 430 C 430 416 500 444 570 428 S 712 410 782 432 S 880 416 920 428"
+          fill="none" stroke="#22d3ee" stroke-opacity="0.85" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M360 456 C 430 466 500 440 570 458 S 712 474 782 448 S 880 462 920 454"
+          fill="none" stroke="#a78bfa" stroke-opacity="0.85" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M360 482 C 430 474 500 494 570 480 S 712 466 782 486 S 880 472 920 482"
+          fill="none" stroke="#34d399" stroke-opacity="0.8" stroke-width="2.5" stroke-linecap="round"/>
 
-  <!-- terminal pill -->
-  <g transform="translate(212,418)">
-    <rect x="0" y="0" width="548" height="62" rx="14" fill="#11131d" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.10"/>
-    <circle cx="26" cy="31" r="6" fill="#ff5f57"/>
-    <circle cx="48" cy="31" r="6" fill="#febc2e"/>
-    <circle cx="70" cy="31" r="6" fill="#28c840"/>
-    <text x="100" y="40" class="mono" font-size="26" fill="#22d3ee">$</text>
-    <text x="128" y="40" class="mono" font-size="26" fill="#e6edf3">pip install robotrace-dev</text>
+    <!-- shared timeline -->
+    <rect x="356" y="506" width="568" height="2.5" rx="1.25" fill="url(#track)"/>
+    <g fill="#2b3548">
+      <rect x="450" y="500" width="2" height="9" rx="1"/>
+      <rect x="544" y="500" width="2" height="9" rx="1"/>
+      <rect x="638" y="500" width="2" height="9" rx="1"/>
+      <rect x="732" y="500" width="2" height="9" rx="1"/>
+      <rect x="826" y="500" width="2" height="9" rx="1"/>
+    </g>
+
+    <!-- playhead -->
+    <line x1="640" y1="414" x2="640" y2="507" stroke="#eef3f8" stroke-opacity="0.5" stroke-width="1.5"/>
+    <circle cx="640" cy="507" r="11" fill="#22d3ee" fill-opacity="0.18"/>
+    <circle cx="640" cy="507" r="5.5" fill="url(#node)"/>
   </g>
 
-  <text x="214" y="528" class="url mono">robotrace.dev</text>
+  <text x="640" y="582" text-anchor="middle" class="foot mono">pip install robotrace-dev</text>
 </svg>
