@@ -13,6 +13,10 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.2.0 - first stable contract. Alpha line closed; public surface
+# semver-locked via tests/test_api_surface_freeze.py. Bit-for-bit
+# compatible with 0.1.0a13+ at wire and import level.
+#
 # 0.1.0a15 - doc release: the PyPI README now renders the "How it works"
 # loop as an SVG image (PyPI has no Mermaid renderer); the GitHub mirror
 # keeps the native Mermaid block. The publish workflow swaps them at
@@ -157,7 +161,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.1.0a15"
+version = "0.2.0"
 description = "Official RoboTrace Python SDK and CLI - observability and evals for AI-powered robots (pip install robotrace-dev, import robotrace)."
 readme = "README.md"
 requires-python = ">=3.10"

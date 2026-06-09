@@ -11,15 +11,7 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
-## [0.2.0 — DRAFT, NOT YET CUT] - TBD
-
-> **Draft.** This entry is a forward-looking sketch of what
-> `0.2.0` will say when it cuts. Nothing here ships until all four
-> SDK 0.2.0 readiness gates are simultaneously green - see
-> `RELEASING-0.2.0.md` at the repo root for the live checklist
-> and the at-cut commit sequence. When we actually cut, this
-> header moves up to `## [0.2.0] - <YYYY-MM-DD>`, the warning
-> banner is removed, and any items still empty get filled in.
+## [0.2.0] - 2026-06-09
 
 ### Public commitment
 
@@ -73,10 +65,16 @@ From this release onward:
 
 ### Added
 
-_To be filled in at cut time._ Today the list is empty - gate 3
-(deprecation infrastructure) and gate 4 (docs alignment) both
-shipped in `0.1.0a13`; gate 1 (pilot signal) and gate 2 (freeze
-clock) are operational gates that don't change the wheel.
+- **First stable contract.** The `0.1.0aN` alpha line is closed.
+  All public symbols across `robotrace`, `robotrace.client`,
+  `robotrace.episode`, `robotrace.errors`, `robotrace.evals`,
+  `robotrace.types`, and `robotrace.verify` are now semver-locked.
+  The mechanical guard is `tests/test_api_surface_freeze.py`
+  diffing the live surface against `api-surface.json` on every CI
+  run. Additive alpha work through `0.1.0a15` (including
+  `failure_time_s`, typed metadata, OTel correlation, framework
+  adapters, and the deprecation helper) rolls into this stable
+  line unchanged at the wire and import level.
 
 ### Compatibility
 

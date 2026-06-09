@@ -97,17 +97,18 @@ pip install robotrace-dev
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual - `pip install robotrace-dev==0.1.0a13` pulls this README.
-> Older pins (`0.1.0a12`, `0.1.0a11`, `0.1.0a10`, …) are prior alphas on
-> the same pre-1.0 API surface.
+> as usual - `pip install robotrace-dev==0.2.0` pulls this README.
+> Older pins (`0.1.0a15`, `0.1.0a13`, `0.1.0a12`, …) are prior alphas on
+> the same API surface and keep working on PyPI.
 
 ## Status
 
-**Alpha (`0.1.0a13`).** The public API in this README is the shape we're
-iterating against; once we cut `1.0.0`, the
-[`log_episode`](#log_episode---the-sacred-call) signature is locked and
-breakages require a major bump (see [Stability](#stability)). Official
-product site: [robotrace.dev](https://robotrace.dev). Docs:
+**Stable (`0.2.0`).** The public API in this README is now semver-locked
+under `0.x`; breakages require a major bump and a full minor of
+`DeprecationWarning` first (see [Stability](#stability)). Once we cut
+`1.0.0`, the [`log_episode`](#log_episode---the-sacred-call) signature
+is locked permanently per AGENTS.md. Official product site:
+[robotrace.dev](https://robotrace.dev). Docs:
 [robotrace.dev/docs](https://robotrace.dev/docs).
 
 ## Quickstart
@@ -382,16 +383,16 @@ base install stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.1.0a13'
+pip install 'robotrace-dev[ros2]==0.2.0'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.1.0a13'
+pip install 'robotrace-dev[lerobot]==0.2.0'
 
 # Gymnasium env rollout → episode
-pip install 'robotrace-dev[gymnasium]==0.1.0a13'
+pip install 'robotrace-dev[gymnasium]==0.2.0'
 
 # Multi-camera mp4 encoding (opencv) - combine with any adapter that writes video
-pip install 'robotrace-dev[ros2,video]==0.1.0a13'
+pip install 'robotrace-dev[ros2,video]==0.2.0'
 ```
 
 ```python
