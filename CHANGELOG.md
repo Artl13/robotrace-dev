@@ -11,6 +11,21 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-11
+
+### Changed
+
+- **README demo SVG** (`assets/robotrace-demo.svg`) now shows
+  `Successfully installed robotrace-dev-0.2.1` instead of the stale
+  `0.1.0a13` line. The PyPI/GitHub hero animation matches the stable
+  release.
+- **README status badge** flips from alpha to stable.
+
+### Compatibility
+
+- **No API or behaviour changes.** Surface is identical to `0.2.0`.
+  Safe to upgrade from any `0.2.0` pin with no code changes.
+
 ## [0.2.0] - 2026-06-09
 
 ### Public commitment

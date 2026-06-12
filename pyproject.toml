@@ -13,6 +13,10 @@
 #   `pip install python-dateutil` → `import dateutil`
 #   `pip install scikit-learn`    → `import sklearn`
 name = "robotrace-dev"
+# 0.2.1 - doc release: README demo SVG now shows the stable install line
+# (`robotrace-dev-0.2.1`); Status badge flips from alpha to stable. No API
+# or behaviour changes; surface identical to 0.2.0.
+#
 # 0.2.0 - first stable contract. Alpha line closed; public surface
 # semver-locked via tests/test_api_surface_freeze.py. Bit-for-bit
 # compatible with 0.1.0a13+ at wire and import level.
@@ -161,7 +165,7 @@ name = "robotrace-dev"
 # traceparent to the create-episode payload, server stores it on
 # episodes.metadata.otel for portal APM deep-links. The "sacred"
 # log_episode signature stays unchanged across both bumps.
-version = "0.2.0"
+version = "0.2.1"
 description = "Official RoboTrace Python SDK and CLI - observability and evals for AI-powered robots (pip install robotrace-dev, import robotrace)."
 readme = "README.md"
 requires-python = ">=3.10"

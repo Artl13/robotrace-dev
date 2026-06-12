@@ -6,7 +6,7 @@ hit 1.0 the contract is locked per AGENTS.md and breakages require
 a major bump.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 
 def install_command(*extras: str, pin: bool = True) -> str:

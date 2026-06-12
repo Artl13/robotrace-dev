@@ -104,7 +104,7 @@
 
     <!-- L2: install output -->
     <g class="line l2">
-      <text x="40" y="150"><tspan class="ok">&#10003;</tspan><tspan class="dim" dx="10">Successfully installed </tspan><tspan class="fg">robotrace-dev-0.1.0a13</tspan></text>
+      <text x="40" y="150"><tspan class="ok">&#10003;</tspan><tspan class="dim" dx="10">Successfully installed </tspan><tspan class="fg">robotrace-dev-0.2.1</tspan></text>
     </g>
 
     <!-- L3: run the script -->

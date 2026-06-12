@@ -29,7 +29,7 @@ to measure regressions - without rolling another in-house dashboard.
 [![httpx](https://img.shields.io/badge/httpx-HTTP%20client-000000)](https://www.python-httpx.org/)
 [![Cloudflare R2](https://img.shields.io/badge/Cloudflare-R2%20uploads-f6821f?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/r2/)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Alpha](https://img.shields.io/badge/Status-alpha-7c3aed)](#status)
+[![Stable](https://img.shields.io/badge/Status-stable-059669)](#status)
 [![ROS 2](https://img.shields.io/badge/ROS%202-optional%20extra-22314e?logo=ros)](https://robotrace.dev/docs/sdk/ros2)
 [![LeRobot](https://img.shields.io/badge/LeRobot-optional%20extra-ff6f00)](https://robotrace.dev/docs/sdk/lerobot)
 [![Gymnasium](https://img.shields.io/badge/Gymnasium-optional%20extra-008170)](https://robotrace.dev/docs/sdk/gymnasium)
@@ -97,13 +97,13 @@ pip install robotrace-dev
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual - `pip install robotrace-dev==0.2.0` pulls this README.
+> as usual - `pip install robotrace-dev==0.2.1` pulls this README.
 > Older pins (`0.1.0a15`, `0.1.0a13`, `0.1.0a12`, …) are prior alphas on
 > the same API surface and keep working on PyPI.
 
 ## Status
 
-**Stable (`0.2.0`).** The public API in this README is now semver-locked
+**Stable (`0.2.1`).** The public API in this README is now semver-locked
 under `0.x`; breakages require a major bump and a full minor of
 `DeprecationWarning` first (see [Stability](#stability)). Once we cut
 `1.0.0`, the [`log_episode`](#log_episode---the-sacred-call) signature
@@ -383,16 +383,16 @@ base install stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.2.0'
+pip install 'robotrace-dev[ros2]==0.2.1'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.2.0'
+pip install 'robotrace-dev[lerobot]==0.2.1'
 
 # Gymnasium env rollout → episode
-pip install 'robotrace-dev[gymnasium]==0.2.0'
+pip install 'robotrace-dev[gymnasium]==0.2.1'
 
 # Multi-camera mp4 encoding (opencv) - combine with any adapter that writes video
-pip install 'robotrace-dev[ros2,video]==0.2.0'
+pip install 'robotrace-dev[ros2,video]==0.2.1'
 ```
 
 ```python
