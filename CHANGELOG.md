@@ -11,6 +11,45 @@ bump and at least one minor of `DeprecationWarning` first.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-13
+
+### Added
+
+- **HDF5 adapter** (`robotrace.adapters.hdf5`) behind the new
+  `[hdf5]` extra (`pip install 'robotrace-dev[hdf5]'`). Imports
+  imitation-learning demonstration files - **robomimic**
+  (`data/demo_*` multi-demo files) and **ALOHA / ACT**
+  (one-file-per-episode, `/action` + `/observations/{qpos,images/*}`) -
+  turning each trajectory into a RoboTrace episode. Four verbs mirror
+  the LeRobot adapter: `scan_file`, `encode_episode`, `upload_episode`,
+  and `upload_dataset` (bulk).
+  - Depends on `h5py` only (~few MB) - **not** robomimic, lerobot, or
+    torch. Image stacks (`(T, H, W, C)` uint8) encode to mp4 via the
+    existing `[video]` extra; a sensor-only file never pays the opencv
+    cost.
+  - `classify_dataset(...)` is a pure function that routes dataset
+    names into slots (`action*` → actions; `images/*` / `*_image` →
+    video; `rewards` / `dones` / `success` → episode metadata;
+    everything else → sensors).
+  - fps is read from robomimic's `data.attrs["env_args"]`
+    (`control_freq`) when present; otherwise pass `fps=` (ALOHA ≈ 50,
+    robomimic ≈ 20). When neither declares a clock the adapter assumes
+    30 and marks `fps_assumed` in the episode metadata.
+  - Additive only - no change to the frozen `0.2.x` core surface.
+
+### Compatibility
+
+- **No breaking changes.** The `0.2.x` public surface
+  (`robotrace`, `.client`, `.episode`, `.errors`, `.evals`,
+  `.types`, `.verify`) is byte-for-byte unchanged - the freeze
+  guard (`tests/test_api_surface_freeze.py`) passes against the
+  committed baseline. Upgrading from any `0.2.x` pin needs no code
+  changes.
+- The deprecated `Episode.upload_video` / `upload_sensors` /
+  `upload_actions` shortcuts (flagged in `0.1.0a13` with `0.3.0` as
+  their *earliest* possible removal) are **kept** in `0.3.0`. They
+  still emit a `DeprecationWarning`; use `Episode.upload(kind, path)`.
+
 ## [0.2.1] - 2026-06-11
 
 ### Changed

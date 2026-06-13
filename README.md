@@ -33,12 +33,13 @@ to measure regressions - without rolling another in-house dashboard.
 [![ROS 2](https://img.shields.io/badge/ROS%202-optional%20extra-22314e?logo=ros)](https://robotrace.dev/docs/sdk/ros2)
 [![LeRobot](https://img.shields.io/badge/LeRobot-optional%20extra-ff6f00)](https://robotrace.dev/docs/sdk/lerobot)
 [![Gymnasium](https://img.shields.io/badge/Gymnasium-optional%20extra-008170)](https://robotrace.dev/docs/sdk/gymnasium)
+[![HDF5](https://img.shields.io/badge/HDF5-optional%20extra-7c3aed)](https://robotrace.dev/docs/sdk/hdf5)
 
 </div>
 
 ---
 
-**Works with** Python 3.10+ · ROS 2 (humble / jazzy) · LeRobot v2.1 · Gymnasium ≥ 1.0 · macOS & Linux. Episode bytes go straight to your object storage — **policy weights never leave your machines.**
+**Works with** Python 3.10+ · ROS 2 (humble / jazzy) · LeRobot v2.1 · Gymnasium ≥ 1.0 · HDF5 (robomimic / ALOHA) · macOS & Linux. Episode bytes go straight to your object storage — **policy weights never leave your machines.**
 
 ## How it works
 
@@ -97,13 +98,13 @@ pip install robotrace-dev
 > `pip install python-dateutil` → `import dateutil`.
 >
 > Pinning for reproducibility (CI, `requirements.txt`) still works
-> as usual - `pip install robotrace-dev==0.2.1` pulls this README.
+> as usual - `pip install robotrace-dev==0.3.0` pulls this README.
 > Older pins (`0.1.0a15`, `0.1.0a13`, `0.1.0a12`, …) are prior alphas on
 > the same API surface and keep working on PyPI.
 
 ## Status
 
-**Stable (`0.2.1`).** The public API in this README is now semver-locked
+**Stable (`0.3.0`).** The public API in this README is now semver-locked
 under `0.x`; breakages require a major bump and a full minor of
 `DeprecationWarning` first (see [Stability](#stability)). Once we cut
 `1.0.0`, the [`log_episode`](#log_episode---the-sacred-call) signature
@@ -383,16 +384,19 @@ base install stays slim:
 
 ```bash
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
-pip install 'robotrace-dev[ros2]==0.2.1'
+pip install 'robotrace-dev[ros2]==0.3.0'
 
 # Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
-pip install 'robotrace-dev[lerobot]==0.2.1'
+pip install 'robotrace-dev[lerobot]==0.3.0'
 
 # Gymnasium env rollout → episode
-pip install 'robotrace-dev[gymnasium]==0.2.1'
+pip install 'robotrace-dev[gymnasium]==0.3.0'
+
+# Imitation-learning HDF5 (robomimic demos / ALOHA episodes) → episode (since 0.3.0)
+pip install 'robotrace-dev[hdf5]==0.3.0'
 
 # Multi-camera mp4 encoding (opencv) - combine with any adapter that writes video
-pip install 'robotrace-dev[ros2,video]==0.2.1'
+pip install 'robotrace-dev[ros2,video]==0.3.0'
 ```
 
 ```python
@@ -426,14 +430,23 @@ rt_gym.upload_rollout(
     seed=42,
 )
 env.close()
+
+# HDF5: one imitation-learning file → episode(s)
+from robotrace.adapters import hdf5
+
+# ALOHA single-episode file → one episode
+hdf5.upload_episode("episode_0.hdf5", policy_version="act-v1", fps=50)
+# robomimic multi-demo file → one episode per demo
+hdf5.upload_dataset("low_dim.hdf5", policy_version="bc-v3", fps=20)
 ```
 
-All three adapters mirror the same surface: `scan_*` for read-only
+All four adapters mirror the same surface: `scan_*` for read-only
 introspection, `encode_*` to write artifacts to disk without
 uploading, and `upload_*` for the one-shot pipeline. Full reference
 at [robotrace.dev/docs/sdk/ros2](https://robotrace.dev/docs/sdk/ros2),
 [robotrace.dev/docs/sdk/lerobot](https://robotrace.dev/docs/sdk/lerobot),
-and [robotrace.dev/docs/sdk/gymnasium](https://robotrace.dev/docs/sdk/gymnasium).
+[robotrace.dev/docs/sdk/gymnasium](https://robotrace.dev/docs/sdk/gymnasium),
+and [robotrace.dev/docs/sdk/hdf5](https://robotrace.dev/docs/sdk/hdf5).
 
 The LeRobot adapter deliberately does **not** depend on the heavy
 `lerobot` PyPI package (which would pull torch + torchvision +
@@ -492,17 +505,24 @@ src/robotrace/
     │   ├── _meta.py
     │   ├── _encode.py
     │   └── _upload.py
-    └── gymnasium/       # env rollout → episode (since 0.1.0a7)
+    ├── gymnasium/       # env rollout → episode (since 0.1.0a7)
+    │   ├── __init__.py
+    │   ├── _scan.py
+    │   ├── _flatten.py
+    │   ├── _encode.py
+    │   └── _upload.py
+    └── hdf5/            # robomimic / ALOHA HDF5 → episode (since 0.3.0)
         ├── __init__.py
+        ├── _classify.py
         ├── _scan.py
-        ├── _flatten.py
         ├── _encode.py
         └── _upload.py
 ```
 
-Next adapter targets (not yet shipped): MuJoCo (standalone), Genesis,
-Isaac Sim, LeRobot v3.0. MuJoCo envs already work through Gymnasium
-when users install `gymnasium[mujoco]`.
+Next adapter targets (not yet shipped): Genesis, Isaac Sim,
+LeRobot v3.0, and RLDS / Open X-Embodiment. MuJoCo isn't a standalone
+target - it logs through the Gymnasium adapter once users install
+`gymnasium[mujoco]`.
 
 ## Contributing
 

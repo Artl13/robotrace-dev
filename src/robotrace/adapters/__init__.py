@@ -11,8 +11,13 @@ Today:
   * `robotrace.adapters.lerobot` - Hugging Face LeRobot v2.1
     datasets → one episode per trajectory.
   * `robotrace.adapters.gymnasium` - Gymnasium env rollout → episode.
+  * `robotrace.adapters.hdf5` - imitation-learning HDF5 files
+    (robomimic `data/demo_*`, ALOHA/ACT `/action` + `/observations`)
+    → one episode per trajectory.
 
-Soon: MuJoCo, Genesis, Isaac Sim, LeRobot v3.0.
+Soon: Genesis, Isaac Sim, LeRobot v3.0, RLDS / Open X-Embodiment.
+MuJoCo isn't a separate adapter - it logs through the Gymnasium
+adapter via `gymnasium[mujoco]` env ids.
 
 Adapters never reach inside the SDK's private modules - they go
 through the same public `Client.start_episode` / `upload_*` /
