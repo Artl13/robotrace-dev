@@ -39,7 +39,7 @@ to measure regressions - without rolling another in-house dashboard.
 
 ---
 
-**Works with** Python 3.10+ · ROS 2 (humble / jazzy) · LeRobot v2.1 · Gymnasium ≥ 1.0 · HDF5 (robomimic / ALOHA) · macOS & Linux. Episode bytes go straight to your object storage — **policy weights never leave your machines.**
+**Works with** Python 3.10+ · ROS 2 (humble / jazzy) · LeRobot v2.0 / v2.1 / v3.0 · Gymnasium ≥ 1.0 · HDF5 (robomimic / ALOHA) · macOS & Linux. Episode bytes go straight to your object storage — **policy weights never leave your machines.**
 
 ## How it works
 
@@ -386,7 +386,7 @@ base install stays slim:
 # rosbag2 → episode (sqlite3 + mcap; no rclpy required)
 pip install 'robotrace-dev[ros2]==0.3.0'
 
-# Hugging Face LeRobot v2.1 datasets → episode-per-trajectory
+# Hugging Face LeRobot v2.x / v3.0 datasets → episode-per-trajectory
 pip install 'robotrace-dev[lerobot]==0.3.0'
 
 # Gymnasium env rollout → episode
@@ -450,10 +450,12 @@ and [robotrace.dev/docs/sdk/hdf5](https://robotrace.dev/docs/sdk/hdf5).
 
 The LeRobot adapter deliberately does **not** depend on the heavy
 `lerobot` PyPI package (which would pull torch + torchvision +
-pyav + several CUDA wheels). It reads the v2.1 on-disk format
-directly via `pyarrow` + `huggingface_hub` - ~20 MB install
-footprint, comparable to `[ros2]`. LeRobot v3.0 (multi-episode
-parquet shards, late 2025) is on the roadmap.
+pyav + several CUDA wheels). It reads the on-disk format directly
+via `pyarrow` + `huggingface_hub` - ~20 MB install footprint,
+comparable to `[ros2]`. Both the v2.x one-file-per-episode layout
+and the v3.0 multi-episode-shard layout (`lerobot >= 0.3.x`) are
+supported; v3.0 video needs the `[video]` extra since episodes are
+trimmed out of shared mp4 shards.
 
 ## Stability
 
@@ -499,7 +501,7 @@ src/robotrace/
     │   ├── _scan.py
     │   ├── _encode.py
     │   └── _upload.py
-    ├── lerobot/         # HF LeRobot v2.1 → episode (since 0.1.0a3)
+    ├── lerobot/         # HF LeRobot v2.x + v3.0 → episode (v2.x since 0.1.0a3, v3.0 since 0.3.0)
     │   ├── __init__.py
     │   ├── _classify.py
     │   ├── _meta.py
@@ -519,10 +521,9 @@ src/robotrace/
         └── _upload.py
 ```
 
-Next adapter targets (not yet shipped): Genesis, Isaac Sim,
-LeRobot v3.0, and RLDS / Open X-Embodiment. MuJoCo isn't a standalone
-target - it logs through the Gymnasium adapter once users install
-`gymnasium[mujoco]`.
+Next adapter targets (not yet shipped): Genesis, Isaac Sim, and
+RLDS / Open X-Embodiment. MuJoCo isn't a standalone target - it logs
+through the Gymnasium adapter once users install `gymnasium[mujoco]`.
 
 ## Contributing
 

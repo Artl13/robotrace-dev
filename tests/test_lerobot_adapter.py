@@ -1,23 +1,34 @@
 """LeRobot adapter tests.
 
-Synthesises a tiny LeRobot v2.1 dataset on disk with two episodes, two
-cameras, an `observation.state`, an `action` vector, and a few `next.*`
-outcome columns. Uses pyarrow to write the parquet shards and opencv
-(when available) to write the per-camera mp4s - so the test never
-talks to the HF Hub and never needs the heavy `lerobot` package.
+Synthesises tiny LeRobot datasets on disk - both the v2.1
+one-file-per-episode layout and the v3.0 multi-episode-shard layout -
+with two episodes, two cameras, an `observation.state`, an `action`
+vector, and a few `next.*` outcome columns. Uses pyarrow to write the
+parquet shards and opencv (when available) to write the mp4s - so the
+test never talks to the HF Hub and never needs the heavy `lerobot`
+package.
 
 Coverage:
 
     test_classify_columns_routes_into_slots     - pure-function classifier
                                                    pins LeRobot's column
                                                    conventions.
-    test_scan_dataset_reads_meta                - info.json, episodes.jsonl,
-                                                   tasks.jsonl all parsed,
-                                                   v3.0 hard-fails clearly.
+    test_scan_dataset_reads_meta                - v2.1 info.json,
+                                                   episodes.jsonl, tasks.jsonl
+                                                   all parsed.
+    test_scan_dataset_reads_v3_meta             - v3.0 info.json +
+                                                   meta/episodes/*.parquet
+                                                   parsed into locators.
+    test_scan_dataset_rejects_*                 - unknown / future versions
+                                                   fail clearly.
     test_encode_episode_writes_artifacts        - encode produces video.mp4 +
                                                    sensors.npz + actions.npz
                                                    with the expected keys
-                                                   and shapes.
+                                                   and shapes (v2.1 + v3.0).
+    test_encode_episode_v3_*                    - v3.0 slices the shared data
+                                                   shard to one episode and
+                                                   trims each camera clip out
+                                                   of the shared mp4.
     test_encode_episode_canonical_camera        - picking one camera skips
                                                    the multi-cam tile.
     test_upload_episode_uses_start_episode      - one-shot upload hits the
@@ -231,6 +242,215 @@ def _maybe_write_videos(root: Path, *, episode_index: int, length: int) -> None:
             writer.release()
 
 
+# ── synthetic v3.0 dataset fixture ────────────────────────────────────
+
+# Episode lengths for the v3 fixture; episode 0 then episode 1 are
+# concatenated into a single data parquet shard and a single mp4 shard
+# per camera. fps=10, so episode 0 occupies [0.0, 0.5) of the shared
+# mp4 and episode 1 occupies [0.5, 0.8).
+_V3_EP_LENGTHS = [5, 3]
+_V3_FPS = 10.0
+
+
+@pytest.fixture
+def synthetic_v3_dataset(tmp_path: Path) -> Path:
+    """Build a tiny LeRobot v3.0 dataset (multi-episode shards).
+
+    Layout:
+
+        my_v3/
+        ├── meta/
+        │   ├── info.json                       (data_path / video_path templates)
+        │   ├── tasks.parquet
+        │   └── episodes/chunk-000/file-000.parquet   (2 episode rows + locators)
+        ├── data/
+        │   └── chunk-000/
+        │       └── file-000.parquet            (both episodes concatenated)
+        └── videos/
+            ├── observation.images.cam_a/chunk-000/file-000.mp4   (8 frames)
+            └── observation.images.cam_b/chunk-000/file-000.mp4   (8 frames)
+    """
+    root = tmp_path / "synthetic_lerobot_v3"
+    (root / "meta" / "episodes" / "chunk-000").mkdir(parents=True)
+    (root / "data" / "chunk-000").mkdir(parents=True)
+    cameras = ["observation.images.cam_a", "observation.images.cam_b"]
+    for cam in cameras:
+        (root / "videos" / cam / "chunk-000").mkdir(parents=True)
+
+    total_frames = sum(_V3_EP_LENGTHS)
+    info = {
+        "codebase_version": "v3.0",
+        "robot_type": "synthetic",
+        "fps": int(_V3_FPS),
+        "total_episodes": len(_V3_EP_LENGTHS),
+        "total_frames": total_frames,
+        "chunks_size": 1000,
+        "data_files_size_in_mb": 100,
+        "video_files_size_in_mb": 500,
+        "data_path": "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+        "video_path": "videos/{video_key}/chunk-{chunk_index:03d}/file-{file_index:03d}.mp4",
+        "features": {
+            "timestamp": {"dtype": "float32", "shape": [1]},
+            "frame_index": {"dtype": "int64", "shape": [1]},
+            "episode_index": {"dtype": "int64", "shape": [1]},
+            "index": {"dtype": "int64", "shape": [1]},
+            "task_index": {"dtype": "int64", "shape": [1]},
+            "observation.images.cam_a": {"dtype": "video", "shape": [24, 32, 3]},
+            "observation.images.cam_b": {"dtype": "video", "shape": [16, 32, 3]},
+            "observation.state": {"dtype": "float32", "shape": [6]},
+            "action": {"dtype": "float32", "shape": [3]},
+            "next.reward": {"dtype": "float32", "shape": [1]},
+            "next.done": {"dtype": "bool", "shape": [1]},
+        },
+    }
+    (root / "meta" / "info.json").write_text(json.dumps(info))
+
+    _write_v3_tasks(root)
+    _write_v3_data_shard(root)
+    _write_v3_episodes_meta(root, cameras)
+    _maybe_write_v3_video_shards(root, cameras, total_frames)
+    return root
+
+
+def _write_v3_tasks(root: Path) -> None:
+    table = pa.table(
+        {
+            "task_index": pa.array([0, 1], type=pa.int64()),
+            "task": pa.array(["pick up cup", "place cup"], type=pa.string()),
+        }
+    )
+    pq.write_table(table, root / "meta" / "tasks.parquet")
+
+
+def _write_v3_data_shard(root: Path) -> None:
+    """One parquet holding both episodes, concatenated, with the columns a
+    real v3 data shard carries (timestamp resets per episode; index is global)."""
+    timestamps: list[float] = []
+    frame_index: list[int] = []
+    episode_index: list[int] = []
+    index: list[int] = []
+    task_index: list[int] = []
+    state: list[list[float]] = []
+    action: list[list[float]] = []
+    reward: list[float] = []
+    done: list[bool] = []
+
+    global_i = 0
+    for ep, length in enumerate(_V3_EP_LENGTHS):
+        for f in range(length):
+            timestamps.append(f / _V3_FPS)  # per-episode reset
+            frame_index.append(f)
+            episode_index.append(ep)
+            index.append(global_i)
+            task_index.append(ep)
+            state.append([float(ep) + 0.1 * k for k in range(6)])
+            action.append([0.1 * (ep + 1), 0.0, -0.05 * (ep + 1)])
+            reward.append(0.1 * (ep + 1))
+            done.append(f == length - 1)
+            global_i += 1
+
+    table = pa.table(
+        {
+            "timestamp": pa.array(timestamps, type=pa.float32()),
+            "frame_index": pa.array(frame_index, type=pa.int64()),
+            "episode_index": pa.array(episode_index, type=pa.int64()),
+            "index": pa.array(index, type=pa.int64()),
+            "task_index": pa.array(task_index, type=pa.int64()),
+            "observation.state": pa.array(state, type=pa.list_(pa.float32())),
+            "action": pa.array(action, type=pa.list_(pa.float32())),
+            "next.reward": pa.array(reward, type=pa.float32()),
+            "next.done": pa.array(done, type=pa.bool_()),
+        }
+    )
+    pq.write_table(table, root / "data" / "chunk-000" / "file-000.parquet")
+
+
+def _write_v3_episodes_meta(root: Path, cameras: list[str]) -> None:
+    """One episode-metadata parquet row per episode, with data + video locators."""
+    rows: dict[str, list[Any]] = {
+        "episode_index": [],
+        "tasks": [],
+        "length": [],
+        "data/chunk_index": [],
+        "data/file_index": [],
+        "dataset_from_index": [],
+        "dataset_to_index": [],
+    }
+    for cam in cameras:
+        rows[f"videos/{cam}/chunk_index"] = []
+        rows[f"videos/{cam}/file_index"] = []
+        rows[f"videos/{cam}/from_timestamp"] = []
+        rows[f"videos/{cam}/to_timestamp"] = []
+
+    cumulative = 0.0
+    global_from = 0
+    task_names = ["pick up cup", "place cup"]
+    for ep, length in enumerate(_V3_EP_LENGTHS):
+        rows["episode_index"].append(ep)
+        rows["tasks"].append([task_names[ep]])
+        rows["length"].append(length)
+        rows["data/chunk_index"].append(0)
+        rows["data/file_index"].append(0)
+        rows["dataset_from_index"].append(global_from)
+        rows["dataset_to_index"].append(global_from + length)
+        duration = length / _V3_FPS
+        for cam in cameras:
+            rows[f"videos/{cam}/chunk_index"].append(0)
+            rows[f"videos/{cam}/file_index"].append(0)
+            rows[f"videos/{cam}/from_timestamp"].append(cumulative)
+            rows[f"videos/{cam}/to_timestamp"].append(cumulative + duration)
+        cumulative += duration
+        global_from += length
+
+    table = pa.table(
+        {
+            "episode_index": pa.array(rows["episode_index"], type=pa.int64()),
+            "tasks": pa.array(rows["tasks"], type=pa.list_(pa.string())),
+            "length": pa.array(rows["length"], type=pa.int64()),
+            "data/chunk_index": pa.array(rows["data/chunk_index"], type=pa.int64()),
+            "data/file_index": pa.array(rows["data/file_index"], type=pa.int64()),
+            "dataset_from_index": pa.array(
+                rows["dataset_from_index"], type=pa.int64()
+            ),
+            "dataset_to_index": pa.array(rows["dataset_to_index"], type=pa.int64()),
+            **{
+                k: pa.array(
+                    v,
+                    type=pa.float64()
+                    if k.endswith("timestamp")
+                    else pa.int64(),
+                )
+                for k, v in rows.items()
+                if k.startswith("videos/")
+            },
+        }
+    )
+    pq.write_table(
+        table, root / "meta" / "episodes" / "chunk-000" / "file-000.parquet"
+    )
+
+
+def _maybe_write_v3_video_shards(
+    root: Path, cameras: list[str], total_frames: int
+) -> None:
+    """Write one shared mp4 per camera holding ALL episodes' frames."""
+    try:
+        import cv2
+    except ImportError:
+        return
+    for cam in cameras:
+        path = root / "videos" / cam / "chunk-000" / "file-000.mp4"
+        h = 24 if cam.endswith("cam_a") else 16
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        writer = cv2.VideoWriter(str(path), fourcc, _V3_FPS, (32, h))
+        try:
+            for i in range(total_frames):
+                pixel = np.full((h, 32, 3), 16 * (i + 1) % 256, dtype=np.uint8)
+                writer.write(pixel)
+        finally:
+            writer.release()
+
+
 # ── classifier ───────────────────────────────────────────────────────
 
 
@@ -305,16 +525,24 @@ def test_scan_dataset_reads_meta(synthetic_dataset: Path) -> None:
     assert "10 fps" in report or "10 fps".replace(" ", "") in report.replace(" ", "")
 
 
-def test_scan_dataset_rejects_v3(tmp_path: Path) -> None:
-    """v3.0 is explicitly out of scope for 0.1.0a3 - fail clearly."""
-    root = tmp_path / "v3_dataset"
+def test_scan_dataset_rejects_future_version(tmp_path: Path) -> None:
+    """A v4+ codebase_version is newer than we know how to read - fail clearly."""
+    root = tmp_path / "v4_dataset"
     (root / "meta").mkdir(parents=True)
     (root / "meta" / "info.json").write_text(
-        json.dumps({"codebase_version": "v3.0", "fps": 30, "total_episodes": 0})
+        json.dumps({"codebase_version": "v4.0", "fps": 30, "total_episodes": 0})
     )
-    (root / "meta" / "episodes.jsonl").write_text("")
+    with pytest.raises(rt.ConfigurationError, match=r"newer than"):
+        lerobot.scan_dataset(str(root))
 
-    with pytest.raises(rt.ConfigurationError, match=r"v3\.0"):
+
+def test_scan_dataset_rejects_unknown_version(tmp_path: Path) -> None:
+    root = tmp_path / "weird_dataset"
+    (root / "meta").mkdir(parents=True)
+    (root / "meta" / "info.json").write_text(
+        json.dumps({"codebase_version": "potato", "fps": 30, "total_episodes": 0})
+    )
+    with pytest.raises(rt.ConfigurationError, match=r"doesn't recognise"):
         lerobot.scan_dataset(str(root))
 
 
@@ -407,6 +635,130 @@ def test_encode_episode_multi_camera_tiles(
     # Tiled output exists and has a non-zero size; full pixel
     # validation belongs in an opencv-internal test, not here.
     assert encoded.video.bytes_size > 0
+
+
+# ── v3.0 scan + encode ───────────────────────────────────────────────
+
+
+def _count_frames(path: Path) -> int:
+    import cv2
+
+    cap = cv2.VideoCapture(str(path))
+    try:
+        n = 0
+        while True:
+            ok, _ = cap.read()
+            if not ok:
+                break
+            n += 1
+        return n
+    finally:
+        cap.release()
+
+
+def test_scan_dataset_reads_v3_meta(synthetic_v3_dataset: Path) -> None:
+    summary = lerobot.scan_dataset(str(synthetic_v3_dataset))
+
+    assert summary.is_local is True
+    assert summary.is_v3 is True
+    assert summary.codebase_version == "v3.0"
+    assert summary.fps == 10.0
+    assert summary.total_episodes == 2
+    assert summary.total_frames == 8
+    assert summary.data_path is not None and "file-" in summary.data_path
+    assert {"observation.images.cam_a", "observation.images.cam_b"} <= set(
+        summary.camera_keys
+    )
+
+    assert {ep.episode_index for ep in summary.episodes} == {0, 1}
+    ep1 = summary.episode(1)
+    assert ep1.length == 3
+    assert ep1.tasks == ["place cup"]
+    # Data locator: both episodes share chunk 0 / file 0.
+    assert ep1.data_chunk_index == 0
+    assert ep1.data_file_index == 0
+    assert ep1.dataset_from_index == 5
+    assert ep1.dataset_to_index == 8
+    # Video locator: episode 1 occupies [0.5, 0.8) of the shared mp4.
+    loc = ep1.video_locators["observation.images.cam_a"]
+    assert loc.chunk_index == 0
+    assert loc.file_index == 0
+    assert loc.from_timestamp == pytest.approx(0.5)
+    assert loc.to_timestamp == pytest.approx(0.8)
+
+
+def test_encode_episode_v3_slices_data_shard(
+    synthetic_v3_dataset: Path, tmp_path: Path
+) -> None:
+    """v3 encode pulls just episode 1's rows out of the shared data shard."""
+    out = tmp_path / "v3_ep1"
+    encoded = lerobot.encode_episode(
+        str(synthetic_v3_dataset),
+        episode_index=1,
+        output_dir=out,
+        canonical_camera="observation.images.cam_a",
+    )
+
+    assert encoded.fps == 10.0
+    assert encoded.duration_s == pytest.approx(0.3)  # 3 frames / 10 fps
+
+    assert encoded.sensors is not None
+    sensors = np.load(encoded.sensors.path)
+    # Only episode 1's 3 rows, not all 8 in the shard.
+    assert sensors["observation.state/value"].shape == (3, 6)
+    # episode 1 state = [1.0, 1.1, ... ] (ep offset 1.0)
+    assert sensors["observation.state/value"][0][0] == pytest.approx(1.0)
+    # timestamps reset to per-episode 0, 0.1, 0.2 → ns (float32 source, so
+    # the 0.1s frame lands within a few ns of 1e8).
+    assert sensors["observation.state/_t_ns"][0] == 0
+    assert sensors["observation.state/_t_ns"][1] == pytest.approx(
+        100_000_000, abs=1000
+    )
+
+    assert encoded.actions is not None
+    actions = np.load(encoded.actions.path)
+    assert actions["action/value"].shape == (3, 3)
+
+    outcome = encoded.metadata["lerobot_episode_outcome"]
+    assert outcome["next.done"] is True
+    assert encoded.metadata["lerobot_codebase_version"] == "v3.0"
+    assert encoded.metadata["lerobot_episode_index"] == 1
+
+
+def test_encode_episode_v3_trims_single_camera(
+    synthetic_v3_dataset: Path, tmp_path: Path
+) -> None:
+    """v3 single camera → episode is trimmed out of the shared mp4 shard."""
+    pytest.importorskip("cv2")
+    out = tmp_path / "v3_trim"
+    encoded = lerobot.encode_episode(
+        str(synthetic_v3_dataset),
+        episode_index=1,
+        output_dir=out,
+        canonical_camera="observation.images.cam_a",
+    )
+    assert encoded.video is not None
+    assert encoded.video.columns == ["observation.images.cam_a"]
+    # Episode 1 is 3 frames - the trim must NOT include all 8 shard frames.
+    assert _count_frames(encoded.video.path) == 3
+
+
+def test_encode_episode_v3_multi_camera_tiles(
+    synthetic_v3_dataset: Path, tmp_path: Path
+) -> None:
+    """v3 multi-camera → both cams trimmed to the episode, then tiled."""
+    pytest.importorskip("cv2")
+    out = tmp_path / "v3_tile"
+    encoded = lerobot.encode_episode(
+        str(synthetic_v3_dataset), episode_index=0, output_dir=out
+    )
+    assert encoded.video is not None
+    assert encoded.video.columns == [
+        "observation.images.cam_a",
+        "observation.images.cam_b",
+    ]
+    # Episode 0 is 5 frames; the tiled clip carries exactly those.
+    assert _count_frames(encoded.video.path) == 5
 
 
 # ── upload_episode (full ingest flow) ────────────────────────────────

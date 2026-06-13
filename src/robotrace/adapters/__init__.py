@@ -8,14 +8,15 @@ install stays slim.
 
 Today:
   * `robotrace.adapters.ros2` - rosbag2 (sqlite3 + mcap) → episode.
-  * `robotrace.adapters.lerobot` - Hugging Face LeRobot v2.1
-    datasets → one episode per trajectory.
+  * `robotrace.adapters.lerobot` - Hugging Face LeRobot datasets
+    (v2.0 / v2.1 one-file-per-episode and v3.0 multi-episode shards)
+    → one episode per trajectory.
   * `robotrace.adapters.gymnasium` - Gymnasium env rollout → episode.
   * `robotrace.adapters.hdf5` - imitation-learning HDF5 files
     (robomimic `data/demo_*`, ALOHA/ACT `/action` + `/observations`)
     → one episode per trajectory.
 
-Soon: Genesis, Isaac Sim, LeRobot v3.0, RLDS / Open X-Embodiment.
+Soon: Genesis, Isaac Sim, RLDS / Open X-Embodiment.
 MuJoCo isn't a separate adapter - it logs through the Gymnasium
 adapter via `gymnasium[mujoco]` env ids.
 

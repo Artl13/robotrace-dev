@@ -36,6 +36,24 @@ bump and at least one minor of `DeprecationWarning` first.
     robomimic ≈ 20). When neither declares a clock the adapter assumes
     30 and marks `fps_assumed` in the episode metadata.
   - Additive only - no change to the frozen `0.2.x` core surface.
+- **LeRobot v3.0 support** in `robotrace.adapters.lerobot`. The
+  adapter now reads the multi-episode-shard layout (`lerobot >= 0.3.x`)
+  in addition to the v2.0 / v2.1 one-file-per-episode layout - same
+  four verbs, same `video.mp4 / sensors.npz / actions.npz` output, no
+  version flag (it's detected from `info.json`).
+  - Reads `meta/episodes/*.parquet` into per-episode locators
+    (`data/chunk_index`, `dataset_from_index` / `dataset_to_index`, and
+    per-camera `videos/<key>/{chunk_index, file_index, from_timestamp,
+    to_timestamp}`), surfaced on `EpisodeMeta` alongside a new
+    `VideoLocator` type. `scan_dataset` stays metadata-only.
+  - `encode_episode` slices the shared data parquet down to the
+    episode's rows (filtering on `episode_index`) and trims each camera
+    clip out of the shared mp4 by its `[from, to)` window. v3.0 video
+    requires the `[video]` extra (opencv) even for a single camera -
+    there's no per-episode mp4 to copy.
+  - v4+ / unrecognized `codebase_version` values now raise a clear
+    `ConfigurationError` instead of being mistaken for a known layout.
+  - Additive only - no change to the frozen `0.2.x` core surface.
 
 ### Compatibility
 

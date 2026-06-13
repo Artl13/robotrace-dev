@@ -1,8 +1,12 @@
 """`encode_episode(...)` - write artifacts for one LeRobot episode.
 
-Walks one episode's parquet file (``data/chunk-XXX/episode_NNNNNN.parquet``)
-and the matching per-camera mp4s (``videos/observation.images.<key>/chunk-XXX/
-episode_NNNNNN.mp4``), and produces the standard RoboTrace artifact shape:
+For v2.x this walks one episode's parquet file
+(``data/chunk-XXX/episode_NNNNNN.parquet``) and the matching per-camera
+mp4s (``videos/observation.images.<key>/chunk-XXX/episode_NNNNNN.mp4``).
+For v3.0 it reads the multi-episode data shard named by the episode's
+locator, slices it to the episode's rows, and trims each camera clip out
+of the shared per-camera mp4 using the ``[from, to)`` timestamp window.
+Either way it produces the standard RoboTrace artifact shape:
 
     video.mp4    one camera passthrough, OR multi-camera horizontally tiled
     sensors.npz  every observation.* column packed under
@@ -36,10 +40,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from ...errors import ConfigurationError
 from ..._version import install_command
+from ...errors import ConfigurationError
 from ._classify import Slot, classify_column
-from ._meta import DatasetSummary, EpisodeMeta, scan_dataset
+from ._meta import DatasetSummary, EpisodeMeta, VideoLocator, scan_dataset
 
 
 @dataclass
@@ -113,20 +117,24 @@ def encode_episode(
     out_dir = Path(output_dir).expanduser().resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    parquet_path = _resolve_episode_parquet(
-        repo_id_or_path, episode_index, summary, revision=revision
+    parquet_path = _resolve_data_parquet(
+        repo_id_or_path, episode_index, summary, ep_meta, revision=revision
     )
 
     pa = _import_pyarrow()
     table = pa.parquet.read_table(parquet_path)
+    if summary.is_v3:
+        # v3.0 data shards concatenate many episodes; slice out just this
+        # one. `timestamp` resets to ~0 per episode, so the downstream
+        # clock math is identical to v2.x.
+        table = _filter_table_to_episode(table, episode_index)
     columns = list(table.column_names)
 
-    # LeRobot v2.1 stores cameras as MP4 files referenced by feature
-    # name in info.json - NOT as parquet columns. So the source of
-    # truth for "which cameras does this dataset have?" is
-    # `summary.camera_keys`, populated from info.json["features"].
-    # The parquet classifier only handles non-image features
-    # (observation.state, action, next.*, etc.).
+    # LeRobot stores cameras as MP4 files referenced by feature name in
+    # info.json - NOT as parquet columns. So the source of truth for
+    # "which cameras does this dataset have?" is `summary.camera_keys`,
+    # populated from info.json["features"]. The parquet classifier only
+    # handles non-image features (observation.state, action, next.*, …).
     video_columns = list(summary.camera_keys)
 
     column_decisions = {c: classify_column(c) for c in columns}
@@ -157,14 +165,25 @@ def encode_episode(
 
     skipped: list[dict[str, Any]] = []
 
-    encoded_video = _encode_video(
-        repo_id_or_path=repo_id_or_path,
-        episode_index=episode_index,
-        camera_columns=video_columns,
-        output_path=out_dir / "video.mp4",
-        revision=revision,
-        skipped=skipped,
-    )
+    if summary.is_v3:
+        encoded_video = _encode_video_v3(
+            repo_id_or_path=repo_id_or_path,
+            summary=summary,
+            ep_meta=ep_meta,
+            camera_columns=video_columns,
+            output_path=out_dir / "video.mp4",
+            revision=revision,
+            skipped=skipped,
+        )
+    else:
+        encoded_video = _encode_video(
+            repo_id_or_path=repo_id_or_path,
+            episode_index=episode_index,
+            camera_columns=video_columns,
+            output_path=out_dir / "video.mp4",
+            revision=revision,
+            skipped=skipped,
+        )
 
     encoded_sensors = _encode_sensors_or_actions(
         table=table,
@@ -206,6 +225,78 @@ def encode_episode(
 
 
 # ── parquet path resolution ───────────────────────────────────────────
+
+
+def _resolve_data_parquet(
+    repo_id_or_path: str,
+    episode_index: int,
+    summary: DatasetSummary,
+    ep_meta: EpisodeMeta,
+    *,
+    revision: str | None,
+) -> Path:
+    """Locate the parquet holding this episode's tabular data.
+
+    v2.x: one file per episode. v3.0: the multi-episode data shard named
+    by the episode's ``data/chunk_index`` + ``data/file_index`` locator.
+    """
+    if summary.is_v3:
+        if ep_meta.data_chunk_index is None or ep_meta.data_file_index is None:
+            raise ConfigurationError(
+                f"episode {episode_index} in {repo_id_or_path} is v3.0 but its "
+                "metadata is missing data/chunk_index or data/file_index - the "
+                "meta/episodes shard looks incomplete."
+            )
+        template = summary.data_path or (
+            "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet"
+        )
+        rel = template.format(
+            chunk_index=ep_meta.data_chunk_index,
+            file_index=ep_meta.data_file_index,
+        )
+        return _resolve_shard_path(repo_id_or_path, summary, rel, revision=revision)
+    return _resolve_episode_parquet(
+        repo_id_or_path, episode_index, summary, revision=revision
+    )
+
+
+def _resolve_shard_path(
+    repo_id_or_path: str,
+    summary: DatasetSummary,
+    rel: str,
+    *,
+    revision: str | None,
+) -> Path:
+    """Resolve one relative shard path to a concrete file (local or Hub)."""
+    if summary.is_local:
+        candidate = Path(summary.repo_id_or_path).expanduser().resolve() / rel
+        if candidate.is_file():
+            return candidate
+        raise ConfigurationError(
+            f"could not find {rel} under {summary.repo_id_or_path}. Is the "
+            "dataset fully downloaded?"
+        )
+    from ._meta import _hub_download
+
+    return _hub_download(repo_id_or_path, rel, revision=revision)
+
+
+def _filter_table_to_episode(table: Any, episode_index: int) -> Any:
+    """Slice a v3.0 multi-episode data shard down to one episode's rows."""
+    if "episode_index" not in table.column_names:
+        raise ConfigurationError(
+            "v3.0 data shard has no `episode_index` column - cannot isolate "
+            f"episode {episode_index}. Unexpected dataset layout."
+        )
+    pc = _import_pyarrow_compute()
+    mask = pc.equal(table.column("episode_index"), episode_index)
+    filtered = table.filter(mask)
+    if filtered.num_rows == 0:
+        raise ConfigurationError(
+            f"episode {episode_index} has no rows in its v3.0 data shard. "
+            "The meta/episodes locator may point at the wrong file."
+        )
+    return filtered
 
 
 def _resolve_episode_parquet(
@@ -391,6 +482,162 @@ def _resolve_video_path(
         f"episode {episode_index}. Tried: {relative_candidates}. "
         f"Last error: {last_error}"
     )
+
+
+def _encode_video_v3(
+    *,
+    repo_id_or_path: str,
+    summary: DatasetSummary,
+    ep_meta: EpisodeMeta,
+    camera_columns: Sequence[str],
+    output_path: Path,
+    revision: str | None,
+    skipped: list[dict[str, Any]],
+) -> EncodedArtifact | None:
+    """Trim one episode out of v3.0 video shards, tiling if multi-cam.
+
+    Unlike v2.x (one mp4 per episode → straight copy), v3.0 concatenates
+    episodes into shared mp4s, so every camera must be trimmed to its
+    ``[from_timestamp, to_timestamp)`` window. That needs opencv even for
+    a single camera; without it we skip video with a clear note.
+    """
+    if not camera_columns:
+        return None
+
+    video_template = summary.video_path or (
+        "videos/{video_key}/chunk-{chunk_index:03d}/file-{file_index:03d}.mp4"
+    )
+
+    resolved: list[tuple[str, Path, VideoLocator]] = []
+    for cam in camera_columns:
+        loc = ep_meta.video_locators.get(cam)
+        if loc is None:
+            skipped.append(
+                {"column": cam, "reason": "no v3.0 video locator for this episode"}
+            )
+            continue
+        rel = video_template.format(
+            video_key=cam, chunk_index=loc.chunk_index, file_index=loc.file_index
+        )
+        try:
+            shard = _resolve_shard_path(
+                repo_id_or_path, summary, rel, revision=revision
+            )
+        except ConfigurationError as exc:
+            skipped.append(
+                {"column": cam, "reason": f"video shard unavailable: {exc}"}
+            )
+            continue
+        resolved.append((cam, shard, loc))
+
+    if not resolved:
+        return None
+
+    try:
+        cv2 = _import_cv2()
+    except ConfigurationError as exc:
+        skipped.append(
+            {
+                "reason": (
+                    "v3.0 video needs opencv to trim episodes out of shared mp4 "
+                    f"shards - install `{install_command('lerobot', 'video')}`."
+                ),
+                "exc": str(exc),
+            }
+        )
+        return None
+
+    fps = summary.fps if summary.fps > 0 else 30.0
+
+    if len(resolved) == 1:
+        cam, shard, loc = resolved[0]
+        _trim_clip(
+            shard, loc.from_timestamp, loc.to_timestamp, fps, output_path, cv2=cv2
+        )
+        return EncodedArtifact(
+            slot="video",
+            path=output_path,
+            bytes_size=output_path.stat().st_size,
+            columns=[cam],
+        )
+
+    np = _import_numpy()
+    temp_clips: list[Path] = []
+    columns_in_order: list[str] = []
+    try:
+        for i, (cam, shard, loc) in enumerate(resolved):
+            clip = output_path.parent / f"_v3clip_{i}.mp4"
+            _trim_clip(
+                shard, loc.from_timestamp, loc.to_timestamp, fps, clip, cv2=cv2
+            )
+            temp_clips.append(clip)
+            columns_in_order.append(cam)
+        _tile_videos_horizontal(temp_clips, output_path, cv2=cv2, np=np)
+    finally:
+        for clip in temp_clips:
+            clip.unlink(missing_ok=True)
+
+    return EncodedArtifact(
+        slot="video",
+        path=output_path,
+        bytes_size=output_path.stat().st_size,
+        columns=columns_in_order,
+    )
+
+
+def _trim_clip(
+    shard_path: Path,
+    from_timestamp: float,
+    to_timestamp: float,
+    fps: float,
+    output_path: Path,
+    *,
+    cv2: Any,
+) -> int:
+    """Copy the ``[from, to)`` frame window of a shard mp4 into a new mp4.
+
+    Frame selection is by index (``round(t * fps)``) rather than mp4
+    timestamp seeking - the shards are constant-fps so index math is
+    exact, and it sidesteps opencv's unreliable keyframe seeking.
+    Returns the number of frames written.
+    """
+    cap = cv2.VideoCapture(str(shard_path))
+    try:
+        if not cap.isOpened():
+            raise ConfigurationError(
+                f"opencv could not open {shard_path}. The mp4 codec is "
+                "likely missing from your opencv wheel."
+            )
+        in_fps = cap.get(cv2.CAP_PROP_FPS) or 0.0
+        if in_fps <= 0:
+            in_fps = fps
+        start_frame = max(0, round(from_timestamp * in_fps))
+        end_frame = round(to_timestamp * in_fps)  # exclusive
+        if end_frame <= start_frame:
+            end_frame = start_frame + 1
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        writer = cv2.VideoWriter(str(output_path), fourcc, in_fps, (width, height))
+        if not writer.isOpened():
+            raise ConfigurationError(
+                f"opencv VideoWriter failed to open {output_path}. "
+                "Try `pip install --upgrade opencv-python`."
+            )
+        written = 0
+        try:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, float(start_frame))
+            for _ in range(start_frame, end_frame):
+                ok, frame = cap.read()
+                if not ok:
+                    break
+                writer.write(frame)
+                written += 1
+        finally:
+            writer.release()
+        return written
+    finally:
+        cap.release()
 
 
 def _tile_videos_horizontal(
@@ -614,6 +861,18 @@ def _import_pyarrow() -> Any:
     except ImportError as exc:
         raise ConfigurationError(
             "the LeRobot adapter needs `pyarrow` to read parquet files. "
+            f"Install with `{install_command('lerobot')}`."
+        ) from exc
+
+
+def _import_pyarrow_compute() -> Any:
+    try:
+        import pyarrow.compute
+
+        return pyarrow.compute
+    except ImportError as exc:
+        raise ConfigurationError(
+            "the LeRobot adapter needs `pyarrow` to filter v3.0 data shards. "
             f"Install with `{install_command('lerobot')}`."
         ) from exc
 

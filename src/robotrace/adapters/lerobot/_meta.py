@@ -1,16 +1,26 @@
-"""Read-only metadata loader for LeRobot v2.1 datasets.
+"""Read-only metadata loader for LeRobot datasets (v2.0 / v2.1 / v3.0).
 
 Loads from either a local directory (``./my_dataset/``) or a HF Hub
 repo id (``lerobot/aloha_static_cups_open``). Hub access fetches only
-the small ``meta/`` files - never a parquet shard or an mp4 - so a
+the small ``meta/`` files - never a data parquet shard or an mp4 - so a
 ``scan_dataset(...)`` call is fast and cheap regardless of the dataset's
 total size.
 
-Files we read:
-  * ``meta/info.json`` - fps, total_episodes, features schema,
-    codebase_version (used to gate v3.0 with a friendly error).
-  * ``meta/episodes.jsonl`` - per-episode length and task index.
-  * ``meta/tasks.jsonl`` - task index → human-readable description.
+Two on-disk layouts are supported:
+
+v2.0 / v2.1 (one file per episode)
+    * ``meta/info.json`` - fps, total_episodes, features schema,
+      codebase_version.
+    * ``meta/episodes.jsonl`` - per-episode length and task index.
+    * ``meta/tasks.jsonl`` - task index → human-readable description.
+
+v3.0 (many episodes per shard)
+    * ``meta/info.json`` - same fields plus ``data_path`` / ``video_path``
+      templates and ``chunks_size``.
+    * ``meta/episodes/chunk-XXX/file-YYY.parquet`` - per-episode records
+      (length, tasks, and the data/video shard locators that say which
+      parquet/mp4 holds the episode and at what row/timestamp range).
+    * ``meta/tasks.parquet`` - task index → description.
 
 We deliberately avoid reading ``meta/stats.json`` (or
 ``meta/episodes_stats.jsonl`` in v2.1) - normalization stats matter
@@ -25,24 +35,65 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from ...errors import ConfigurationError
 from ..._version import install_command
+from ...errors import ConfigurationError
 
-# Datasets we know how to read end-to-end. v2.1 is the on-disk format
-# used by virtually every public `lerobot/*` Hub dataset as of
-# May 2026; v3.0 is the new multi-episode-shard format and lands as a
-# separate ship in 0.1.0a4. Anything else hard-fails with a hint to
-# pin to a v2.1 revision.
-_SUPPORTED_CODEBASE_VERSIONS: frozenset[str] = frozenset({"v2.0", "v2.1"})
+# Datasets we know how to read end-to-end. v2.0 / v2.1 are the
+# one-file-per-episode layouts used by virtually every public
+# `lerobot/*` Hub dataset through 2025; v3.0 is the multi-episode-shard
+# layout (`lerobot >= 0.3.x`). Anything else hard-fails with a hint.
+_SUPPORTED_CODEBASE_VERSIONS: frozenset[str] = frozenset(
+    {"v2.0", "v2.1", "v3.0", "v3.1"}
+)
+
+# v3.0 default path templates (from `lerobot.datasets.utils`). Used when
+# `info.json` omits them - older v3 pre-releases sometimes did.
+_V3_DEFAULT_DATA_PATH = "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet"
+_V3_DEFAULT_VIDEO_PATH = (
+    "videos/{video_key}/chunk-{chunk_index:03d}/file-{file_index:03d}.mp4"
+)
+_V3_EPISODES_DIR = "meta/episodes"
+_V3_TASKS_PATH = "meta/tasks.parquet"
+
+
+@dataclass(frozen=True)
+class VideoLocator:
+    """Where one camera's frames for one episode live in a v3.0 shard.
+
+    v3.0 concatenates many episodes into one mp4 per camera. To pull a
+    single episode back out you need the shard file (chunk + file index)
+    and the ``[from_timestamp, to_timestamp)`` window inside it.
+    """
+
+    video_key: str
+    chunk_index: int
+    file_index: int
+    from_timestamp: float
+    to_timestamp: float
 
 
 @dataclass(frozen=True)
 class EpisodeMeta:
-    """Per-episode facts read from ``meta/episodes.jsonl``."""
+    """Per-episode facts.
+
+    For v2.x these come from ``meta/episodes.jsonl``; the v3.0 locator
+    fields stay ``None`` / empty. For v3.0 they come from one row of a
+    ``meta/episodes/*.parquet`` shard, and the locator fields point at
+    the data parquet shard + per-camera video windows that hold this
+    episode.
+    """
 
     episode_index: int
     length: int  # number of frames in the episode
     tasks: list[str]  # human-readable task description(s); rarely empty
+    # v3.0-only locators. None for v2.x (each episode is its own file).
+    data_chunk_index: int | None = None
+    data_file_index: int | None = None
+    dataset_from_index: int | None = None  # global row range start (inclusive)
+    dataset_to_index: int | None = None  # global row range end (exclusive)
+    # Per-camera video window, keyed by the full feature name
+    # (e.g. ``observation.images.laptop``).
+    video_locators: dict[str, VideoLocator] = field(default_factory=dict)
 
 
 @dataclass
@@ -93,6 +144,15 @@ class DatasetSummary:
     feature_columns: list[str] = field(default_factory=list)
     camera_keys: list[str] = field(default_factory=list)
     episodes: list[EpisodeMeta] = field(default_factory=list)
+    # v3.0 path templates from info.json (``data_path`` / ``video_path``).
+    # None for v2.x, where the encoder uses hardcoded per-episode paths.
+    data_path: str | None = None
+    video_path: str | None = None
+
+    @property
+    def is_v3(self) -> bool:
+        """True for the multi-episode-shard layout (v3.x)."""
+        return self.codebase_version.startswith("v3")
 
     def report(self) -> str:
         """Human-readable summary, one line per section.
@@ -159,7 +219,7 @@ def scan_dataset(
         paths. Defaults to ``main``.
 
     Raises ``ConfigurationError`` if:
-      * the format version isn't v2.0 / v2.1 (v3.0 fails clearly)
+      * the format version isn't v2.0 / v2.1 / v3.0
       * the meta files are missing or malformed
       * (Hub only) ``huggingface_hub`` isn't installed
     """
@@ -173,10 +233,63 @@ def scan_dataset(
                 "<root>/{meta,data,videos}/."
             )
         info_path = meta_dir / "info.json"
-        episodes_path = meta_dir / "episodes.jsonl"
-        tasks_path = meta_dir / "tasks.jsonl"
     else:
         info_path = _hub_download(repo_id_or_path, "meta/info.json", revision=revision)
+
+    info = _load_info(info_path)
+    _check_format_version(repo_id_or_path, info)
+
+    feature_columns = sorted((info.get("features") or {}).keys())
+    camera_keys = _camera_keys(info, feature_columns)
+    version = str(info.get("codebase_version") or "unknown")
+
+    if version.startswith("v3"):
+        episodes = _load_episodes_v3(
+            repo_id_or_path, is_local, camera_keys, revision=revision
+        )
+        data_path = str(info.get("data_path") or _V3_DEFAULT_DATA_PATH)
+        video_path = str(info.get("video_path") or _V3_DEFAULT_VIDEO_PATH)
+    else:
+        episodes = _load_episodes_v2(repo_id_or_path, is_local, revision=revision)
+        data_path = None
+        video_path = None
+
+    return DatasetSummary(
+        repo_id_or_path=repo_id_or_path,
+        is_local=is_local,
+        codebase_version=version,
+        fps=float(info.get("fps") or 0),
+        total_episodes=int(info.get("total_episodes") or len(episodes)),
+        total_frames=int(info.get("total_frames") or sum(e.length for e in episodes)),
+        feature_columns=feature_columns,
+        camera_keys=camera_keys,
+        episodes=episodes,
+        data_path=data_path,
+        video_path=video_path,
+    )
+
+
+def _camera_keys(info: dict[str, Any], feature_columns: list[str]) -> list[str]:
+    """Camera feature names. v3 marks them ``dtype: "video"``; older
+    datasets just use the ``observation.images.`` prefix."""
+    features = info.get("features") or {}
+    by_dtype = [
+        k for k, v in features.items() if isinstance(v, dict) and v.get("dtype") == "video"
+    ]
+    if by_dtype:
+        return sorted(by_dtype)
+    return [c for c in feature_columns if c.startswith("observation.images.")]
+
+
+def _load_episodes_v2(
+    repo_id_or_path: str, is_local: bool, *, revision: str | None
+) -> list[EpisodeMeta]:
+    """v2.x: read ``meta/episodes.jsonl`` (+ optional ``meta/tasks.jsonl``)."""
+    if is_local:
+        meta_dir = Path(repo_id_or_path).expanduser().resolve() / "meta"
+        episodes_path: Path = meta_dir / "episodes.jsonl"
+        tasks_path: Path | None = meta_dir / "tasks.jsonl"
+    else:
         episodes_path = _hub_download(
             repo_id_or_path, "meta/episodes.jsonl", revision=revision
         )
@@ -189,29 +302,11 @@ def scan_dataset(
         except ConfigurationError:
             tasks_path = None
 
-    info = _load_info(info_path)
-    _check_format_version(repo_id_or_path, info)
-
-    feature_columns = sorted((info.get("features") or {}).keys())
-    camera_keys = [c for c in feature_columns if c.startswith("observation.images.")]
-
     tasks_by_index: dict[int, str] = {}
     if tasks_path is not None and Path(tasks_path).is_file():
         tasks_by_index = _load_tasks(Path(tasks_path))
 
-    episodes = _load_episodes(Path(episodes_path), tasks_by_index)
-
-    return DatasetSummary(
-        repo_id_or_path=repo_id_or_path,
-        is_local=is_local,
-        codebase_version=str(info.get("codebase_version") or "unknown"),
-        fps=float(info.get("fps") or 0),
-        total_episodes=int(info.get("total_episodes") or len(episodes)),
-        total_frames=int(info.get("total_frames") or sum(e.length for e in episodes)),
-        feature_columns=feature_columns,
-        camera_keys=camera_keys,
-        episodes=episodes,
-    )
+    return _load_episodes(Path(episodes_path), tasks_by_index)
 
 
 # ── internals ─────────────────────────────────────────────────────────
@@ -257,20 +352,19 @@ def _check_format_version(repo_id_or_path: str, info: dict[str, Any]) -> None:
     if version in _SUPPORTED_CODEBASE_VERSIONS:
         return
     if version.startswith("v3"):
+        # We read v3.0 / v3.1; warn-but-proceed for an unseen v3.x point
+        # release rather than hard-failing on a layout we likely handle.
+        return
+    if version.startswith(("v4", "v5", "v6", "v7", "v8", "v9")):
         raise ConfigurationError(
-            f"{repo_id_or_path} is a LeRobot dataset format {version!r}, which "
-            "uses multi-episode parquet shards instead of one-file-per-episode. "
-            "The robotrace adapter currently supports v2.0 / v2.1 only - "
-            "v3.0 is on the roadmap for robotrace 0.1.0a4. Workarounds: "
-            "(a) pin to a v2.1 revision of the dataset (`revision='v2.1'`), "
-            "(b) convert the dataset locally with `lerobot`'s "
-            "`convert_dataset_v21_to_v30.py` script in reverse, or "
-            "(c) open an issue at "
-            "https://github.com/Artl13/robotrace-dev/issues with your dataset."
+            f"{repo_id_or_path} is a LeRobot dataset format {version!r}, which is "
+            "newer than anything this robotrace release knows how to read "
+            "(supported: v2.0, v2.1, v3.0). Upgrade robotrace, or open an issue "
+            "at https://github.com/Artl13/robotrace-dev/issues with your dataset."
         )
     raise ConfigurationError(
         f"{repo_id_or_path} declares codebase_version={version!r}, which the "
-        "robotrace adapter doesn't recognise. Supported: v2.0, v2.1."
+        "robotrace adapter doesn't recognise. Supported: v2.0, v2.1, v3.0."
     )
 
 
@@ -354,7 +448,192 @@ def _load_tasks(tasks_path: Path) -> dict[int, str]:
     return out
 
 
+# ── v3.0 episode metadata (parquet shards) ────────────────────────────
+
+
+def _load_episodes_v3(
+    repo_id_or_path: str,
+    is_local: bool,
+    camera_keys: list[str],
+    *,
+    revision: str | None,
+) -> list[EpisodeMeta]:
+    """v3.0: read every ``meta/episodes/*.parquet`` shard into EpisodeMeta.
+
+    Each row is one episode and carries the locators (which data parquet
+    shard + which row range, and per-camera the video shard + timestamp
+    window) needed to pull that episode back out of the concatenated
+    shards later, in ``encode_episode``.
+    """
+    shard_paths = _v3_episode_shard_paths(repo_id_or_path, is_local, revision=revision)
+    if not shard_paths:
+        raise ConfigurationError(
+            f"{repo_id_or_path} declares a v3.0 layout but has no "
+            "meta/episodes/*.parquet shards. Is the dataset fully uploaded? "
+            "(v3 writers must call `dataset.finalize()` before pushing.)"
+        )
+
+    tasks_by_index = _load_tasks_v3(repo_id_or_path, is_local, revision=revision)
+
+    out: list[EpisodeMeta] = []
+    for path in shard_paths:
+        for row in _read_parquet_rows(path):
+            out.append(_episode_from_v3_row(row, camera_keys, tasks_by_index))
+    out.sort(key=lambda e: e.episode_index)
+    return out
+
+
+def _episode_from_v3_row(
+    row: dict[str, Any],
+    camera_keys: list[str],
+    tasks_by_index: dict[int, str],
+) -> EpisodeMeta:
+    ep_idx = int(row.get("episode_index", 0))
+    length = int(row.get("length") or 0)
+    tasks = _normalize_tasks(row, tasks_by_index)
+
+    locators: dict[str, VideoLocator] = {}
+    for key in camera_keys:
+        chunk = row.get(f"videos/{key}/chunk_index")
+        file_ = row.get(f"videos/{key}/file_index")
+        from_ts = row.get(f"videos/{key}/from_timestamp")
+        to_ts = row.get(f"videos/{key}/to_timestamp")
+        if chunk is None or file_ is None or from_ts is None or to_ts is None:
+            continue
+        locators[key] = VideoLocator(
+            video_key=key,
+            chunk_index=int(chunk),
+            file_index=int(file_),
+            from_timestamp=float(from_ts),
+            to_timestamp=float(to_ts),
+        )
+
+    return EpisodeMeta(
+        episode_index=ep_idx,
+        length=length,
+        tasks=tasks,
+        data_chunk_index=_opt_int(row.get("data/chunk_index")),
+        data_file_index=_opt_int(row.get("data/file_index")),
+        dataset_from_index=_opt_int(row.get("dataset_from_index")),
+        dataset_to_index=_opt_int(row.get("dataset_to_index")),
+        video_locators=locators,
+    )
+
+
+def _opt_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _v3_episode_shard_paths(
+    repo_id_or_path: str,
+    is_local: bool,
+    *,
+    revision: str | None,
+) -> list[Path]:
+    if is_local:
+        root = Path(repo_id_or_path).expanduser().resolve() / _V3_EPISODES_DIR
+        return sorted(root.rglob("*.parquet"))
+    rels = [
+        f
+        for f in _list_hub_files(repo_id_or_path, revision=revision)
+        if f.startswith(_V3_EPISODES_DIR + "/") and f.endswith(".parquet")
+    ]
+    return [_hub_download(repo_id_or_path, rel, revision=revision) for rel in sorted(rels)]
+
+
+def _load_tasks_v3(
+    repo_id_or_path: str,
+    is_local: bool,
+    *,
+    revision: str | None,
+) -> dict[int, str]:
+    """Best-effort ``meta/tasks.parquet`` → ``{task_index: description}``.
+
+    v3 also embeds a ``tasks`` list directly on each episode row, so this
+    map is only a fallback for datasets that store ``task_index`` instead.
+    A missing or oddly-shaped tasks file is non-fatal.
+    """
+    if is_local:
+        path = Path(repo_id_or_path).expanduser().resolve() / _V3_TASKS_PATH
+        if not path.is_file():
+            return {}
+    else:
+        try:
+            path = _hub_download(repo_id_or_path, _V3_TASKS_PATH, revision=revision)
+        except ConfigurationError:
+            return {}
+
+    out: dict[int, str] = {}
+    try:
+        rows = _read_parquet_rows(path)
+    except ConfigurationError:
+        return {}
+    for i, row in enumerate(rows):
+        idx_raw = row.get("task_index", i)
+        desc = (
+            row.get("task")
+            or row.get("description")
+            or row.get("__index_level_0__")
+            or ""
+        )
+        idx = _opt_int(idx_raw)
+        if idx is not None:
+            out[idx] = str(desc)
+    return out
+
+
+def _read_parquet_rows(path: Path) -> list[dict[str, Any]]:
+    """Read a parquet file into a list of per-row dicts (column-keyed)."""
+    pq = _import_pyarrow_parquet()
+    try:
+        table = pq.read_table(path)
+    except Exception as exc:  # pyarrow raises a variety of error types
+        raise ConfigurationError(
+            f"failed to read parquet {path}: {exc}. Corrupted shard, or a "
+            "v3 dataset that wasn't finalized before upload?"
+        ) from exc
+    rows: list[dict[str, Any]] = table.to_pylist()
+    return rows
+
+
+def _import_pyarrow_parquet() -> Any:
+    try:
+        import pyarrow.parquet as pq
+    except ImportError as exc:
+        raise ConfigurationError(
+            "reading LeRobot v3.0 metadata needs `pyarrow`. Install with "
+            f"`{install_command('lerobot')}`."
+        ) from exc
+    return pq
+
+
 # ── HF Hub plumbing ───────────────────────────────────────────────────
+
+
+def _list_hub_files(repo_id: str, *, revision: str | None) -> list[str]:
+    """List every file path in an HF Hub dataset repo.
+
+    Used to discover the variable number of ``meta/episodes/*.parquet``
+    shards in a v3.0 dataset without guessing chunk/file indices.
+    """
+    hub = _import_huggingface_hub()
+    try:
+        return list(
+            hub.HfApi().list_repo_files(
+                repo_id=repo_id, repo_type="dataset", revision=revision
+            )
+        )
+    except Exception as exc:
+        raise ConfigurationError(
+            f"huggingface_hub failed to list files in {repo_id}: {exc}. "
+            "Common causes: typo'd repo id, dataset is private (set HF_TOKEN), "
+            "or no internet."
+        ) from exc
 
 
 def _hub_download(

@@ -45,15 +45,23 @@ provenance.
 Format support
 --------------
 
-LeRobot dataset format **v2.1** is supported in this release. v2.1 is
-the format used by the vast majority of public `lerobot/*` Hub
-datasets as of May 2026 - one parquet per episode, one mp4 per
-episode per camera. Format v3.0 (multi-episode parquet shards,
-introduced late 2025) raises a clear `ConfigurationError` with a
-suggestion to either pin to v2.1 or open an issue. v3.0 support is
-on the roadmap for ``robotrace 0.1.0a4`` - we'll prioritize it once
-real users hit the wall, rather than guess at the format ahead of
-demand.
+LeRobot dataset formats **v2.0, v2.1, and v3.0** are supported.
+
+* **v2.0 / v2.1** - one parquet per episode, one mp4 per episode per
+  camera. The layout used by the vast majority of public `lerobot/*`
+  Hub datasets through 2025. A single camera's mp4 is passed through
+  untouched; multiple cameras are tiled with opencv.
+* **v3.0** - the multi-episode-shard layout (`lerobot >= 0.3.x`): many
+  episodes are concatenated into shared parquet/mp4 files and addressed
+  through relational metadata under `meta/episodes/*.parquet`. The
+  adapter reads each episode's locator (data shard + row range, and the
+  per-camera video shard + `[from, to)` timestamp window), slices the
+  data parquet down to the episode's rows, and trims each camera clip
+  out of its shared mp4. v3.0 video always needs the `[video]` extra
+  (opencv) because there's no per-episode file to copy.
+
+Newer (v4+) or unrecognized `codebase_version` values raise a clear
+`ConfigurationError`.
 
 Dependency strategy
 -------------------
@@ -80,7 +88,7 @@ from __future__ import annotations
 
 from ._classify import ColumnClass, Slot, classify_column
 from ._encode import EncodedArtifact, EncodedEpisode, encode_episode
-from ._meta import DatasetSummary, EpisodeMeta, scan_dataset
+from ._meta import DatasetSummary, EpisodeMeta, VideoLocator, scan_dataset
 from ._upload import upload_dataset, upload_episode
 
 __all__ = [
@@ -90,6 +98,7 @@ __all__ = [
     "upload_dataset",
     "DatasetSummary",
     "EpisodeMeta",
+    "VideoLocator",
     "EncodedEpisode",
     "EncodedArtifact",
     "ColumnClass",
